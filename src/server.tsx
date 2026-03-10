@@ -5,6 +5,8 @@ import {
 import { createServerEntry } from '@tanstack/react-start/server-entry'
 import { generateRssFeed } from '@/lib/feed'
 import { generateSitemap, generateRobotsTxt } from '@/lib/sitemap'
+import { db } from '@/db'
+import { sql } from 'drizzle-orm'
 
 const SECURITY_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
@@ -51,6 +53,20 @@ async function handleSeoEndpoints(request: Request): Promise<Response | null> {
         'Cache-Control': 'public, max-age=86400',
       },
     })
+  }
+
+  if (url.pathname === '/health') {
+    try {
+      await db.execute(sql`SELECT 1`)
+      return new Response(JSON.stringify({ status: 'ok', db: 'connected' }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    } catch {
+      return new Response(
+        JSON.stringify({ status: 'error', db: 'disconnected' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
   }
 
   return null

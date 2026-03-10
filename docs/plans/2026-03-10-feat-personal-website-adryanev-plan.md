@@ -620,7 +620,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Framer Motion Animations
-- [ ] Install `motion` (rebranded Framer Motion)
+- [x] Install `motion` (rebranded Framer Motion)
 - [ ] Configure `LazyMotion` with `domAnimation` features (reduce bundle ~15kb)
 - [ ] Configure `MotionConfig reducedMotion="user"` for accessibility
 - [ ] Page transitions:
@@ -636,8 +636,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 - [ ] SSR safety: use `initial={false}` where needed to prevent hydration flash
 
 ##### Cmd+K Command Palette
-- [ ] Install `cmdk`
-- [ ] Build `CommandPalette` component wrapping `Command.Dialog`:
+- [x] Install `cmdk`
+- [x] Build `CommandPalette` component wrapping `Command.Dialog`:
   - Keyboard shortcut: `Cmd+K` (desktop) / search icon button (mobile)
   - Groups: Navigation, Blog Posts, Projects, Theme
   - Navigation items: all public routes with icons
@@ -645,19 +645,19 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Projects: search titles via server function
   - Theme toggle items: Light, Dark, System
   - `keywords` prop for alias-based filtering
-- [ ] Style with Tailwind using `[cmdk-*]` data attribute selectors
+- [x] Style with Tailwind using `[cmdk-*]` data attribute selectors
 - [ ] Animate `--cmdk-list-height` for smooth height transitions
-- [ ] Mount in root layout (available on all pages)
-- [ ] Search endpoint (`/api/search`): queries posts + projects by title `ILIKE '%query%'`
+- [x] Mount in root layout (available on all pages)
+- [x] Search endpoint (`/api/search`): queries posts + projects by title `ILIKE '%query%'`
 
 ##### Terminal CLI Easter Egg
 > **Scope warning:** This is the highest-risk feature for scope creep. Start with core commands (`help`, `ls`, `cd`, `cat`, `clear`, `pwd`, `whoami`). Add tab completion and `history` only if time permits.
 
-- [ ] Build `TerminalOverlay` component:
+- [x] Build `TerminalOverlay` component:
   - Toggle: keyboard shortcut (`` Ctrl+` ``) + hint in footer ("Press Ctrl+` for terminal")
   - Overlay: semi-transparent backdrop with terminal window (monospace font, green-on-black aesthetic)
   - State persisted in `sessionStorage` (current directory, command history)
-- [ ] Command parser supporting:
+- [x] Command parser supporting:
   - `help` — list available commands
   - `whoami` — display name, role, and bio
   - `ls` — list items in current "directory" (maps to site sections)
@@ -669,7 +669,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - `history` — show command history
   - Arrow keys for command history navigation
   - Tab completion for commands and paths
-- [ ] Virtual file system mapping site structure:
+- [x] Virtual file system mapping site structure:
   ```
   /
   ├── about.md
@@ -684,8 +684,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   ├── saas/
   └── contact.md
   ```
-- [ ] Hide on mobile (touch devices) — show only on desktop
-- [ ] Accessible: terminal is decorative, not the primary navigation
+- [x] Hide on mobile (touch devices) — show only on desktop
+- [x] Accessible: terminal is decorative, not the primary navigation
 
 **Key files:**
 - `src/components/command-palette/CommandPalette.tsx`
@@ -708,37 +708,37 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 
 **Tasks:**
 
-- [ ] Create `Dockerfile` (multi-stage build):
+- [x] Create `Dockerfile` (multi-stage build):
   - Stage 1: Install dependencies with pnpm
   - Stage 2: Build app (`vite build`)
   - Stage 3: Production image (node:22-alpine, non-root user)
   - Include `drizzle/` migrations folder
   - Run migrations on startup
-- [ ] Create `docker-compose.yml`:
+- [x] Create `docker-compose.yml`:
   - App service (TanStack Start)
   - PostgreSQL service (with volume for persistence)
   - MinIO service (optional, for local S3 development)
-- [ ] Create `docker-compose.prod.yml` (Dokploy-compatible):
+- [x] Create `docker-compose.prod.yml` (Dokploy-compatible):
   - App service with production env vars
   - PostgreSQL with backup volume
   - Health check: `GET /api/health` endpoint
 - [ ] Configure S3 bucket public read policy (images must be publicly accessible for portfolio/blog/OG images; set bucket policy or use CDN proxy)
-- [ ] Add health check endpoint (`/api/health`): returns 200 + DB connection status
+- [x] Add health check endpoint (`/api/health`): returns 200 + DB connection status
 - [ ] Configure Umami analytics:
   - Add Umami script tag in root layout
   - Track custom events: theme toggle, Cmd+K usage, terminal usage, PDF download, contact form submit
-- [ ] Security headers in `src/server.tsx`:
+- [x] Security headers in `src/server.tsx`:
   - `X-Frame-Options: DENY`
   - `X-Content-Type-Options: nosniff`
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `Content-Security-Policy` (strict, allow self + S3 bucket + Umami)
   - `Strict-Transport-Security` (production only)
-- [ ] Performance optimization:
+- [x] Performance optimization:
   - Lazy load below-fold images with `loading="lazy"`
   - Responsive images with `srcset` for portfolio screenshots
   - Code-split admin routes (not loaded for visitors)
   - Static asset caching headers
-- [ ] Create `CLAUDE.md` with project conventions:
+- [x] Create `CLAUDE.md` with project conventions:
   - Package manager: pnpm
   - Code style: no semicolons, single quotes, ESM
   - Path alias: `@/*` → `./src/*`
@@ -746,7 +746,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Server code in `.functions.ts` and `.server.ts` files
   - Drizzle schema in `src/db/schema/`
   - Test files co-located: `*.test.ts`
-- [ ] Create `.env.example` documenting all required environment variables
+- [x] Create `.env.example` documenting all required environment variables
 
 **Key files:**
 - `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`

@@ -1,7 +1,7 @@
 ---
 title: "feat: Build adryanev.com personal website"
 type: feat
-status: active
+status: completed
 date: 2026-03-10
 origin: docs/brainstorms/2026-03-10-personal-website-brainstorm.md
 ---

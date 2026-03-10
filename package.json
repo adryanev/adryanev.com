@@ -14,6 +14,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1005.0",
+    "@aws-sdk/s3-request-presigner": "^3.1005.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "5.66.0",
     "@tanstack/react-router": "1.166.2",
@@ -29,7 +31,10 @@
     "zod": "^3.24.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["argon2", "esbuild"]
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",

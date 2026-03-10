@@ -308,7 +308,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 - [x] Install and configure Drizzle ORM + `pg` driver
 - [x] Define complete database schema (all tables from ERD above)
 - [x] Create `drizzle.config.ts` with PostgreSQL credentials
-- [ ] Run `drizzle-kit generate` + `drizzle-kit migrate` for initial migration
+- [x] Run `drizzle-kit generate` + `drizzle-kit migrate` for initial migration
 - [x] Create seed script (`src/db/seed.ts`):
   - Admin user (email from env, password hashed with argon2id)
   - Initial portfolio categories (College, Freelance, TopApp.id, Work, Apple Developer Academy, Lexicon)
@@ -349,27 +349,27 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 
 **Tasks:**
 
-- [ ] Implement auth server functions (`src/server/functions/auth.functions.ts`):
+- [x] Implement auth server functions (`src/server/functions/auth.functions.ts`):
   - `login`: validate email + password (argon2id verify), create session row, set HTTP-only cookie
   - `logout`: delete session row, clear cookie
   - `getCurrentUser`: read session cookie, look up session in DB, return user or null
-- [ ] Cookie configuration: `httpOnly: true`, `secure: true` (production), `sameSite: 'lax'`, `maxAge: 7 days`, `path: '/'`
-- [ ] Implement sliding session renewal: extend `expires_at` on each authenticated request
-- [ ] Create auth middleware (`src/server/middleware/auth.ts`):
-  - Uses `createMiddleware` to call `getCurrentUser`
-  - Passes user to context on success
+- [x] Cookie configuration: `httpOnly: true`, `secure: true` (production), `sameSite: 'lax'`, `maxAge: 7 days`, `path: '/'`
+- [x] Implement sliding session renewal: extend `expires_at` on each authenticated request
+- [x] Create auth middleware (`src/server/middleware/auth.ts`):
+  - Uses `beforeLoad` in `_layout.tsx` to call `getCurrentUser`
+  - Passes user to route context on success
   - Throws `redirect({ to: '/admin/login' })` on failure
-- [ ] Build admin login page (`src/routes/admin/login.tsx` — **must be outside `_layout.tsx` auth guard**; place at `admin.login.tsx` or use a pathless layout so login is not protected):
+- [x] Build admin login page (`src/routes/admin/login.tsx` — **must be outside `_layout.tsx` auth guard**; place at `admin.login.tsx` or use a pathless layout so login is not protected):
   - Email + password form
   - Rate limiting: 5 attempts per 15 minutes per IP (server-side check)
   - Error display for invalid credentials
   - Redirect to `/admin` on success (or to `?redirect=` param)
-- [ ] Build admin layout route (`src/routes/admin/_layout.tsx`):
+- [x] Build admin layout route (`src/routes/admin/_layout.tsx`):
   - `beforeLoad` calls `getCurrentUser()` server function
   - Redirects to `/admin/login` if no session
   - Admin sidebar navigation (Posts, Portfolio, SaaS, Resume, Contacts)
   - Logout button
-- [ ] Build admin dashboard (`src/routes/admin/index.tsx`):
+- [x] Build admin dashboard (`src/routes/admin/_layout/index.tsx`):
   - Summary cards: total posts, total projects, unread contacts, draft count
   - Quick links to each admin section
 

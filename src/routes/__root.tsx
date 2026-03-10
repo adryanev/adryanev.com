@@ -3,6 +3,7 @@ import {
   HeadContent,
   Outlet,
   Scripts,
+  useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Header } from '@/components/layout/Header'
@@ -66,6 +67,9 @@ function NotFoundComponent() {
 }
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const isAdmin = pathname.startsWith('/admin')
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -75,13 +79,17 @@ function RootComponent() {
         className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100"
         suppressHydrationWarning
       >
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
+        {isAdmin ? (
+          <Outlet />
+        ) : (
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
+        )}
         {import.meta.env.DEV && <TanStackRouterDevtools />}
         <Scripts />
       </body>

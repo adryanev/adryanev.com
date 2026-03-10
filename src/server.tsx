@@ -3,6 +3,8 @@ import {
   defaultStreamHandler,
 } from '@tanstack/react-start/server'
 import { createServerEntry } from '@tanstack/react-start/server-entry'
+import { generateRssFeed } from '@/lib/feed'
+import { generateSitemap, generateRobotsTxt } from '@/lib/sitemap'
 
 const SECURITY_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
@@ -18,7 +20,52 @@ if (process.env.NODE_ENV === 'production') {
 
 const handler = createStartHandler(defaultStreamHandler)
 
+// SEO endpoints that return non-HTML responses
+async function handleSeoEndpoints(request: Request): Promise<Response | null> {
+  const url = new URL(request.url)
+
+  if (url.pathname === '/feed.xml') {
+    const xml = await generateRssFeed()
+    return new Response(xml, {
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  }
+
+  if (url.pathname === '/sitemap.xml') {
+    const xml = await generateSitemap()
+    return new Response(xml, {
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  }
+
+  if (url.pathname === '/robots.txt') {
+    return new Response(generateRobotsTxt(), {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    })
+  }
+
+  return null
+}
+
 const secureHandler: typeof handler = async (request) => {
+  // Check SEO endpoints first
+  const seoResponse = await handleSeoEndpoints(request)
+  if (seoResponse) {
+    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+      seoResponse.headers.set(key, value)
+    }
+    return seoResponse
+  }
+
   const response = await handler(request)
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(key, value)

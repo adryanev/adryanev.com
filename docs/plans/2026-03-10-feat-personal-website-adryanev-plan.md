@@ -401,8 +401,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Blog Post Management
-- [ ] Post list page (`/admin/posts`): DataTable with title, status, date, actions (edit, delete)
-- [ ] New post page (`/admin/posts/new`):
+- [x] Post list page (`/admin/posts`): DataTable with title, status, date, actions (edit, delete)
+- [x] New post page (`/admin/posts/new`):
   - Title field (auto-generates slug, slug is editable)
   - Markdown editor with live preview (side-by-side layout)
   - Tag selector (create-on-type, multi-select)
@@ -411,23 +411,23 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Status toggle: Draft / Published
   - Published date picker (defaults to now when status changes to Published)
   - Auto-save to localStorage every 30 seconds (visual indicator)
-- [ ] Edit post page (`/admin/posts/$id.edit`): same form, pre-populated
-- [ ] Delete: soft-delete with confirmation dialog (sets `deleted_at`, excluded from queries)
-- [ ] Server functions: `createPost`, `updatePost`, `deletePost`, `getPosts`, `getPostById`
-- [ ] Slug uniqueness validation (server-side check before save)
-- [ ] Markdown sanitization: use `rehype-sanitize` in rendering pipeline
+- [x] Edit post page (`/admin/posts/$id.edit`): same form, pre-populated
+- [x] Delete: soft-delete with confirmation dialog (sets `deleted_at`, excluded from queries)
+- [x] Server functions: `createPost`, `updatePost`, `deletePost`, `getPosts`, `getPostById`
+- [x] Slug uniqueness validation (server-side check before save)
+- [x] Markdown sanitization: use `rehype-sanitize` in rendering pipeline
 
 ##### S3 Image Upload System
-- [ ] Create S3 client (`src/lib/storage.ts`) using AWS SDK v3:
+- [x] Create S3 client (`src/lib/storage.ts`) using AWS SDK v3:
   - `forcePathStyle: true` for S3-compatible providers
   - Presigned URL generation (PUT, 5-minute expiry)
   - File type allowlist: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
   - Max file size: 10MB (validated server-side before generating URL)
-- [ ] Upload API route (`src/routes/api/upload.ts`):
+- [x] Upload API route (`src/routes/api/upload.ts`):
   - Protected by auth middleware
   - Accepts: filename, contentType
   - Returns: presigned URL, final S3 key
-- [ ] Reusable `ImageUploader` component:
+- [x] Reusable `ImageUploader` component:
   - Drag-and-drop + file picker
   - Client-side file type/size validation
   - Direct upload to S3 via presigned URL
@@ -435,11 +435,11 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Returns S3 URL on completion
 
 ##### Portfolio Management
-- [ ] Category management page (`/admin/portfolio/categories.tsx`):
+- [x] Category management page (`/admin/portfolio/categories.tsx`):
   - List categories with sort order
   - Add/edit/delete categories (inline or modal)
-- [ ] Project list page (`/admin/portfolio`): DataTable grouped by category
-- [ ] New project page (`/admin/portfolio/new`):
+- [x] Project list page (`/admin/portfolio`): DataTable grouped by category
+- [x] New project page (`/admin/portfolio/new`):
   - Title, slug (auto-generated), category (dropdown), year, role, workplace
   - Technology tags (multi-input, free-text)
   - Description (markdown editor, simpler than blog — no live preview needed)
@@ -447,36 +447,36 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Screenshot gallery: multi-image upload with drag-to-reorder, alt text per image
   - Status: Draft / Published
   - Sort order within category
-- [ ] Edit project page (`/admin/portfolio/$id.edit`)
-- [ ] Server functions: `createProject`, `updateProject`, `deleteProject`, project image CRUD
+- [x] Edit project page (`/admin/portfolio/$id.edit`)
+- [x] Server functions: `createProject`, `updateProject`, `deleteProject`, project image CRUD
 
 ##### SaaS Listing Management
-- [ ] SaaS list page (`/admin/saas`): DataTable with name, status badge, actions
-- [ ] New listing page (`/admin/saas/new`):
+- [x] SaaS list page (`/admin/saas`): DataTable with name, status badge, actions
+- [x] New listing page (`/admin/saas/new`):
   - Name, slug, description, URL, GitHub URL
   - Logo upload (S3)
   - Technology tags
   - Status: Active / Beta / Retired
   - Sort order
-- [ ] Edit listing page (`/admin/saas/$id.edit`)
-- [ ] Server functions: `createSaasListing`, `updateSaasListing`, `deleteSaasListing`
+- [x] Edit listing page (`/admin/saas/$id.edit`)
+- [x] Server functions: `createSaasListing`, `updateSaasListing`, `deleteSaasListing`
 
 ##### Resume Management
-- [ ] Resume entries page (`/admin/resume`):
+- [x] Resume entries page (`/admin/resume`):
   - Grouped by type (Experience, Education, Certification, Skill)
   - Add/edit/delete entries (modal or inline)
   - Fields: type, title, organization, location, description, start_date, end_date (null = current), sort_order
   - Drag-to-reorder within each type group
-- [ ] Server functions: `createResumeEntry`, `updateResumeEntry`, `deleteResumeEntry`, `reorderEntries`
+- [x] Server functions: `createResumeEntry`, `updateResumeEntry`, `deleteResumeEntry`, `reorderEntries`
 
 ##### Contact Submissions
-- [ ] Contacts page (`/admin/contacts`):
+- [x] Contacts page (`/admin/contacts`):
   - List with name, email, subject, date, read/unread status
   - Click to view full message (expandable row or side panel)
   - Mark as read/unread
   - Delete with confirmation
   - Unread count badge in admin sidebar
-- [ ] Server functions: `getContacts`, `markContactRead`, `deleteContact`
+- [x] Server functions: `getContacts`, `markContactRead`, `deleteContact`
 
 **Key files:**
 - `src/server/functions/posts.functions.ts`

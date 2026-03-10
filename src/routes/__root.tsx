@@ -35,6 +35,12 @@ export const Route = createRootRoute({
         rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap',
       },
+      {
+        rel: 'alternate',
+        type: 'application/rss+xml',
+        title: 'Adryan Eka Vandra — Blog',
+        href: '/feed.xml',
+      },
     ],
     scripts: [
       {

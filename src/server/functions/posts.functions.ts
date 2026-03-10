@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, isNull, and, desc, count, ilike, inArray } from 'drizzle-orm'
+import { eq, isNull, and, desc } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, tags, postsToTags } from '@/db/schema/posts'
 

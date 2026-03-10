@@ -8,6 +8,8 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { CommandPalette } from '@/components/command-palette/CommandPalette'
+import { TerminalOverlay } from '@/components/terminal/TerminalOverlay'
 import '../app.css'
 
 export const Route = createRootRoute({
@@ -96,6 +98,8 @@ function RootComponent() {
             <Footer />
           </div>
         )}
+        {!isAdmin && <CommandPalette />}
+        {!isAdmin && <TerminalOverlay />}
         {import.meta.env.DEV && <TanStackRouterDevtools />}
         <Scripts />
       </body>

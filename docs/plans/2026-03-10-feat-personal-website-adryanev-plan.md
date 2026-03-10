@@ -506,22 +506,22 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Home Page (`/`)
-- [ ] Hero section: animated developer-themed intro with name, title, and brief tagline
-- [ ] Section previews: latest blog posts, featured projects, active SaaS, resume highlights
-- [ ] CTA links to each section
+- [x] Hero section: animated developer-themed intro with name, title, and brief tagline
+- [x] Section previews: latest blog posts, featured projects, active SaaS, resume highlights
+- [x] CTA links to each section
 
 ##### About Page (`/about`)
-- [ ] Bio content (from `site_settings` or hardcoded initially)
-- [ ] Skills/technologies overview
-- [ ] Social links
+- [x] Bio content (from `site_settings` or hardcoded initially)
+- [x] Skills/technologies overview
+- [x] Social links
 
 ##### Blog Pages
-- [ ] Blog listing (`/blog`):
+- [x] Blog listing (`/blog`):
   - Page-based pagination (12 posts per page, `?page=N`)
   - Post cards: title, excerpt, date, tags, cover image
   - Tag filter (optional query param: `?tag=typescript`)
   - Only `status = 'published'` posts shown
-- [ ] Blog post (`/blog/$slug`):
+- [x] Blog post (`/blog/$slug`):
   - SSR-rendered markdown content using `unified` + `remark-gfm` + `rehype-sanitize` + `rehype-shiki` (Shiki for syntax highlighting)
   - Post metadata: title, date, tags, reading time estimate
   - Cover image
@@ -529,13 +529,13 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Dynamic `<head>` meta tags: title, description, canonical URL, OG image URL
 
 ##### Portfolio Pages
-- [ ] Categories overview (`/portfolio`):
+- [x] Categories overview (`/portfolio`):
   - Grid of category cards with name, description, project count
   - Category slugs: `college`, `freelance`, `topapp-id`, `work`, `apple-developer-academy`, `lexicon`
-- [ ] Category listing (`/portfolio/$category`):
+- [x] Category listing (`/portfolio/$category`):
   - All published projects in the category, ordered by `sort_order`
   - Project cards with title, year, role, technology tags, thumbnail
-- [ ] Project detail (`/portfolio/$category/$slug`):
+- [x] Project detail (`/portfolio/$category/$slug`):
   - **Following Figma template structure:**
   - Left sidebar: project name (h1), year, role, workplace, technology tags, GitHub/external links (with icons)
   - Right area: project description + screenshot gallery (grid layout)
@@ -544,10 +544,10 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - 404 if project doesn't exist or isn't published
 
 ##### Resume Page (`/resume`)
-- [ ] Interactive timeline: vertical timeline with entries grouped by type
-- [ ] Experience entries: expandable cards with company, title, dates, description
-- [ ] Education entries: similar layout
-- [ ] Skills section: grouped tags
+- [x] Interactive timeline: vertical timeline with entries grouped by type
+- [x] Experience entries: expandable cards with company, title, dates, description
+- [x] Education entries: similar layout
+- [x] Skills section: grouped tags
 - [ ] "Download PDF" button: links to `/api/resume.pdf`
 - [ ] PDF generation route (`/api/resume.pdf`):
   - Uses `@react-pdf/renderer` with `renderToStream`
@@ -556,41 +556,41 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Cache with `Cache-Control: public, max-age=3600` (1 hour)
 
 ##### SaaS Showcase (`/saas`)
-- [ ] Card grid: active first, then beta, then retired (within each group: by sort_order)
-- [ ] Each card: name, description, tech tags, status badge (color-coded), links
-- [ ] Retired listings shown with reduced opacity
-- [ ] Empty state if no listings
+- [x] Card grid: active first, then beta, then retired (within each group: by sort_order)
+- [x] Each card: name, description, tech tags, status badge (color-coded), links
+- [x] Retired listings shown with reduced opacity
+- [x] Empty state if no listings
 
 ##### Contact Page (`/contact`)
-- [ ] Form fields: name (required), email (required, validated), subject (optional), message (required, 10-5000 chars)
-- [ ] Spam protection:
+- [x] Form fields: name (required), email (required, validated), subject (optional), message (required, 10-5000 chars)
+- [x] Spam protection:
   - Honeypot field (hidden CSS field, reject if filled)
   - Rate limiting: 3 submissions per IP per hour (server-side)
-- [ ] Client-side validation with error messages
-- [ ] Server-side validation (Zod schema via `drizzle-zod` or manual)
-- [ ] Success state: inline confirmation message
-- [ ] Error state: user-friendly error with retry option
+- [x] Client-side validation with error messages
+- [x] Server-side validation (Zod schema via `drizzle-zod` or manual)
+- [x] Success state: inline confirmation message
+- [x] Error state: user-friendly error with retry option
 
 ##### SEO Infrastructure
-- [ ] Dynamic `<head>` meta tags per route (title, description, canonical, OG)
+- [x] Dynamic `<head>` meta tags per route (title, description, canonical, OG)
 - [ ] OG image generation (`/api/og.png?title=...&type=...`):
   - Satori + Sharp pipeline
   - Dark gradient background with site typography
   - Title + section label
   - Cached with `Cache-Control: public, max-age=86400, s-maxage=604800`
   - Font loaded from `public/fonts/`
-- [ ] RSS feed (`/api/feed.xml`):
+- [x] RSS feed (`/api/feed.xml`):
   - Uses `feed` npm package
   - RSS 2.0 format with full post content
   - Cached for 1 hour
   - `<link rel="alternate" type="application/rss+xml">` in root layout
-- [ ] Sitemap (`/api/sitemap.xml`):
+- [x] Sitemap (`/api/sitemap.xml`):
   - Auto-generated from all published pages, posts, and projects
   - Cached for 1 hour
-- [ ] Robots.txt (`/api/robots.txt`):
+- [x] Robots.txt (`/api/robots.txt`):
   - Disallow `/admin/*`
   - Sitemap reference
-- [ ] Custom 404 page: developer-themed "page not found" with navigation links
+- [x] Custom 404 page: developer-themed "page not found" with navigation links
 - [ ] JSON-LD structured data: `Person` (home/about), `Article` (blog posts), `SoftwareApplication` (SaaS)
 
 **Key files:**

@@ -45,9 +45,16 @@ export function Footer() {
           ))}
         </div>
 
-        <p className="font-mono text-xs text-slate-400 dark:text-slate-600">
-          &copy; {new Date().getFullYear()}
-        </p>
+        <div className="text-center sm:text-right">
+          <p className="font-mono text-xs text-slate-400 dark:text-slate-600">
+            &copy; {new Date().getFullYear()}
+          </p>
+          <p className="mt-1 hidden font-mono text-xs text-slate-400 dark:text-slate-600 sm:block">
+            Press{' '}
+            <kbd className="rounded bg-slate-100 px-1 dark:bg-slate-800">Ctrl+`</kbd>{' '}
+            for terminal
+          </p>
+        </div>
       </div>
     </footer>
   )

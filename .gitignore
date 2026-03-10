@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.output/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TanStack generated
+src/routeTree.gen.ts
+
+# Drizzle
+drizzle/meta/
+
+# Logs
+*.log
+npm-debug.log*

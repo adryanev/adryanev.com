@@ -5,13 +5,14 @@ import { getPublishedPosts, getAllTags } from '@/server/functions/public.functio
 
 export const Route = createFileRoute('/blog/')({
   validateSearch: (search: Record<string, unknown>) => ({
-    page: Number(search.page) || 1,
+    page: search.page ? Number(search.page) : undefined,
     tag: (search.tag as string) || undefined,
   }),
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
+    const page = deps.page ?? 1
     const [data, tags] = await Promise.all([
-      getPublishedPosts({ data: { page: deps.page, tag: deps.tag } }),
+      getPublishedPosts({ data: { page, tag: deps.tag } }),
       getAllTags(),
     ])
     return { ...data, tags, currentTag: deps.tag }

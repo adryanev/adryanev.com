@@ -5,12 +5,20 @@ import {
   Scripts,
   useRouterState,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { lazy, Suspense } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { TerminalOverlay } from '@/components/terminal/TerminalOverlay'
 import '../app.css'
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-router-devtools').then((mod) => ({
+        default: mod.TanStackRouterDevtools,
+      })),
+    )
+  : () => null
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -100,7 +108,9 @@ function RootComponent() {
         )}
         {!isAdmin && <CommandPalette />}
         {!isAdmin && <TerminalOverlay />}
-        {import.meta.env.DEV && <TanStackRouterDevtools />}
+        <Suspense>
+          <TanStackRouterDevtools />
+        </Suspense>
         <Scripts />
       </body>
     </html>

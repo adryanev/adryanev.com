@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { contentStatusEnum } from './enums'
 
@@ -33,7 +33,9 @@ export const portfolioProjects = pgTable('portfolio_projects', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-})
+}, (table) => [
+  index('portfolio_projects_status_idx').on(table.status),
+])
 
 export const projectImages = pgTable('project_images', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),

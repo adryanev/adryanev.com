@@ -1,0 +1,1 @@
+ALTER TABLE "resume_entries" ADD COLUMN "organization_url" text;

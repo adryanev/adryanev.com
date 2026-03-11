@@ -1,7 +1,7 @@
 ---
 title: "feat: Build adryanev.com personal website"
 type: feat
-status: active
+status: completed
 date: 2026-03-10
 origin: docs/brainstorms/2026-03-10-personal-website-brainstorm.md
 ---
@@ -308,7 +308,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 - [x] Install and configure Drizzle ORM + `pg` driver
 - [x] Define complete database schema (all tables from ERD above)
 - [x] Create `drizzle.config.ts` with PostgreSQL credentials
-- [ ] Run `drizzle-kit generate` + `drizzle-kit migrate` for initial migration
+- [x] Run `drizzle-kit generate` + `drizzle-kit migrate` for initial migration
 - [x] Create seed script (`src/db/seed.ts`):
   - Admin user (email from env, password hashed with argon2id)
   - Initial portfolio categories (College, Freelance, TopApp.id, Work, Apple Developer Academy, Lexicon)
@@ -349,27 +349,27 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 
 **Tasks:**
 
-- [ ] Implement auth server functions (`src/server/functions/auth.functions.ts`):
+- [x] Implement auth server functions (`src/server/functions/auth.functions.ts`):
   - `login`: validate email + password (argon2id verify), create session row, set HTTP-only cookie
   - `logout`: delete session row, clear cookie
   - `getCurrentUser`: read session cookie, look up session in DB, return user or null
-- [ ] Cookie configuration: `httpOnly: true`, `secure: true` (production), `sameSite: 'lax'`, `maxAge: 7 days`, `path: '/'`
-- [ ] Implement sliding session renewal: extend `expires_at` on each authenticated request
-- [ ] Create auth middleware (`src/server/middleware/auth.ts`):
-  - Uses `createMiddleware` to call `getCurrentUser`
-  - Passes user to context on success
+- [x] Cookie configuration: `httpOnly: true`, `secure: true` (production), `sameSite: 'lax'`, `maxAge: 7 days`, `path: '/'`
+- [x] Implement sliding session renewal: extend `expires_at` on each authenticated request
+- [x] Create auth middleware (`src/server/middleware/auth.ts`):
+  - Uses `beforeLoad` in `_layout.tsx` to call `getCurrentUser`
+  - Passes user to route context on success
   - Throws `redirect({ to: '/admin/login' })` on failure
-- [ ] Build admin login page (`src/routes/admin/login.tsx` — **must be outside `_layout.tsx` auth guard**; place at `admin.login.tsx` or use a pathless layout so login is not protected):
+- [x] Build admin login page (`src/routes/admin/login.tsx` — **must be outside `_layout.tsx` auth guard**; place at `admin.login.tsx` or use a pathless layout so login is not protected):
   - Email + password form
   - Rate limiting: 5 attempts per 15 minutes per IP (server-side check)
   - Error display for invalid credentials
   - Redirect to `/admin` on success (or to `?redirect=` param)
-- [ ] Build admin layout route (`src/routes/admin/_layout.tsx`):
+- [x] Build admin layout route (`src/routes/admin/_layout.tsx`):
   - `beforeLoad` calls `getCurrentUser()` server function
   - Redirects to `/admin/login` if no session
   - Admin sidebar navigation (Posts, Portfolio, SaaS, Resume, Contacts)
   - Logout button
-- [ ] Build admin dashboard (`src/routes/admin/index.tsx`):
+- [x] Build admin dashboard (`src/routes/admin/_layout/index.tsx`):
   - Summary cards: total posts, total projects, unread contacts, draft count
   - Quick links to each admin section
 
@@ -401,8 +401,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Blog Post Management
-- [ ] Post list page (`/admin/posts`): DataTable with title, status, date, actions (edit, delete)
-- [ ] New post page (`/admin/posts/new`):
+- [x] Post list page (`/admin/posts`): DataTable with title, status, date, actions (edit, delete)
+- [x] New post page (`/admin/posts/new`):
   - Title field (auto-generates slug, slug is editable)
   - Markdown editor with live preview (side-by-side layout)
   - Tag selector (create-on-type, multi-select)
@@ -411,23 +411,23 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Status toggle: Draft / Published
   - Published date picker (defaults to now when status changes to Published)
   - Auto-save to localStorage every 30 seconds (visual indicator)
-- [ ] Edit post page (`/admin/posts/$id.edit`): same form, pre-populated
-- [ ] Delete: soft-delete with confirmation dialog (sets `deleted_at`, excluded from queries)
-- [ ] Server functions: `createPost`, `updatePost`, `deletePost`, `getPosts`, `getPostById`
-- [ ] Slug uniqueness validation (server-side check before save)
-- [ ] Markdown sanitization: use `rehype-sanitize` in rendering pipeline
+- [x] Edit post page (`/admin/posts/$id.edit`): same form, pre-populated
+- [x] Delete: soft-delete with confirmation dialog (sets `deleted_at`, excluded from queries)
+- [x] Server functions: `createPost`, `updatePost`, `deletePost`, `getPosts`, `getPostById`
+- [x] Slug uniqueness validation (server-side check before save)
+- [x] Markdown sanitization: use `rehype-sanitize` in rendering pipeline
 
 ##### S3 Image Upload System
-- [ ] Create S3 client (`src/lib/storage.ts`) using AWS SDK v3:
+- [x] Create S3 client (`src/lib/storage.ts`) using AWS SDK v3:
   - `forcePathStyle: true` for S3-compatible providers
   - Presigned URL generation (PUT, 5-minute expiry)
   - File type allowlist: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
   - Max file size: 10MB (validated server-side before generating URL)
-- [ ] Upload API route (`src/routes/api/upload.ts`):
+- [x] Upload API route (`src/routes/api/upload.ts`):
   - Protected by auth middleware
   - Accepts: filename, contentType
   - Returns: presigned URL, final S3 key
-- [ ] Reusable `ImageUploader` component:
+- [x] Reusable `ImageUploader` component:
   - Drag-and-drop + file picker
   - Client-side file type/size validation
   - Direct upload to S3 via presigned URL
@@ -435,11 +435,11 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Returns S3 URL on completion
 
 ##### Portfolio Management
-- [ ] Category management page (`/admin/portfolio/categories.tsx`):
+- [x] Category management page (`/admin/portfolio/categories.tsx`):
   - List categories with sort order
   - Add/edit/delete categories (inline or modal)
-- [ ] Project list page (`/admin/portfolio`): DataTable grouped by category
-- [ ] New project page (`/admin/portfolio/new`):
+- [x] Project list page (`/admin/portfolio`): DataTable grouped by category
+- [x] New project page (`/admin/portfolio/new`):
   - Title, slug (auto-generated), category (dropdown), year, role, workplace
   - Technology tags (multi-input, free-text)
   - Description (markdown editor, simpler than blog — no live preview needed)
@@ -447,36 +447,36 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Screenshot gallery: multi-image upload with drag-to-reorder, alt text per image
   - Status: Draft / Published
   - Sort order within category
-- [ ] Edit project page (`/admin/portfolio/$id.edit`)
-- [ ] Server functions: `createProject`, `updateProject`, `deleteProject`, project image CRUD
+- [x] Edit project page (`/admin/portfolio/$id.edit`)
+- [x] Server functions: `createProject`, `updateProject`, `deleteProject`, project image CRUD
 
 ##### SaaS Listing Management
-- [ ] SaaS list page (`/admin/saas`): DataTable with name, status badge, actions
-- [ ] New listing page (`/admin/saas/new`):
+- [x] SaaS list page (`/admin/saas`): DataTable with name, status badge, actions
+- [x] New listing page (`/admin/saas/new`):
   - Name, slug, description, URL, GitHub URL
   - Logo upload (S3)
   - Technology tags
   - Status: Active / Beta / Retired
   - Sort order
-- [ ] Edit listing page (`/admin/saas/$id.edit`)
-- [ ] Server functions: `createSaasListing`, `updateSaasListing`, `deleteSaasListing`
+- [x] Edit listing page (`/admin/saas/$id.edit`)
+- [x] Server functions: `createSaasListing`, `updateSaasListing`, `deleteSaasListing`
 
 ##### Resume Management
-- [ ] Resume entries page (`/admin/resume`):
+- [x] Resume entries page (`/admin/resume`):
   - Grouped by type (Experience, Education, Certification, Skill)
   - Add/edit/delete entries (modal or inline)
   - Fields: type, title, organization, location, description, start_date, end_date (null = current), sort_order
   - Drag-to-reorder within each type group
-- [ ] Server functions: `createResumeEntry`, `updateResumeEntry`, `deleteResumeEntry`, `reorderEntries`
+- [x] Server functions: `createResumeEntry`, `updateResumeEntry`, `deleteResumeEntry`, `reorderEntries`
 
 ##### Contact Submissions
-- [ ] Contacts page (`/admin/contacts`):
+- [x] Contacts page (`/admin/contacts`):
   - List with name, email, subject, date, read/unread status
   - Click to view full message (expandable row or side panel)
   - Mark as read/unread
   - Delete with confirmation
   - Unread count badge in admin sidebar
-- [ ] Server functions: `getContacts`, `markContactRead`, `deleteContact`
+- [x] Server functions: `getContacts`, `markContactRead`, `deleteContact`
 
 **Key files:**
 - `src/server/functions/posts.functions.ts`
@@ -506,22 +506,22 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Home Page (`/`)
-- [ ] Hero section: animated developer-themed intro with name, title, and brief tagline
-- [ ] Section previews: latest blog posts, featured projects, active SaaS, resume highlights
-- [ ] CTA links to each section
+- [x] Hero section: animated developer-themed intro with name, title, and brief tagline
+- [x] Section previews: latest blog posts, featured projects, active SaaS, resume highlights
+- [x] CTA links to each section
 
 ##### About Page (`/about`)
-- [ ] Bio content (from `site_settings` or hardcoded initially)
-- [ ] Skills/technologies overview
-- [ ] Social links
+- [x] Bio content (from `site_settings` or hardcoded initially)
+- [x] Skills/technologies overview
+- [x] Social links
 
 ##### Blog Pages
-- [ ] Blog listing (`/blog`):
+- [x] Blog listing (`/blog`):
   - Page-based pagination (12 posts per page, `?page=N`)
   - Post cards: title, excerpt, date, tags, cover image
   - Tag filter (optional query param: `?tag=typescript`)
   - Only `status = 'published'` posts shown
-- [ ] Blog post (`/blog/$slug`):
+- [x] Blog post (`/blog/$slug`):
   - SSR-rendered markdown content using `unified` + `remark-gfm` + `rehype-sanitize` + `rehype-shiki` (Shiki for syntax highlighting)
   - Post metadata: title, date, tags, reading time estimate
   - Cover image
@@ -529,13 +529,13 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Dynamic `<head>` meta tags: title, description, canonical URL, OG image URL
 
 ##### Portfolio Pages
-- [ ] Categories overview (`/portfolio`):
+- [x] Categories overview (`/portfolio`):
   - Grid of category cards with name, description, project count
   - Category slugs: `college`, `freelance`, `topapp-id`, `work`, `apple-developer-academy`, `lexicon`
-- [ ] Category listing (`/portfolio/$category`):
+- [x] Category listing (`/portfolio/$category`):
   - All published projects in the category, ordered by `sort_order`
   - Project cards with title, year, role, technology tags, thumbnail
-- [ ] Project detail (`/portfolio/$category/$slug`):
+- [x] Project detail (`/portfolio/$category/$slug`):
   - **Following Figma template structure:**
   - Left sidebar: project name (h1), year, role, workplace, technology tags, GitHub/external links (with icons)
   - Right area: project description + screenshot gallery (grid layout)
@@ -544,10 +544,10 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - 404 if project doesn't exist or isn't published
 
 ##### Resume Page (`/resume`)
-- [ ] Interactive timeline: vertical timeline with entries grouped by type
-- [ ] Experience entries: expandable cards with company, title, dates, description
-- [ ] Education entries: similar layout
-- [ ] Skills section: grouped tags
+- [x] Interactive timeline: vertical timeline with entries grouped by type
+- [x] Experience entries: expandable cards with company, title, dates, description
+- [x] Education entries: similar layout
+- [x] Skills section: grouped tags
 - [ ] "Download PDF" button: links to `/api/resume.pdf`
 - [ ] PDF generation route (`/api/resume.pdf`):
   - Uses `@react-pdf/renderer` with `renderToStream`
@@ -556,41 +556,41 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Cache with `Cache-Control: public, max-age=3600` (1 hour)
 
 ##### SaaS Showcase (`/saas`)
-- [ ] Card grid: active first, then beta, then retired (within each group: by sort_order)
-- [ ] Each card: name, description, tech tags, status badge (color-coded), links
-- [ ] Retired listings shown with reduced opacity
-- [ ] Empty state if no listings
+- [x] Card grid: active first, then beta, then retired (within each group: by sort_order)
+- [x] Each card: name, description, tech tags, status badge (color-coded), links
+- [x] Retired listings shown with reduced opacity
+- [x] Empty state if no listings
 
 ##### Contact Page (`/contact`)
-- [ ] Form fields: name (required), email (required, validated), subject (optional), message (required, 10-5000 chars)
-- [ ] Spam protection:
+- [x] Form fields: name (required), email (required, validated), subject (optional), message (required, 10-5000 chars)
+- [x] Spam protection:
   - Honeypot field (hidden CSS field, reject if filled)
   - Rate limiting: 3 submissions per IP per hour (server-side)
-- [ ] Client-side validation with error messages
-- [ ] Server-side validation (Zod schema via `drizzle-zod` or manual)
-- [ ] Success state: inline confirmation message
-- [ ] Error state: user-friendly error with retry option
+- [x] Client-side validation with error messages
+- [x] Server-side validation (Zod schema via `drizzle-zod` or manual)
+- [x] Success state: inline confirmation message
+- [x] Error state: user-friendly error with retry option
 
 ##### SEO Infrastructure
-- [ ] Dynamic `<head>` meta tags per route (title, description, canonical, OG)
+- [x] Dynamic `<head>` meta tags per route (title, description, canonical, OG)
 - [ ] OG image generation (`/api/og.png?title=...&type=...`):
   - Satori + Sharp pipeline
   - Dark gradient background with site typography
   - Title + section label
   - Cached with `Cache-Control: public, max-age=86400, s-maxage=604800`
   - Font loaded from `public/fonts/`
-- [ ] RSS feed (`/api/feed.xml`):
+- [x] RSS feed (`/api/feed.xml`):
   - Uses `feed` npm package
   - RSS 2.0 format with full post content
   - Cached for 1 hour
   - `<link rel="alternate" type="application/rss+xml">` in root layout
-- [ ] Sitemap (`/api/sitemap.xml`):
+- [x] Sitemap (`/api/sitemap.xml`):
   - Auto-generated from all published pages, posts, and projects
   - Cached for 1 hour
-- [ ] Robots.txt (`/api/robots.txt`):
+- [x] Robots.txt (`/api/robots.txt`):
   - Disallow `/admin/*`
   - Sitemap reference
-- [ ] Custom 404 page: developer-themed "page not found" with navigation links
+- [x] Custom 404 page: developer-themed "page not found" with navigation links
 - [ ] JSON-LD structured data: `Person` (home/about), `Article` (blog posts), `SoftwareApplication` (SaaS)
 
 **Key files:**
@@ -620,7 +620,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 **Tasks:**
 
 ##### Framer Motion Animations
-- [ ] Install `motion` (rebranded Framer Motion)
+- [x] Install `motion` (rebranded Framer Motion)
 - [ ] Configure `LazyMotion` with `domAnimation` features (reduce bundle ~15kb)
 - [ ] Configure `MotionConfig reducedMotion="user"` for accessibility
 - [ ] Page transitions:
@@ -636,8 +636,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 - [ ] SSR safety: use `initial={false}` where needed to prevent hydration flash
 
 ##### Cmd+K Command Palette
-- [ ] Install `cmdk`
-- [ ] Build `CommandPalette` component wrapping `Command.Dialog`:
+- [x] Install `cmdk`
+- [x] Build `CommandPalette` component wrapping `Command.Dialog`:
   - Keyboard shortcut: `Cmd+K` (desktop) / search icon button (mobile)
   - Groups: Navigation, Blog Posts, Projects, Theme
   - Navigation items: all public routes with icons
@@ -645,19 +645,19 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Projects: search titles via server function
   - Theme toggle items: Light, Dark, System
   - `keywords` prop for alias-based filtering
-- [ ] Style with Tailwind using `[cmdk-*]` data attribute selectors
+- [x] Style with Tailwind using `[cmdk-*]` data attribute selectors
 - [ ] Animate `--cmdk-list-height` for smooth height transitions
-- [ ] Mount in root layout (available on all pages)
-- [ ] Search endpoint (`/api/search`): queries posts + projects by title `ILIKE '%query%'`
+- [x] Mount in root layout (available on all pages)
+- [x] Search endpoint (`/api/search`): queries posts + projects by title `ILIKE '%query%'`
 
 ##### Terminal CLI Easter Egg
 > **Scope warning:** This is the highest-risk feature for scope creep. Start with core commands (`help`, `ls`, `cd`, `cat`, `clear`, `pwd`, `whoami`). Add tab completion and `history` only if time permits.
 
-- [ ] Build `TerminalOverlay` component:
+- [x] Build `TerminalOverlay` component:
   - Toggle: keyboard shortcut (`` Ctrl+` ``) + hint in footer ("Press Ctrl+` for terminal")
   - Overlay: semi-transparent backdrop with terminal window (monospace font, green-on-black aesthetic)
   - State persisted in `sessionStorage` (current directory, command history)
-- [ ] Command parser supporting:
+- [x] Command parser supporting:
   - `help` — list available commands
   - `whoami` — display name, role, and bio
   - `ls` — list items in current "directory" (maps to site sections)
@@ -669,7 +669,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - `history` — show command history
   - Arrow keys for command history navigation
   - Tab completion for commands and paths
-- [ ] Virtual file system mapping site structure:
+- [x] Virtual file system mapping site structure:
   ```
   /
   ├── about.md
@@ -684,8 +684,8 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   ├── saas/
   └── contact.md
   ```
-- [ ] Hide on mobile (touch devices) — show only on desktop
-- [ ] Accessible: terminal is decorative, not the primary navigation
+- [x] Hide on mobile (touch devices) — show only on desktop
+- [x] Accessible: terminal is decorative, not the primary navigation
 
 **Key files:**
 - `src/components/command-palette/CommandPalette.tsx`
@@ -708,37 +708,37 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
 
 **Tasks:**
 
-- [ ] Create `Dockerfile` (multi-stage build):
+- [x] Create `Dockerfile` (multi-stage build):
   - Stage 1: Install dependencies with pnpm
   - Stage 2: Build app (`vite build`)
   - Stage 3: Production image (node:22-alpine, non-root user)
   - Include `drizzle/` migrations folder
   - Run migrations on startup
-- [ ] Create `docker-compose.yml`:
+- [x] Create `docker-compose.yml`:
   - App service (TanStack Start)
   - PostgreSQL service (with volume for persistence)
   - MinIO service (optional, for local S3 development)
-- [ ] Create `docker-compose.prod.yml` (Dokploy-compatible):
+- [x] Create `docker-compose.prod.yml` (Dokploy-compatible):
   - App service with production env vars
   - PostgreSQL with backup volume
   - Health check: `GET /api/health` endpoint
 - [ ] Configure S3 bucket public read policy (images must be publicly accessible for portfolio/blog/OG images; set bucket policy or use CDN proxy)
-- [ ] Add health check endpoint (`/api/health`): returns 200 + DB connection status
+- [x] Add health check endpoint (`/api/health`): returns 200 + DB connection status
 - [ ] Configure Umami analytics:
   - Add Umami script tag in root layout
   - Track custom events: theme toggle, Cmd+K usage, terminal usage, PDF download, contact form submit
-- [ ] Security headers in `src/server.tsx`:
+- [x] Security headers in `src/server.tsx`:
   - `X-Frame-Options: DENY`
   - `X-Content-Type-Options: nosniff`
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `Content-Security-Policy` (strict, allow self + S3 bucket + Umami)
   - `Strict-Transport-Security` (production only)
-- [ ] Performance optimization:
+- [x] Performance optimization:
   - Lazy load below-fold images with `loading="lazy"`
   - Responsive images with `srcset` for portfolio screenshots
   - Code-split admin routes (not loaded for visitors)
   - Static asset caching headers
-- [ ] Create `CLAUDE.md` with project conventions:
+- [x] Create `CLAUDE.md` with project conventions:
   - Package manager: pnpm
   - Code style: no semicolons, single quotes, ESM
   - Path alias: `@/*` → `./src/*`
@@ -746,7 +746,7 @@ export const saasStatusEnum = pgEnum('saas_status', ['active', 'beta', 'retired'
   - Server code in `.functions.ts` and `.server.ts` files
   - Drizzle schema in `src/db/schema/`
   - Test files co-located: `*.test.ts`
-- [ ] Create `.env.example` documenting all required environment variables
+- [x] Create `.env.example` documenting all required environment variables
 
 **Key files:**
 - `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`

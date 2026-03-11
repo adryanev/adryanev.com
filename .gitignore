@@ -22,8 +22,8 @@ Thumbs.db
 # TanStack generated
 src/routeTree.gen.ts
 
-# Drizzle
-drizzle/meta/
+# Drizzle snapshot journal is auto-generated but needed for migrations
+# (do not ignore drizzle/ — migrations must be tracked)
 
 # Logs
 *.log

@@ -3,11 +3,22 @@ import {
   HeadContent,
   Outlet,
   Scripts,
+  useRouterState,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { lazy, Suspense } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { CommandPalette } from '@/components/command-palette/CommandPalette'
+import { TerminalOverlay } from '@/components/terminal/TerminalOverlay'
 import '../app.css'
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-router-devtools').then((mod) => ({
+        default: mod.TanStackRouterDevtools,
+      })),
+    )
+  : () => null
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -33,6 +44,12 @@ export const Route = createRootRoute({
       {
         rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap',
+      },
+      {
+        rel: 'alternate',
+        type: 'application/rss+xml',
+        title: 'Adryan Eka Vandra — Blog',
+        href: '/feed.xml',
       },
     ],
     scripts: [
@@ -66,6 +83,9 @@ function NotFoundComponent() {
 }
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const isAdmin = pathname.startsWith('/admin')
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -75,14 +95,22 @@ function RootComponent() {
         className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100"
         suppressHydrationWarning
       >
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
-        {import.meta.env.DEV && <TanStackRouterDevtools />}
+        {isAdmin ? (
+          <Outlet />
+        ) : (
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
+        )}
+        {!isAdmin && <CommandPalette />}
+        {!isAdmin && <TerminalOverlay />}
+        <Suspense>
+          <TanStackRouterDevtools />
+        </Suspense>
         <Scripts />
       </body>
     </html>

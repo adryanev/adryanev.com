@@ -31,13 +31,11 @@ function CategoriesPage() {
       createFn({
         data: { name: newName, description: newDesc || undefined },
       }),
-    onSuccess: (result) => {
-      if (result && !('error' in result)) {
-        setNewName('')
-        setNewDesc('')
-        setShowNew(false)
-        Route.router?.invalidate()
-      }
+    onSuccess: () => {
+      setNewName('')
+      setNewDesc('')
+      setShowNew(false)
+      Route.router?.invalidate()
     },
   })
 

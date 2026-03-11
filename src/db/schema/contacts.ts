@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const contacts = pgTable('contacts', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
@@ -10,4 +10,6 @@ export const contacts = pgTable('contacts', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-})
+}, (table) => [
+  index('contacts_created_at_idx').on(table.createdAt),
+])

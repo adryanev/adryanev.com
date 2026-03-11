@@ -14,9 +14,9 @@ import {
   Sun,
   Moon,
   Monitor,
-  Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { setTheme as persistTheme } from '@/lib/theme'
 import { searchContent } from '@/server/functions/search.functions'
 
 const NAV_ITEMS = [
@@ -75,15 +75,8 @@ export function CommandPalette() {
     navigate({ to })
   }
 
-  const setTheme = (theme: 'light' | 'dark' | 'system') => {
-    if (theme === 'system') {
-      localStorage.removeItem('theme')
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      document.documentElement.classList.toggle('dark', isDark)
-    } else {
-      localStorage.setItem('theme', theme)
-      document.documentElement.classList.toggle('dark', theme === 'dark')
-    }
+  const handleSetTheme = (theme: 'light' | 'dark' | 'system') => {
+    persistTheme(theme)
     setOpen(false)
   }
 
@@ -186,7 +179,7 @@ export function CommandPalette() {
             <Command.Group heading="Theme" className="px-2 py-1 text-xs font-medium text-slate-400">
               <Command.Item
                 value="light theme"
-                onSelect={() => setTheme('light')}
+                onSelect={() => handleSetTheme('light')}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
                   'aria-selected:bg-accent/10 aria-selected:text-accent',
@@ -196,7 +189,7 @@ export function CommandPalette() {
               </Command.Item>
               <Command.Item
                 value="dark theme"
-                onSelect={() => setTheme('dark')}
+                onSelect={() => handleSetTheme('dark')}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
                   'aria-selected:bg-accent/10 aria-selected:text-accent',
@@ -206,7 +199,7 @@ export function CommandPalette() {
               </Command.Item>
               <Command.Item
                 value="system theme auto"
-                onSelect={() => setTheme('system')}
+                onSelect={() => handleSetTheme('system')}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
                   'aria-selected:bg-accent/10 aria-selected:text-accent',

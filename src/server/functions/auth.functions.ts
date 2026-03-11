@@ -55,9 +55,7 @@ export const login = createServerFn({ method: 'POST' })
     const ip = getRequestIP({ xForwardedFor: true }) ?? '127.0.0.1'
     const rateCheck = checkRateLimit(ip)
     if (!rateCheck.allowed) {
-      return {
-        error: `Too many login attempts. Try again in ${rateCheck.retryAfterSeconds} seconds.`,
-      }
+      throw new Error(`Too many login attempts. Try again in ${rateCheck.retryAfterSeconds} seconds.`)
     }
 
     // Find user by email
@@ -66,13 +64,13 @@ export const login = createServerFn({ method: 'POST' })
     })
 
     if (!user) {
-      return { error: 'Invalid email or password' }
+      throw new Error('Invalid email or password')
     }
 
     // Verify password
     const valid = await verify(user.passwordHash, data.password)
     if (!valid) {
-      return { error: 'Invalid email or password' }
+      throw new Error('Invalid email or password')
     }
 
     // Create DB session

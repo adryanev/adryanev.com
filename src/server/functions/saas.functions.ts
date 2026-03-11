@@ -2,13 +2,16 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq, isNull, asc } from 'drizzle-orm'
 import { db } from '@/db'
 import { saasListings } from '@/db/schema/saas'
-
-function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-}
+import { getCurrentUser } from '@/server/functions/auth.functions'
+import { slugify } from '@/lib/slugify'
 
 export const getSaasListings = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     return db.query.saasListings.findMany({
       where: isNull(saasListings.deletedAt),
       orderBy: asc(saasListings.sortOrder),
@@ -19,6 +22,11 @@ export const getSaasListings = createServerFn({ method: 'GET' }).handler(
 export const getSaasById = createServerFn({ method: 'GET' })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     return (
       (await db.query.saasListings.findFirst({
         where: eq(saasListings.id, data.id),
@@ -41,11 +49,16 @@ export const createSaasListing = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     const slug = data.slug || slugify(data.name)
     const existing = await db.query.saasListings.findFirst({
       where: eq(saasListings.slug, slug),
     })
-    if (existing) return { error: 'A listing with this slug already exists' }
+    if (existing) throw new Error('A listing with this slug already exists')
 
     await db.insert(saasListings).values({
       name: data.name,
@@ -77,6 +90,11 @@ export const updateSaasListing = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     await db
       .update(saasListings)
       .set({
@@ -98,6 +116,11 @@ export const updateSaasListing = createServerFn({ method: 'POST' })
 export const deleteSaasListing = createServerFn({ method: 'POST' })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     await db
       .update(saasListings)
       .set({ deletedAt: new Date() })

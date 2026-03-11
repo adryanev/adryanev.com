@@ -22,13 +22,22 @@ if (process.env.NODE_ENV === 'production') {
 
 const handler = createStartHandler(defaultStreamHandler)
 
+// In-memory cache for expensive SEO endpoints
+let rssCache: { xml: string; cachedAt: number } | null = null
+let sitemapCache: { xml: string; cachedAt: number } | null = null
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
 // SEO endpoints that return non-HTML responses
 async function handleSeoEndpoints(request: Request): Promise<Response | null> {
   const url = new URL(request.url)
 
   if (url.pathname === '/feed.xml') {
-    const xml = await generateRssFeed()
-    return new Response(xml, {
+    const now = Date.now()
+    if (!rssCache || now - rssCache.cachedAt > CACHE_TTL) {
+      const xml = await generateRssFeed()
+      rssCache = { xml, cachedAt: now }
+    }
+    return new Response(rssCache.xml, {
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600',
@@ -37,8 +46,12 @@ async function handleSeoEndpoints(request: Request): Promise<Response | null> {
   }
 
   if (url.pathname === '/sitemap.xml') {
-    const xml = await generateSitemap()
-    return new Response(xml, {
+    const now = Date.now()
+    if (!sitemapCache || now - sitemapCache.cachedAt > CACHE_TTL) {
+      const xml = await generateSitemap()
+      sitemapCache = { xml, cachedAt: now }
+    }
+    return new Response(sitemapCache.xml, {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600',

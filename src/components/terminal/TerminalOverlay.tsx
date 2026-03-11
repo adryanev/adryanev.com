@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate, useRouterState } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,7 +31,6 @@ const FILE_SYSTEM: Record<string, { type: 'dir' | 'file'; children?: string[]; c
 }
 
 const PATH_MAP: Record<string, string> = {
-  '/': '/',
   '/about.md': '/about',
   '/resume/': '/resume',
   '/blog/': '/blog',
@@ -47,6 +46,7 @@ type Line = { type: 'input' | 'output'; text: string }
 
 export function TerminalOverlay() {
   const [open, setOpen] = useState(false)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [lines, setLines] = useState<Line[]>([
     { type: 'output', text: 'Welcome to adryanev.com terminal. Type "help" for commands.' },
   ])
@@ -57,7 +57,11 @@ export function TerminalOverlay() {
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
+
+  // Detect touch device after hydration
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window)
+  }, [])
 
   // Toggle with Ctrl+`
   useEffect(() => {
@@ -215,8 +219,8 @@ export function TerminalOverlay() {
     }
   }
 
-  // Hide on mobile
-  if (typeof window !== 'undefined' && 'ontouchstart' in window) return null
+  // Hide on touch devices
+  if (isTouchDevice) return null
 
   if (!open) return null
 

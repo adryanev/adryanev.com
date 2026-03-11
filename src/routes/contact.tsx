@@ -38,11 +38,10 @@ function ContactPage() {
         setFieldErrors(result.errors as Record<string, string>)
         return
       }
-      if (result && 'error' in result) {
-        setFieldErrors({ form: result.error as string })
-        return
-      }
       setSubmitted(true)
+    },
+    onError: (err) => {
+      setFieldErrors({ form: err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.' })
     },
   })
 

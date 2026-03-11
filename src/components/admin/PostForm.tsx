@@ -60,16 +60,12 @@ export function PostForm({
       }
       return createFn({ data })
     },
-    onSuccess: (result) => {
-      if (result && 'error' in result && result.error) {
-        setError(result.error)
-      } else {
-        // Clear autosave on successful save
-        localStorage.removeItem(AUTOSAVE_KEY)
-        navigate({ to: '/admin/posts' })
-      }
+    onSuccess: () => {
+      // Clear autosave on successful save
+      localStorage.removeItem(AUTOSAVE_KEY)
+      navigate({ to: '/admin/posts' })
     },
-    onError: () => setError('Failed to save post'),
+    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save post'),
   })
 
   // Autosave to localStorage every 30 seconds (new posts only)

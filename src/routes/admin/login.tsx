@@ -26,15 +26,11 @@ function LoginPage() {
   const loginFn = useServerFn(login)
   const loginMutation = useMutation({
     mutationFn: () => loginFn({ data: { email, password } }),
-    onSuccess: (result) => {
-      if (result && 'error' in result && result.error) {
-        setError(result.error)
-      } else {
-        navigate({ to: '/admin' })
-      }
+    onSuccess: () => {
+      navigate({ to: '/admin' })
     },
-    onError: () => {
-      setError('An unexpected error occurred. Please try again.')
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
     },
   })
 

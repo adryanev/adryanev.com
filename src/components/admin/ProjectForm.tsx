@@ -77,14 +77,10 @@ export function ProjectForm({
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: (result) => {
-      if (result && 'error' in result && result.error) {
-        setError(result.error)
-      } else {
-        navigate({ to: '/admin/portfolio' })
-      }
+    onSuccess: () => {
+      navigate({ to: '/admin/portfolio' })
     },
-    onError: () => setError('Failed to save project'),
+    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save project'),
   })
 
   const addTech = useCallback(() => {

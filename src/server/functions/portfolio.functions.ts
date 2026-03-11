@@ -6,17 +6,17 @@ import {
   portfolioProjects,
   projectImages,
 } from '@/db/schema/portfolio'
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
+import { getCurrentUser } from '@/server/functions/auth.functions'
+import { slugify } from '@/lib/slugify'
 
 // Categories
 export const getCategories = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     return db.query.portfolioCategories.findMany({
       orderBy: asc(portfolioCategories.sortOrder),
       with: { projects: { where: isNull(portfolioProjects.deletedAt) } },
@@ -29,11 +29,16 @@ export const createCategory = createServerFn({ method: 'POST' })
     (data: { name: string; slug?: string; description?: string; sortOrder?: number }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     const slug = data.slug || slugify(data.name)
     const existing = await db.query.portfolioCategories.findFirst({
       where: eq(portfolioCategories.slug, slug),
     })
-    if (existing) return { error: 'Category with this slug already exists' }
+    if (existing) throw new Error('Category with this slug already exists')
 
     await db.insert(portfolioCategories).values({
       name: data.name,
@@ -49,6 +54,11 @@ export const updateCategory = createServerFn({ method: 'POST' })
     (data: { id: number; name: string; slug?: string; description?: string; sortOrder?: number }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     await db
       .update(portfolioCategories)
       .set({
@@ -64,6 +74,11 @@ export const updateCategory = createServerFn({ method: 'POST' })
 export const deleteCategory = createServerFn({ method: 'POST' })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     await db
       .delete(portfolioCategories)
       .where(eq(portfolioCategories.id, data.id))
@@ -73,6 +88,11 @@ export const deleteCategory = createServerFn({ method: 'POST' })
 // Projects
 export const getProjects = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     return db.query.portfolioProjects.findMany({
       where: isNull(portfolioProjects.deletedAt),
       orderBy: [asc(portfolioProjects.sortOrder), desc(portfolioProjects.createdAt)],
@@ -84,6 +104,11 @@ export const getProjects = createServerFn({ method: 'GET' }).handler(
 export const getProjectById = createServerFn({ method: 'GET' })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     return (
       (await db.query.portfolioProjects.findFirst({
         where: and(
@@ -114,11 +139,16 @@ export const createProject = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     const slug = data.slug || slugify(data.title)
     const existing = await db.query.portfolioProjects.findFirst({
       where: eq(portfolioProjects.slug, slug),
     })
-    if (existing) return { error: 'A project with this slug already exists' }
+    if (existing) throw new Error('A project with this slug already exists')
 
     const [project] = await db
       .insert(portfolioProjects)
@@ -172,6 +202,11 @@ export const updateProject = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     const slug = data.slug || slugify(data.title)
 
     await db
@@ -216,6 +251,11 @@ export const updateProject = createServerFn({ method: 'POST' })
 export const deleteProject = createServerFn({ method: 'POST' })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     await db
       .update(portfolioProjects)
       .set({ deletedAt: new Date() })

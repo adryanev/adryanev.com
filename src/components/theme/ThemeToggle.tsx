@@ -1,33 +1,25 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type Theme = 'light' | 'dark' | 'system'
-
-function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'dark'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
-}
-
-function applyTheme(theme: Theme) {
-  const resolved = theme === 'system' ? getSystemTheme() : theme
-  document.documentElement.classList.toggle('dark', resolved === 'dark')
-}
+import {
+  type Theme,
+  getStoredTheme,
+  applyTheme,
+  setTheme as persistTheme,
+  isSystemTheme,
+} from '@/lib/theme'
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('system')
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as Theme | null
-    const initial = stored ?? 'system'
+    const initial = getStoredTheme()
     setTheme(initial)
     applyTheme(initial)
 
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {
-      if (localStorage.getItem('theme') === 'system' || !localStorage.getItem('theme')) {
+      if (isSystemTheme()) {
         applyTheme('system')
       }
     }
@@ -39,8 +31,7 @@ export function ThemeToggle() {
     const order: Theme[] = ['dark', 'light', 'system']
     const next = order[(order.indexOf(theme) + 1) % order.length]
     setTheme(next)
-    localStorage.setItem('theme', next)
-    applyTheme(next)
+    persistTheme(next)
   }, [theme])
 
   const Icon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor

@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Calendar, Clock, Tag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublishedPosts, getAllTags } from '@/server/functions/public.functions'
-import { estimateReadingTime } from '@/lib/markdown'
 
 export const Route = createFileRoute('/blog/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -119,7 +118,7 @@ function BlogListPage() {
                 )}
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {estimateReadingTime(post.content)} min read
+                  {post.readingTime} min read
                 </span>
               </div>
               {post.excerpt && (

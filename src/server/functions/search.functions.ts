@@ -4,13 +4,17 @@ import { db } from '@/db'
 import { posts } from '@/db/schema/posts'
 import { portfolioProjects } from '@/db/schema/portfolio'
 
+function escapeLike(str: string): string {
+  return str.replace(/[%_\\]/g, '\\$&')
+}
+
 export const searchContent = createServerFn({ method: 'GET' })
   .inputValidator((data: { query: string }) => data)
   .handler(async ({ data }) => {
     const q = data.query.trim()
     if (q.length < 2) return { posts: [], projects: [] }
 
-    const pattern = `%${q}%`
+    const pattern = `%${escapeLike(q)}%`
 
     const [matchedPosts, matchedProjects] = await Promise.all([
       db.query.posts.findMany({

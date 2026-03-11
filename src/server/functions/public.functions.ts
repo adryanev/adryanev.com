@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, isNull, desc, asc } from 'drizzle-orm'
+import { eq, and, isNull, desc, asc, count, lt, gt, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, postsToTags, tags } from '@/db/schema/posts'
 import {
@@ -41,22 +41,44 @@ export const getPublishedPosts = createServerFn({ method: 'GET' })
       if (tagPostIds.length === 0) return { posts: [], total: 0, page, totalPages: 0 }
     }
 
-    const allPosts = await db.query.posts.findMany({
-      where: and(...conditions),
-      orderBy: desc(posts.publishedAt),
-      with: { postsToTags: { with: { tag: true } } },
+    // Build the full WHERE condition including tag filter
+    const whereCondition = tagPostIds
+      ? and(...conditions, inArray(posts.id, tagPostIds))
+      : and(...conditions)
+
+    // Run paginated query and count in parallel
+    const [paginatedPosts, [{ total }]] = await Promise.all([
+      db.query.posts.findMany({
+        where: whereCondition,
+        orderBy: desc(posts.publishedAt),
+        limit: perPage,
+        offset,
+        with: { postsToTags: { with: { tag: true } } },
+        columns: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImage: true,
+          status: true,
+          publishedAt: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      db.select({ total: count() }).from(posts).where(whereCondition),
+    ])
+
+    // Compute reading time server-side and strip content from response
+    const postsWithReadingTime = paginatedPosts.map((post) => {
+      const readingTime = estimateReadingTime(post.content)
+      const { content: _content, ...rest } = post
+      return { ...rest, readingTime }
     })
 
-    let filtered = allPosts
-    if (tagPostIds) {
-      filtered = allPosts.filter((p) => tagPostIds!.includes(p.id))
-    }
-
-    const total = filtered.length
-    const paginated = filtered.slice(offset, offset + perPage)
-
     return {
-      posts: paginated,
+      posts: postsWithReadingTime,
       total,
       page,
       totalPages: Math.ceil(total / perPage),
@@ -79,24 +101,30 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     const html = await renderMarkdown(post.content)
     const readingTime = estimateReadingTime(post.content)
 
-    // Get prev/next posts
+    // Get prev/next posts relative to the current post's publishedAt
     const [prev, next] = await Promise.all([
-      db.query.posts.findFirst({
-        where: and(
-          eq(posts.status, 'published'),
-          isNull(posts.deletedAt),
-        ),
-        orderBy: desc(posts.publishedAt),
-        columns: { slug: true, title: true },
-      }),
-      db.query.posts.findFirst({
-        where: and(
-          eq(posts.status, 'published'),
-          isNull(posts.deletedAt),
-        ),
-        orderBy: asc(posts.publishedAt),
-        columns: { slug: true, title: true },
-      }),
+      post.publishedAt
+        ? db.query.posts.findFirst({
+            where: and(
+              eq(posts.status, 'published'),
+              isNull(posts.deletedAt),
+              lt(posts.publishedAt, post.publishedAt),
+            ),
+            orderBy: desc(posts.publishedAt),
+            columns: { slug: true, title: true },
+          })
+        : Promise.resolve(undefined),
+      post.publishedAt
+        ? db.query.posts.findFirst({
+            where: and(
+              eq(posts.status, 'published'),
+              isNull(posts.deletedAt),
+              gt(posts.publishedAt, post.publishedAt),
+            ),
+            orderBy: asc(posts.publishedAt),
+            columns: { slug: true, title: true },
+          })
+        : Promise.resolve(undefined),
     ])
 
     return { ...post, html, readingTime, prev, next }
@@ -242,9 +270,17 @@ export const submitContact = createServerFn({ method: 'POST' })
     // Rate limit: 3 per hour per "session" (simplified, no IP in server fn context)
     const key = data.email.toLowerCase()
     const now = Date.now()
+
+    // Prune expired entries to prevent memory leak
+    for (const [k, v] of contactRateLimit) {
+      if (now > v.resetAt) {
+        contactRateLimit.delete(k)
+      }
+    }
+
     const limit = contactRateLimit.get(key)
     if (limit && limit.resetAt > now && limit.count >= 3) {
-      return { error: 'Too many submissions. Please try again later.' }
+      throw new Error('Too many submissions. Please try again later.')
     }
     if (!limit || limit.resetAt <= now) {
       contactRateLimit.set(key, { count: 1, resetAt: now + 60 * 60 * 1000 })

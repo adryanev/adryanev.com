@@ -4,14 +4,35 @@ import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
-import { createHighlighter } from 'shiki'
+import rehypeShiki from '@shikijs/rehype'
 
-let highlighterPromise: ReturnType<typeof createHighlighter> | null = null
+// Sanitization schema that allows Shiki-generated HTML attributes.
+// Shiki runs as a rehype plugin BEFORE sanitize, so all its output
+// passes through the sanitizer — no post-process bypass.
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [...(defaultSchema.attributes?.code ?? []), 'className', 'style'],
+    span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style'],
+    pre: [
+      ...(defaultSchema.attributes?.pre ?? []),
+      'className',
+      'style',
+      'tabindex',
+    ],
+  },
+}
 
-function getHighlighter() {
-  if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: ['github-dark', 'github-light'],
+export async function renderMarkdown(content: string): Promise<string> {
+  const result = await unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkRehype)
+    // Shiki runs inside the pipeline, before sanitize
+    .use(rehypeShiki, {
+      themes: { dark: 'github-dark', light: 'github-light' },
+      defaultLanguage: 'text',
       langs: [
         'typescript',
         'javascript',
@@ -22,68 +43,15 @@ function getHighlighter() {
         'css',
         'html',
         'yaml',
-        'markdown',
         'sql',
-        'python',
-        'go',
-        'rust',
-        'dart',
-        'kotlin',
-        'swift',
-        'diff',
+        'dockerfile',
       ],
     })
-  }
-  return highlighterPromise
-}
-
-export async function renderMarkdown(content: string): Promise<string> {
-  const highlighter = await getHighlighter()
-
-  // Allow class attributes for syntax highlighting
-  const schema = {
-    ...defaultSchema,
-    attributes: {
-      ...defaultSchema.attributes,
-      code: [...(defaultSchema.attributes?.code ?? []), 'className', 'style'],
-      span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style'],
-      pre: [...(defaultSchema.attributes?.pre ?? []), 'className', 'style'],
-    },
-  }
-
-  const result = await unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkRehype)
-    .use(rehypeSanitize, schema)
+    .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeStringify)
     .process(content)
 
-  let html = String(result)
-
-  // Post-process: apply shiki highlighting to code blocks
-  html = html.replace(
-    /<pre><code(?:\s+class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
-    (_match, lang, code) => {
-      const decoded = code
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-
-      try {
-        return highlighter.codeToHtml(decoded, {
-          lang: lang || 'text',
-          themes: { dark: 'github-dark', light: 'github-light' },
-        })
-      } catch {
-        return `<pre><code>${code}</code></pre>`
-      }
-    },
-  )
-
-  return html
+  return String(result)
 }
 
 export function estimateReadingTime(content: string): number {

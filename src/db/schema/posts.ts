@@ -1,4 +1,4 @@
-import { integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { contentStatusEnum } from './enums'
 
@@ -18,7 +18,9 @@ export const posts = pgTable('posts', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-})
+}, (table) => [
+  index('posts_status_published_at_idx').on(table.status, table.publishedAt),
+])
 
 export const tags = pgTable('tags', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),

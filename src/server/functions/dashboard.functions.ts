@@ -4,9 +4,15 @@ import { db } from '@/db'
 import { posts } from '@/db/schema/posts'
 import { portfolioProjects } from '@/db/schema/portfolio'
 import { contacts } from '@/db/schema/contacts'
+import { getCurrentUser } from '@/server/functions/auth.functions'
 
 export const getDashboardStats = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
     const [totalPosts, draftPosts, totalProjects, unreadContacts] =
       await Promise.all([
         db

@@ -46,11 +46,10 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: (result) => {
-      if (result && 'error' in result && result.error) setError(result.error)
-      else navigate({ to: '/admin/saas' })
+    onSuccess: () => {
+      navigate({ to: '/admin/saas' })
     },
-    onError: () => setError('Failed to save'),
+    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save'),
   })
 
   const addTech = useCallback(() => {

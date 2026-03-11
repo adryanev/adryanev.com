@@ -33,11 +33,6 @@ export function ImageUploader({
         },
       })
 
-      if ('error' in result) {
-        setError(result.error)
-        return
-      }
-
       // Upload directly to S3
       const uploadResponse = await fetch(result.uploadUrl, {
         method: 'PUT',
@@ -51,8 +46,8 @@ export function ImageUploader({
       }
 
       onChange(result.publicUrl)
-    } catch {
-      setError('Upload failed. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     } finally {
       setUploading(false)
     }

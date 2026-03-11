@@ -23,12 +23,12 @@ export async function createPresignedUploadUrl(
   filename: string,
   contentType: string,
   fileSize: number,
-): Promise<{ url: string; key: string } | { error: string }> {
+): Promise<{ url: string; key: string }> {
   if (!ALLOWED_TYPES.includes(contentType)) {
-    return { error: `File type not allowed. Allowed: ${ALLOWED_TYPES.join(', ')}` }
+    throw new Error(`File type not allowed. Allowed: ${ALLOWED_TYPES.join(', ')}`)
   }
   if (fileSize > MAX_FILE_SIZE) {
-    return { error: `File too large. Maximum size: 10MB` }
+    throw new Error('File too large. Maximum size: 10MB')
   }
 
   const ext = filename.split('.').pop() ?? 'bin'

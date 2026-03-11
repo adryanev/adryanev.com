@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Plus, Save, Trash2, X } from 'lucide-react'
+import { Plus, Save, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   getResumeEntries,
@@ -27,6 +27,7 @@ function ResumePage() {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [technology, setTechnology] = useState('')
   const [sortOrder, setSortOrder] = useState(0)
 
   const createFn = useServerFn(createResumeEntry)
@@ -41,6 +42,7 @@ function ResumePage() {
           organization: organization || undefined,
           location: location || undefined,
           description: description || undefined,
+          technology: technology.trim() ? technology.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
           startDate: startDate || undefined,
           endDate: endDate || undefined,
           sortOrder,
@@ -52,6 +54,7 @@ function ResumePage() {
       setOrganization('')
       setLocation('')
       setDescription('')
+      setTechnology('')
       setStartDate('')
       setEndDate('')
       Route.router?.invalidate()
@@ -110,6 +113,10 @@ function ResumePage() {
               <label className="mb-1 block text-xs font-medium">Description</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={cn('w-full rounded-md border px-3 py-2 text-sm', 'border-slate-300 dark:border-slate-700 dark:bg-slate-800')} />
             </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium">Technology <span className="text-slate-400">(comma-separated)</span></label>
+              <input type="text" value={technology} onChange={(e) => setTechnology(e.target.value)} placeholder="Flutter, Go, PostgreSQL" className={cn('w-full rounded-md border px-3 py-2 text-sm', 'border-slate-300 dark:border-slate-700 dark:bg-slate-800')} />
+            </div>
             <div className="grid gap-3 md:grid-cols-3">
               <div>
                 <label className="mb-1 block text-xs font-medium">Start Date</label>
@@ -151,6 +158,13 @@ function ResumePage() {
                         <p className="text-xs text-slate-400">
                           {entry.startDate} — {entry.endDate ?? 'Present'}
                         </p>
+                      )}
+                      {entry.technology && entry.technology.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {entry.technology.map((tech) => (
+                            <span key={tech} className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">{tech}</span>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <button onClick={() => { if (confirm('Delete?')) deleteMut.mutate(entry.id) }} className="text-slate-400 hover:text-red-500">

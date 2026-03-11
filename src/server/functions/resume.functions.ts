@@ -23,8 +23,10 @@ export const createResumeEntry = createServerFn({ method: 'POST' })
       type: 'experience' | 'education' | 'certification' | 'skill'
       title: string
       organization?: string
+      organizationUrl?: string
       location?: string
       description?: string
+      technology?: string[]
       startDate?: string
       endDate?: string
       sortOrder?: number
@@ -40,8 +42,10 @@ export const createResumeEntry = createServerFn({ method: 'POST' })
       type: data.type,
       title: data.title,
       organization: data.organization,
+      organizationUrl: data.organizationUrl,
       location: data.location,
       description: data.description,
+      technology: data.technology ?? null,
       startDate: data.startDate,
       endDate: data.endDate,
       sortOrder: data.sortOrder ?? 0,
@@ -56,8 +60,10 @@ export const updateResumeEntry = createServerFn({ method: 'POST' })
       type: 'experience' | 'education' | 'certification' | 'skill'
       title: string
       organization?: string
+      organizationUrl?: string
       location?: string
       description?: string
+      technology?: string[]
       startDate?: string
       endDate?: string
       sortOrder?: number
@@ -75,8 +81,10 @@ export const updateResumeEntry = createServerFn({ method: 'POST' })
         type: data.type,
         title: data.title,
         organization: data.organization,
+        organizationUrl: data.organizationUrl,
         location: data.location,
         description: data.description,
+        technology: data.technology ?? null,
         startDate: data.startDate,
         endDate: data.endDate,
         sortOrder: data.sortOrder,

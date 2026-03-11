@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Briefcase, GraduationCap, Award, Wrench, MapPin, Calendar } from 'lucide-react'
+import { useState } from 'react'
+import { Briefcase, GraduationCap, Award, Wrench, MapPin, Calendar, Download, Loader2, Mail, Github, Linkedin, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublicResume } from '@/server/functions/public.functions'
 
@@ -27,6 +28,7 @@ const typeConfig = {
 
 function ResumePage() {
   const resume = Route.useLoaderData()
+  const [generating, setGenerating] = useState(false)
 
   const sections = [
     { type: 'experience' as const, entries: resume.experience },
@@ -35,12 +37,62 @@ function ResumePage() {
     { type: 'skill' as const, entries: resume.skill },
   ].filter((s) => s.entries.length > 0)
 
+  async function handleDownload() {
+    setGenerating(true)
+    try {
+      const { generateResumePDF } = await import(
+        '@/components/resume/ResumePDF'
+      )
+      await generateResumePDF(resume)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <h1 className="text-4xl font-bold">Resume</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
-        My professional journey.
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold">Adryan Eka Vandra</h1>
+          <p className="mt-1 text-lg text-slate-600 dark:text-slate-400">
+            Software Engineer
+          </p>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-slate-500 dark:text-slate-400">
+            <a href="mailto:adryanekavandra@gmail.com" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+              <Mail className="h-3.5 w-3.5" />
+              adryanekavandra@gmail.com
+            </a>
+            <a href="https://linkedin.com/in/adryanev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+              <Linkedin className="h-3.5 w-3.5" />
+              linkedin.com/in/adryanev
+            </a>
+            <a href="https://github.com/adryanev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+              <Github className="h-3.5 w-3.5" />
+              github.com/adryanev
+            </a>
+            <a href="https://adryanev.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+              <Globe className="h-3.5 w-3.5" />
+              adryanev.com
+            </a>
+          </div>
+        </div>
+        <button
+          onClick={handleDownload}
+          disabled={generating}
+          className={cn(
+            'flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+            'bg-accent text-slate-950 hover:bg-accent-hover',
+            'disabled:opacity-60',
+          )}
+        >
+          {generating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {generating ? 'Generating...' : 'Download PDF'}
+        </button>
+      </div>
 
       {sections.length === 0 ? (
         <div className="mt-12 text-center text-slate-500">
@@ -58,18 +110,29 @@ function ResumePage() {
                     <Icon className="h-5 w-5 text-accent" />
                     <h2 className="text-2xl font-bold">{label}</h2>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 space-y-3">
                     {entries.map((entry) => (
-                      <span
-                        key={entry.id}
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-medium',
-                          'bg-slate-100 text-slate-700',
-                          'dark:bg-slate-800 dark:text-slate-300',
-                        )}
-                      >
-                        {entry.title}
-                      </span>
+                      <div key={entry.id}>
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{entry.title}</h3>
+                        {entry.technology && entry.technology.length > 0 ? (
+                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                            {entry.technology.map((tech) => (
+                              <span
+                                key={tech}
+                                className={cn(
+                                  'rounded-md px-2.5 py-1 text-xs font-medium',
+                                  'bg-slate-100 text-slate-700',
+                                  'dark:bg-slate-800 dark:text-slate-300',
+                                )}
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        ) : entry.description ? (
+                          <p className="mt-1 text-sm text-slate-500">{entry.description}</p>
+                        ) : null}
+                      </div>
                     ))}
                   </div>
                 </section>
@@ -93,7 +156,20 @@ function ResumePage() {
 
                       <h3 className="text-lg font-semibold">{entry.title}</h3>
                       {entry.organization && (
-                        <p className="text-sm text-accent">{entry.organization}</p>
+                        <p className="text-sm text-accent">
+                          {entry.organizationUrl ? (
+                            <a
+                              href={entry.organizationUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline decoration-accent/30 hover:decoration-accent"
+                            >
+                              {entry.organization}
+                            </a>
+                          ) : (
+                            entry.organization
+                          )}
+                        </p>
                       )}
                       <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
                         {(entry.startDate || entry.endDate) && (
@@ -110,9 +186,23 @@ function ResumePage() {
                         )}
                       </div>
                       {entry.description && (
-                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                          {entry.description}
-                        </p>
+                        <DescriptionList text={entry.description} />
+                      )}
+                      {entry.technology && entry.technology.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {entry.technology.map((tech) => (
+                            <span
+                              key={tech}
+                              className={cn(
+                                'rounded-md px-2 py-0.5 text-xs font-medium',
+                                'bg-slate-100 text-slate-600',
+                                'dark:bg-slate-800 dark:text-slate-400',
+                              )}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ))}
@@ -122,6 +212,36 @@ function ResumePage() {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Splits a description into sentences and renders the first as a summary
+ * paragraph and the rest as bullet points for scannability.
+ */
+function DescriptionList({ text }: { text: string }) {
+  const sentences = text
+    .split(/(?<=\.)\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+
+  if (sentences.length <= 1) {
+    return (
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{text}</p>
+    )
+  }
+
+  return (
+    <div className="mt-2 space-y-1.5">
+      <p className="text-sm italic text-slate-500 dark:text-slate-500">
+        {sentences[0]}
+      </p>
+      <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
+        {sentences.slice(1).map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ul>
     </div>
   )
 }

@@ -23,9 +23,9 @@ function PortfolioPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-      <h1 className="text-4xl font-bold">Portfolio</h1>
+      <h1 className="text-4xl font-bold tracking-tight">Portfolio</h1>
       <p className="mt-2 text-slate-600 dark:text-slate-400">
-        Projects organized by career phase.
+        A collection of projects across different roles and organizations.
       </p>
 
       {categories.length === 0 ? (
@@ -40,14 +40,14 @@ function PortfolioPage() {
               to="/portfolio/$category"
               params={{ category: cat.slug }}
               className={cn(
-                'group rounded-lg border p-6 transition-colors',
-                'border-slate-200 hover:border-accent/30 hover:bg-accent/5',
+                'group rounded-lg border p-6 transition-all',
+                'border-slate-200 hover:border-accent/30 hover:bg-accent/5 hover:shadow-md',
                 'dark:border-slate-800 dark:hover:border-accent/30 dark:hover:bg-accent/5',
               )}
             >
               <div className="flex items-center gap-3">
                 <FolderOpen className="h-5 w-5 text-accent" />
-                <h2 className="text-lg font-semibold group-hover:text-accent">
+                <h2 className="text-lg font-bold group-hover:text-accent transition-colors">
                   {cat.name}
                 </h2>
               </div>

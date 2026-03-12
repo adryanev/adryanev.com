@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/admin/_layout/contacts')({
 
 function ContactsPage() {
   const contacts = Route.useLoaderData()
+  const router = useRouter()
   const [expandedId, setExpandedId] = useState<number | null>(null)
 
   const markReadFn = useServerFn(markContactRead)
@@ -21,12 +22,12 @@ function ContactsPage() {
   const markReadMut = useMutation({
     mutationFn: (data: { id: number; isRead: boolean }) =>
       markReadFn({ data }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   return (

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Github, Linkedin, Mail, MapPin } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Github, Linkedin, Mail } from 'lucide-react'
+import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 
 export const Route = createFileRoute('/about')({
   component: AboutPage,
@@ -27,87 +27,120 @@ const skills = [
 const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/adryanev', icon: Github },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/adryanev', icon: Linkedin },
-  { label: 'Email', href: 'mailto:hello@adryanev.com', icon: Mail },
+  { label: 'Email', href: 'mailto:me@adryanev.com', icon: Mail },
 ]
 
 function AboutPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <h1 className="text-4xl font-bold">About Me</h1>
+    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
+      {/* Header */}
+      <Reveal>
+        <div className="mb-16 border-b-4 border-text-primary pb-8">
+          <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
+            About
+          </h1>
+          <div className="mt-8 flex items-center gap-4">
+            <div className="h-4 w-4 bg-accent brutal-border" />
+            <span className="font-mono text-sm text-text-secondary tracking-wider">
+              Adryan Eka Vandra · Software Engineer
+            </span>
+          </div>
+        </div>
+      </Reveal>
 
-      <div className="mt-8 space-y-6 text-slate-700 dark:text-slate-300">
-        <p className="text-lg leading-relaxed">
-          I'm <strong>Adryan Eka Vandra</strong>, a Software Engineer based in
-          Indonesia. I build web and mobile applications, with a focus on
-          clean architecture, developer experience, and shipping products
-          that people actually use.
-        </p>
-        <p className="leading-relaxed">
-          My journey spans from college projects to freelance work, through
-          Apple Developer Academy and professional roles at various companies.
-          Currently, I'm working on SaaS products and exploring the
-          intersection of developer tooling and AI.
-        </p>
-        <p className="leading-relaxed">
-          When I'm not coding, I write about software engineering on my blog,
-          contribute to open source, and experiment with new technologies.
-        </p>
-      </div>
-
-      <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-        <MapPin className="h-4 w-4" />
-        <span>Indonesia</span>
-      </div>
-
-      {/* Skills */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-bold">Skills & Technologies</h2>
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group) => (
-            <div key={group.category}>
-              <h3 className="text-sm font-semibold text-accent">
-                {group.category}
-              </h3>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {group.items.map((item) => (
-                  <span
-                    key={item}
-                    className={cn(
-                      'rounded-md px-2 py-1 text-sm',
-                      'bg-slate-100 text-slate-700',
-                      'dark:bg-slate-800 dark:text-slate-300',
-                    )}
-                  >
-                    {item}
-                  </span>
-                ))}
+      <div className="grid gap-16 md:grid-cols-[1fr_2fr] lg:gap-24">
+        {/* Left Column - Image/Stats */}
+        <div className="space-y-8">
+          <Reveal>
+            <div className="aspect-[3/4] w-full brutal-border brutal-shadow-lg bg-bg-secondary relative overflow-hidden group flex items-center justify-center">
+              <div className="text-center space-y-4 p-8">
+                <span className="font-serif text-[8rem] font-bold italic text-accent leading-none">A</span>
+                <p className="font-mono text-sm text-text-secondary tracking-widest uppercase">Adryan Eka Vandra</p>
+              </div>
+              <div className="absolute bottom-4 left-4 right-4 bg-bg-primary p-4 brutal-border">
+                <p className="font-mono text-xs text-text-primary tracking-wider">
+                  Software Engineer · Indonesia
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </Reveal>
 
-      {/* Social Links */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-bold">Connect</h2>
-        <div className="mt-4 flex gap-4">
-          {socialLinks.map(({ label, href, icon: Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                'flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors',
-                'border-slate-200 hover:border-accent hover:text-accent',
-                'dark:border-slate-800 dark:hover:border-accent',
-              )}
-            >
-              <Icon className="h-4 w-4" /> {label}
-            </a>
-          ))}
+          <Reveal delay={0.1}>
+            <div className="brutal-border bg-bg-primary p-6 space-y-4">
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="font-mono text-sm text-text-secondary">Status</span>
+                <span className="font-mono text-sm font-bold text-accent">Available</span>
+              </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="font-mono text-sm text-text-secondary">Location</span>
+                <span className="font-mono text-sm text-text-primary">Indonesia</span>
+              </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="font-mono text-sm text-text-secondary">Role</span>
+                <span className="font-mono text-sm text-text-primary">Software Engineer</span>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.15}>
+            <div className="flex gap-4">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex h-12 w-12 items-center justify-center bg-bg-primary brutal-border text-text-primary transition-colors hover:bg-accent hover:text-accent-fg hover:border-text-primary"
+                  aria-label={label}
+                >
+                  <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                </a>
+              ))}
+            </div>
+          </Reveal>
         </div>
-      </section>
+
+        {/* Right Column - Text content */}
+        <div>
+          <Reveal>
+            <div className="font-serif text-2xl leading-relaxed text-text-primary md:text-4xl">
+              <p className="mb-8">
+                <span className="text-accent font-bold font-sans">01.</span> I engineer systems that don't just work — they <span className="italic">perform</span> under pressure. With a foundation in robust backend architectures and a keen eye for distinctive frontend experiences, I build software that commands attention.
+              </p>
+              <p className="mb-8 text-text-secondary">
+                <span className="text-accent font-bold font-sans">02.</span> My approach is rooted in the belief that digital products should feel tactile, responsive, and undeniably fast. I reject generic boilerplate in favor of crafted, purpose-built solutions.
+              </p>
+              <p>
+                <span className="text-accent font-bold font-sans">03.</span> Whether it's architecting a high-throughput API or designing an unforgettable user interface, my goal remains the same: to create software that leaves a lasting impact.
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="mt-16 pt-16 border-t-2 border-text-primary space-y-8">
+              <h2 className="font-serif text-2xl font-bold italic text-text-primary">
+                Skills & Tools
+              </h2>
+              {skills.map((group) => (
+                <div key={group.category} className="space-y-4">
+                  <h3 className="font-mono text-xs text-text-secondary uppercase tracking-widest">
+                    {group.category}
+                  </h3>
+                  <StaggerChildren className="flex flex-wrap gap-3">
+                    {group.items.map((item) => (
+                      <StaggerItem key={item}>
+                        <span className="bg-bg-secondary px-4 py-2 font-mono text-sm brutal-border transition-colors hover:text-accent hover:border-accent">
+                          {item}
+                        </span>
+                      </StaggerItem>
+                    ))}
+                  </StaggerChildren>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </div>
     </div>
   )
 }

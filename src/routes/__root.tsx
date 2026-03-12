@@ -8,9 +8,20 @@ import {
 import { lazy, Suspense } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { CommandPalette } from '@/components/command-palette/CommandPalette'
-import { TerminalOverlay } from '@/components/terminal/TerminalOverlay'
+import { ThemeProvider } from '@/context/ThemeContext'
 import '../app.css'
+
+const CommandPalette = lazy(() =>
+  import('@/components/command-palette/CommandPalette').then((mod) => ({
+    default: mod.CommandPalette,
+  })),
+)
+
+const TerminalOverlay = lazy(() =>
+  import('@/components/terminal/TerminalOverlay').then((mod) => ({
+    default: mod.TerminalOverlay,
+  })),
+)
 
 const TanStackRouterDevtools = import.meta.env.DEV
   ? lazy(() =>
@@ -27,6 +38,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { name: 'theme-color', content: '#f4f0eb', media: '(prefers-color-scheme: light)' },
+      { name: 'theme-color', content: '#0a0a0a', media: '(prefers-color-scheme: dark)' },
       { title: 'Adryan Eka Vandra — Software Engineer' },
       {
         name: 'description',
@@ -43,7 +56,7 @@ export const Route = createRootRoute({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap',
       },
       {
         rel: 'alternate',
@@ -62,20 +75,20 @@ export const Route = createRootRoute({
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="text-center">
-        <p className="font-mono text-6xl font-bold text-accent">404</p>
-        <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-          Page not found
+    <div className="flex min-h-[60vh] items-center justify-center border-b border-border">
+      <div className="text-center p-12 brutal-border brutal-shadow bg-bg-primary dark:bg-bg-secondary">
+        <p className="font-serif text-8xl font-bold text-accent italic">404</p>
+        <p className="mt-4 font-serif text-2xl font-bold italic text-text-primary">
+          Page Not Found
         </p>
-        <p className="mt-2 font-mono text-sm text-slate-500 dark:text-slate-500">
-          $ cat page.md → error: no such file
+        <p className="mt-4 font-sans text-sm text-text-secondary">
+          The page you're looking for doesn't exist.
         </p>
         <a
           href="/"
-          className="mt-6 inline-block rounded-md bg-accent px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-accent-hover"
+          className="mt-8 inline-block brutal-border bg-accent px-8 py-3 text-sm font-bold uppercase tracking-wider text-accent-fg transition-colors hover:bg-text-primary hover:text-bg-primary"
         >
-          Go home
+          Back to Home
         </a>
       </div>
     </div>
@@ -92,22 +105,37 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body
-        className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+        className="min-h-screen font-sans"
         suppressHydrationWarning
       >
+        {/* Skip link for keyboard navigation */}
+        {!isAdmin && (
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-accent focus:text-accent-fg focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:font-bold"
+          >
+            Skip to main content
+          </a>
+        )}
         {isAdmin ? (
           <Outlet />
         ) : (
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">
-              <Outlet />
-            </main>
-            <Footer />
-          </div>
+          <ThemeProvider>
+            <div className="flex min-h-screen flex-col bg-bg-primary/95">
+              <Header />
+              <main id="main-content" className="flex-1 flex flex-col">
+                <Outlet />
+              </main>
+              <Footer />
+            </div>
+            <Suspense>
+              <CommandPalette />
+            </Suspense>
+            <Suspense>
+              <TerminalOverlay />
+            </Suspense>
+          </ThemeProvider>
         )}
-        {!isAdmin && <CommandPalette />}
-        {!isAdmin && <TerminalOverlay />}
         <Suspense>
           <TanStackRouterDevtools />
         </Suspense>

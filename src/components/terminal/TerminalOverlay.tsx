@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { X } from 'lucide-react'
+import { X, Terminal as TerminalIcon, Minimize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const HELP_TEXT = `Available commands:
@@ -14,20 +14,21 @@ const HELP_TEXT = `Available commands:
   clear     - Clear the terminal
   history   - Show command history`
 
-const WHOAMI = `Adryan Eka Vandra
-Role: Software Engineer
-Location: Indonesia
-GitHub: github.com/adryanev
-Email: hello@adryanev.com`
+const WHOAMI = `ADRYAN EKA VANDRA
+ROLE: SOFTWARE ENGINEER
+LOCATION: INDONESIA
+GITHUB: github.com/adryanev
+EMAIL: me@adryanev.com
+STATUS: OPERATIONAL`
 
 const FILE_SYSTEM: Record<string, { type: 'dir' | 'file'; children?: string[]; content?: string }> = {
   '/': { type: 'dir', children: ['about.md', 'resume/', 'blog/', 'portfolio/', 'saas/', 'contact.md'] },
-  '/about.md': { type: 'file', content: 'Software Engineer based in Indonesia.\nBuilding web and mobile applications with a focus on clean architecture.' },
+  '/about.md': { type: 'file', content: 'Software Engineer based in Indonesia.\nBuilding resilient, high-performance systems with a focus on clean architecture.' },
   '/resume/': { type: 'dir', children: ['experience/', 'education/', 'skills/'] },
   '/blog/': { type: 'dir', children: ['(posts loaded from database)'] },
   '/portfolio/': { type: 'dir', children: ['college/', 'freelance/', 'work/', 'apple-developer-academy/', 'lexicon/'] },
   '/saas/': { type: 'dir', children: ['(SaaS products loaded from database)'] },
-  '/contact.md': { type: 'file', content: 'Want to get in touch?\nVisit /contact or email hello@adryanev.com' },
+  '/contact.md': { type: 'file', content: 'Want to get in touch?\nVisit /contact or email me@adryanev.com' },
 }
 
 const PATH_MAP: Record<string, string> = {
@@ -48,7 +49,8 @@ export function TerminalOverlay() {
   const [open, setOpen] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [lines, setLines] = useState<Line[]>([
-    { type: 'output', text: 'Welcome to adryanev.com terminal. Type "help" for commands.' },
+    { type: 'output', text: 'VANDRA_OS v2.0.4 — KERNEL: BRUTALIST_UI' },
+    { type: 'output', text: 'Type "help" for available commands.' },
   ])
   const [input, setInput] = useState('')
   const [history, setHistory] = useState<string[]>([])
@@ -75,14 +77,21 @@ export function TerminalOverlay() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
-  // Focus input when opened
+  // Lock body scroll and focus input when opened
   useEffect(() => {
-    if (open) inputRef.current?.focus()
+    if (!open) return
+    document.body.style.overflow = 'hidden'
+    inputRef.current?.focus()
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [open])
 
   // Auto-scroll
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight)
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
   }, [lines])
 
   const addLine = useCallback((type: 'input' | 'output', text: string) => {
@@ -98,7 +107,7 @@ export function TerminalOverlay() {
       setHistory((prev) => [...prev, trimmed])
       setHistoryIdx(-1)
 
-      const [command, ...args] = trimmed.split(/\s+/)
+      const [command, ...args] = trimmed.toLowerCase().split(/\s+/)
       const arg = args.join(' ')
 
       switch (command) {
@@ -119,7 +128,7 @@ export function TerminalOverlay() {
           break
 
         case 'history':
-          addLine('output', history.map((h, i) => `  ${i + 1}  ${h}`).join('\n') || '(no history)')
+          addLine('output', history.map((h, i) => `  ${(i + 1).toString().padStart(2, '0')}  ${h}`).join('\n') || '(empty)')
           break
 
         case 'ls': {
@@ -127,7 +136,7 @@ export function TerminalOverlay() {
           if (dir?.type === 'dir' && dir.children) {
             addLine('output', dir.children.join('  '))
           } else {
-            addLine('output', `ls: cannot access '${cwd}': Not a directory`)
+            addLine('output', `err: cannot access '${cwd}': not a directory`)
           }
           break
         }
@@ -155,14 +164,14 @@ export function TerminalOverlay() {
             // Try as a route anyway
             const route = PATH_MAP[target] || `/${arg}`
             navigate({ to: route })
-            addLine('output', `cd: navigating to ${route}`)
+            addLine('output', `navigating to ${route}`)
           }
           break
         }
 
         case 'cat': {
           if (!arg) {
-            addLine('output', 'cat: missing file operand')
+            addLine('output', 'err: missing operand')
             break
           }
           const filePath = arg.startsWith('/') ? arg : `${cwd}${arg}`
@@ -170,19 +179,19 @@ export function TerminalOverlay() {
           if (file?.type === 'file' && file.content) {
             addLine('output', file.content)
           } else {
-            addLine('output', `cat: ${arg}: No such file`)
+            addLine('output', `err: ${arg}: file not found`)
           }
           break
         }
 
         case 'open': {
           if (!arg) {
-            addLine('output', 'open: missing URL')
+            addLine('output', 'err: missing url')
             break
           }
           const url = arg.startsWith('http') ? arg : `https://${arg}`
           window.open(url, '_blank')
-          addLine('output', `Opening ${url}...`)
+          addLine('output', `opening ${url}...`)
           break
         }
 
@@ -216,6 +225,8 @@ export function TerminalOverlay() {
           setInput(history[idx])
         }
       }
+    } else if (e.key === 'Escape') {
+      setOpen(false)
     }
   }
 
@@ -225,63 +236,91 @@ export function TerminalOverlay() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-text-primary/80 backdrop-blur-[4px]"
         onClick={() => setOpen(false)}
       />
 
       {/* Terminal window */}
       <div
-        className={cn(
-          'relative w-full max-w-2xl rounded-lg border shadow-2xl',
-          'border-slate-700 bg-[#0d1117]',
-        )}
+        className="relative w-full max-w-3xl brutal-border brutal-shadow-lg bg-bg-primary overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-300 overscroll-contain"
       >
         {/* Title bar */}
-        <div className="flex items-center justify-between border-b border-slate-700 px-4 py-2">
-          <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <div className="h-3 w-3 rounded-full bg-yellow-500" />
-            <div className="h-3 w-3 rounded-full bg-green-500" />
+        <div className="flex items-center justify-between border-b-2 border-text-primary bg-bg-secondary px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-1 bg-accent brutal-border">
+              <TerminalIcon className="h-4 w-4 text-accent-fg" />
+            </div>
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-text-primary">
+              Terminal
+            </span>
           </div>
-          <span className="font-mono text-xs text-slate-500">
-            adryanev@web:~
-          </span>
-          <button
-            onClick={() => setOpen(false)}
-            className="text-slate-500 hover:text-slate-300"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-4">
+             <button
+              onClick={() => setOpen(false)}
+              className="text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Minimize terminal"
+            >
+              <Minimize2 className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-text-secondary hover:text-accent transition-colors"
+              aria-label="Close terminal"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Terminal body */}
         <div
           ref={scrollRef}
-          className="h-80 overflow-y-auto p-4 font-mono text-sm"
+          className="h-[500px] overflow-y-auto p-8 font-mono text-sm leading-relaxed scrollbar-thin"
           onClick={() => inputRef.current?.focus()}
         >
-          {lines.map((line, i) => (
-            <div key={i} className={cn('whitespace-pre-wrap', line.type === 'input' ? 'text-green-400' : 'text-slate-300')}>
-              {line.text}
-            </div>
-          ))}
+          <div className="space-y-2">
+            {lines.map((line, i) => (
+              <div key={i} className={cn(
+                'whitespace-pre-wrap break-words',
+                line.type === 'input' ? 'text-accent font-bold' : 'text-text-primary'
+              )}>
+                {line.type === 'input' ? (
+                  <span className="flex gap-2">
+                    <span className="opacity-50 tracking-tighter">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
+                    <span>{line.text}</span>
+                  </span>
+                ) : (
+                  line.text
+                )}
+              </div>
+            ))}
+          </div>
 
           {/* Input line */}
-          <div className="flex items-center text-green-400">
+          <div className="flex items-center gap-2 text-accent font-bold mt-4">
+            <span className="opacity-50 tracking-tighter">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
             <span>{cwd} $ </span>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent outline-none text-green-400 caret-green-400"
+              aria-label="Terminal input"
+              className="flex-1 bg-transparent outline-none focus-visible:outline-none text-accent caret-accent"
               spellCheck={false}
               autoComplete="off"
             />
           </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="border-t-2 border-text-primary bg-bg-secondary px-6 py-2 flex justify-between font-mono text-[10px] font-bold text-text-secondary tracking-wider">
+          <span>Secure</span>
+          <span>Ctrl+` to toggle</span>
+          <span>Esc to close</span>
         </div>
       </div>
     </div>

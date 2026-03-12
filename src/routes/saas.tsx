@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ExternalLink, Github } from 'lucide-react'
+import { Github, Zap, Server } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublicSaas } from '@/server/functions/public.functions'
+import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 
 export const Route = createFileRoute('/saas')({
   loader: () => getPublicSaas(),
@@ -17,16 +18,9 @@ export const Route = createFileRoute('/saas')({
   }),
 })
 
-const statusColors = {
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  beta: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  retired: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500',
-}
-
 function SaasPage() {
   const listings = Route.useLoaderData()
 
-  // Group: active first, then beta, then retired
   const grouped = {
     active: listings.filter((l) => l.status === 'active'),
     beta: listings.filter((l) => l.status === 'beta'),
@@ -36,92 +30,103 @@ function SaasPage() {
   const ordered = [...grouped.active, ...grouped.beta, ...grouped.retired]
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <h1 className="text-4xl font-bold">SaaS Products</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
-        Products I've built and maintain.
-      </p>
+    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
+      <Reveal>
+        <div className="mb-16 border-b-4 border-text-primary pb-8">
+          <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
+            SaaS
+          </h1>
+          <div className="mt-8 flex items-center gap-4">
+            <div className="h-4 w-4 bg-accent brutal-border" />
+            <span className="font-mono text-sm text-text-secondary tracking-wider">
+              Products & Infrastructure
+            </span>
+          </div>
+        </div>
+      </Reveal>
 
       {ordered.length === 0 ? (
-        <div className="mt-12 text-center text-slate-500">
+        <div className="mt-12 text-center text-text-secondary font-serif text-2xl italic">
           No products listed yet.
         </div>
       ) : (
-        <div className="mt-10 space-y-6">
-          {ordered.map((saas) => (
-            <div
-              key={saas.id}
-              className={cn(
-                'rounded-lg border p-6 transition-colors',
-                'border-slate-200 dark:border-slate-800',
-                saas.status === 'retired' && 'opacity-60',
-              )}
-            >
-              <div className="flex items-start gap-4">
-                {saas.logoUrl && (
-                  <img
-                    src={saas.logoUrl}
-                    alt={saas.name}
-                    className="h-12 w-12 rounded-lg"
-                  />
+        <StaggerChildren className="grid gap-8 md:grid-cols-2">
+          {ordered.map((product) => (
+            <StaggerItem key={product.id}>
+              <div
+                className={cn(
+                  'flex flex-col border-2 border-text-primary bg-bg-primary brutal-shadow transition-all hover:-translate-y-1 hover:brutal-shadow-lg',
+                  product.status === 'retired' && 'opacity-60'
                 )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold">{saas.name}</h2>
-                    <span
-                      className={cn(
-                        'rounded-full px-2 py-0.5 text-xs font-medium',
-                        statusColors[saas.status],
+              >
+                {/* Header */}
+                <div className="border-b-2 border-text-primary bg-bg-secondary p-6 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-text-primary text-bg-primary brutal-border overflow-hidden">
+                      {product.logoUrl ? (
+                        <img src={product.logoUrl} alt={product.name} loading="lazy" className="h-6 w-6 object-cover" />
+                      ) : (
+                        <Server className="h-6 w-6" />
                       )}
-                    >
-                      {saas.status}
-                    </span>
+                    </div>
+                    <h2 className="font-serif text-3xl font-bold italic">{product.name}</h2>
                   </div>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                    {saas.description}
+                  <StatusBadge status={product.status} />
+                </div>
+
+                {/* Body */}
+                <div className="p-8 flex-1 flex flex-col">
+                  <p className="font-sans text-lg text-text-secondary mb-8 flex-1">
+                    {product.description}
                   </p>
 
-                  {/* Tech tags */}
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {saas.technology.map((tech) => (
-                      <span
-                        key={tech}
-                        className="rounded bg-accent/10 px-1.5 py-0.5 text-xs text-accent"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
+                  {product.technology && product.technology.length > 0 && (
+                    <div className="space-y-3 mb-8">
+                      {product.technology.map(tech => (
+                        <div key={tech} className="flex items-center gap-3 font-mono text-sm text-text-primary">
+                          <Zap className="h-4 w-4 text-accent" />
+                          {tech}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                  {/* Links */}
-                  <div className="mt-4 flex gap-3">
-                    {saas.url && (
-                      <a
-                        href={saas.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" /> Visit
+                  <div className="flex flex-col gap-4 mt-auto pt-4">
+                    {product.url && (
+                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="w-full text-center bg-text-primary text-bg-primary py-4 font-mono font-bold uppercase tracking-widest brutal-border transition-colors hover:bg-accent hover:text-accent-fg">
+                        Visit
                       </a>
                     )}
-                    {saas.githubUrl && (
-                      <a
-                        href={saas.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-accent"
-                      >
-                        <Github className="h-3.5 w-3.5" /> Source
+                    {product.githubUrl && (
+                      <a href={product.githubUrl} target="_blank" rel="noopener noreferrer" className="w-full text-center flex items-center justify-center gap-2 bg-bg-secondary text-text-primary py-4 font-mono font-bold uppercase tracking-widest brutal-border transition-colors hover:text-accent hover:border-accent">
+                        <Github className="h-4 w-4" /> Source Code
                       </a>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
       )}
     </div>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    active: 'bg-accent text-accent-fg',
+    beta: 'bg-accent/20 text-accent border-accent',
+    retired: 'bg-text-secondary/20 text-text-secondary',
+  }
+  return (
+    <span
+      className={cn(
+        'px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest brutal-border',
+        colors[status] ?? colors.active,
+      )}
+    >
+      {status}
+    </span>
   )
 }

@@ -14,9 +14,9 @@ import {
   Sun,
   Moon,
   Monitor,
+  Search,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { setTheme as persistTheme } from '@/lib/theme'
+import { useTheme } from '@/context/ThemeContext'
 import { searchContent } from '@/server/functions/search.functions'
 
 const NAV_ITEMS = [
@@ -37,6 +37,7 @@ export function CommandPalette() {
     projects: { id: number; title: string; slug: string; category: { slug: string } }[]
   }>({ posts: [], projects: [] })
   const navigate = useNavigate()
+  const { setTheme } = useTheme()
   const searchFn = useServerFn(searchContent)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
@@ -76,58 +77,54 @@ export function CommandPalette() {
   }
 
   const handleSetTheme = (theme: 'light' | 'dark' | 'system') => {
-    persistTheme(theme)
+    setTheme(theme)
     setOpen(false)
   }
 
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-text-primary/60 backdrop-blur-[2px]"
         onClick={() => setOpen(false)}
       />
-      <div className="fixed left-1/2 top-[20%] w-full max-w-lg -translate-x-1/2">
+      <div className="relative w-full max-w-xl px-4 animate-in fade-in zoom-in-95 duration-200">
         <Command
-          className={cn(
-            'rounded-xl border shadow-2xl',
-            'border-slate-200 bg-white',
-            'dark:border-slate-700 dark:bg-slate-900',
-          )}
+          className="brutal-border brutal-shadow-lg bg-bg-primary overflow-hidden flex flex-col overscroll-contain"
           shouldFilter={true}
         >
-          <Command.Input
-            value={query}
-            onValueChange={handleSearch}
-            placeholder="Search pages, posts, projects..."
-            className={cn(
-              'w-full border-b px-4 py-3 text-sm outline-none',
-              'border-slate-200 bg-transparent placeholder:text-slate-400',
-              'dark:border-slate-700 dark:placeholder:text-slate-500',
-            )}
-          />
-          <Command.List
-            className="max-h-80 overflow-y-auto p-2"
-          >
-            <Command.Empty className="px-4 py-8 text-center text-sm text-slate-500">
-              No results found.
+          <div className="flex items-center border-b-2 border-text-primary px-4 bg-bg-secondary">
+            <Search className="h-5 w-5 text-text-secondary mr-3" />
+            <Command.Input
+              value={query}
+              onValueChange={handleSearch}
+              placeholder="Search pages, posts, projects\u2026"
+              aria-label="Search"
+              className="w-full py-5 font-sans text-base text-text-primary outline-none placeholder:text-text-secondary bg-transparent"
+            />
+          </div>
+
+          <Command.List className="max-h-[60vh] overflow-y-auto p-2 scrollbar-thin">
+            <Command.Empty className="px-6 py-12 text-center">
+              <p className="font-serif text-2xl italic text-text-primary mb-2">No results</p>
+              <p className="font-mono text-xs text-text-secondary">Try a different search term</p>
             </Command.Empty>
 
             {/* Navigation */}
-            <Command.Group heading="Navigation" className="px-2 py-1 text-xs font-medium text-slate-400">
+            <Command.Group
+              heading="Pages"
+              className="px-4 pt-4 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
+            >
               {NAV_ITEMS.map((item) => (
                 <Command.Item
                   key={item.to}
                   value={`${item.label} ${item.keywords}`}
                   onSelect={() => go(item.to)}
-                  className={cn(
-                    'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                    'aria-selected:bg-accent/10 aria-selected:text-accent',
-                  )}
+                  className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <item.icon className="h-5 w-5 shrink-0 text-text-secondary" />
                   {item.label}
                 </Command.Item>
               ))}
@@ -135,18 +132,18 @@ export function CommandPalette() {
 
             {/* Blog search results */}
             {results.posts.length > 0 && (
-              <Command.Group heading="Blog Posts" className="px-2 py-1 text-xs font-medium text-slate-400">
+              <Command.Group
+                heading="Blog Posts"
+                className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
+              >
                 {results.posts.map((post) => (
                   <Command.Item
                     key={`post-${post.id}`}
                     value={post.title}
                     onSelect={() => go(`/blog/${post.slug}`)}
-                    className={cn(
-                      'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                      'aria-selected:bg-accent/10 aria-selected:text-accent',
-                    )}
+                    className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
                   >
-                    <FileText className="h-4 w-4 shrink-0" />
+                    <FileText className="h-5 w-5 shrink-0 text-text-secondary" />
                     {post.title}
                   </Command.Item>
                 ))}
@@ -155,7 +152,10 @@ export function CommandPalette() {
 
             {/* Project search results */}
             {results.projects.length > 0 && (
-              <Command.Group heading="Projects" className="px-2 py-1 text-xs font-medium text-slate-400">
+              <Command.Group
+                heading="Projects"
+                className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
+              >
                 {results.projects.map((project) => (
                   <Command.Item
                     key={`project-${project.id}`}
@@ -163,12 +163,9 @@ export function CommandPalette() {
                     onSelect={() =>
                       go(`/portfolio/${project.category.slug}/${project.slug}`)
                     }
-                    className={cn(
-                      'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                      'aria-selected:bg-accent/10 aria-selected:text-accent',
-                    )}
+                    className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
                   >
-                    <FolderOpen className="h-4 w-4 shrink-0" />
+                    <FolderOpen className="h-5 w-5 shrink-0 text-text-secondary" />
                     {project.title}
                   </Command.Item>
                 ))}
@@ -176,53 +173,40 @@ export function CommandPalette() {
             )}
 
             {/* Theme */}
-            <Command.Group heading="Theme" className="px-2 py-1 text-xs font-medium text-slate-400">
-              <Command.Item
-                value="light theme"
-                onSelect={() => handleSetTheme('light')}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                  'aria-selected:bg-accent/10 aria-selected:text-accent',
-                )}
-              >
-                <Sun className="h-4 w-4 shrink-0" /> Light
-              </Command.Item>
-              <Command.Item
-                value="dark theme"
-                onSelect={() => handleSetTheme('dark')}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                  'aria-selected:bg-accent/10 aria-selected:text-accent',
-                )}
-              >
-                <Moon className="h-4 w-4 shrink-0" /> Dark
-              </Command.Item>
-              <Command.Item
-                value="system theme auto"
-                onSelect={() => handleSetTheme('system')}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm',
-                  'aria-selected:bg-accent/10 aria-selected:text-accent',
-                )}
-              >
-                <Monitor className="h-4 w-4 shrink-0" /> System
-              </Command.Item>
+            <Command.Group
+              heading="Theme"
+              className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
+            >
+              {[
+                { label: 'Light', theme: 'light', icon: Sun },
+                { label: 'Dark', theme: 'dark', icon: Moon },
+                { label: 'System', theme: 'system', icon: Monitor },
+              ].map((t) => (
+                <Command.Item
+                  key={t.theme}
+                  value={`${t.label} theme`}
+                  onSelect={() => handleSetTheme(t.theme as any)}
+                  className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
+                >
+                  <t.icon className="h-5 w-5 shrink-0 text-text-secondary" />
+                  {t.label}
+                </Command.Item>
+              ))}
             </Command.Group>
           </Command.List>
 
-          <div className="border-t border-slate-200 px-4 py-2 text-xs text-slate-400 dark:border-slate-700">
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono dark:bg-slate-800">
-              ↑↓
-            </kbd>{' '}
-            navigate{' '}
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono dark:bg-slate-800">
-              ↵
-            </kbd>{' '}
-            select{' '}
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono dark:bg-slate-800">
-              esc
-            </kbd>{' '}
-            close
+          <div className="border-t-2 border-text-primary bg-bg-secondary px-6 py-3 flex items-center justify-between font-mono text-[10px] font-bold text-text-secondary tracking-wider">
+            <div className="flex gap-4">
+              <span>
+                <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">↑↓</kbd> Navigate
+              </span>
+              <span>
+                <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">↵</kbd> Select
+              </span>
+            </div>
+            <span>
+              <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">Esc</kbd> Close
+            </span>
           </div>
         </Command>
       </div>

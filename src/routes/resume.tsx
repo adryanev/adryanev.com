@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Briefcase, GraduationCap, Award, Wrench, MapPin, Calendar, Download, Loader2, Mail, Github, Linkedin, Globe } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Download, Loader2 } from 'lucide-react'
 import { getPublicResume } from '@/server/functions/public.functions'
+import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 
 export const Route = createFileRoute('/resume')({
   loader: () => getPublicResume(),
@@ -19,23 +19,9 @@ export const Route = createFileRoute('/resume')({
   }),
 })
 
-const typeConfig = {
-  experience: { label: 'Experience', icon: Briefcase },
-  education: { label: 'Education', icon: GraduationCap },
-  certification: { label: 'Certifications', icon: Award },
-  skill: { label: 'Skills', icon: Wrench },
-} as const
-
 function ResumePage() {
   const resume = Route.useLoaderData()
   const [generating, setGenerating] = useState(false)
-
-  const sections = [
-    { type: 'experience' as const, entries: resume.experience },
-    { type: 'education' as const, entries: resume.education },
-    { type: 'certification' as const, entries: resume.certification },
-    { type: 'skill' as const, entries: resume.skill },
-  ].filter((s) => s.entries.length > 0)
 
   async function handleDownload() {
     setGenerating(true)
@@ -50,155 +36,89 @@ function ResumePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold">Adryan Eka Vandra</h1>
-          <p className="mt-1 text-lg text-slate-600 dark:text-slate-400">
-            Software Engineer
-          </p>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-slate-500 dark:text-slate-400">
-            <a href="mailto:adryanekavandra@gmail.com" className="flex items-center gap-1.5 hover:text-accent transition-colors">
-              <Mail className="h-3.5 w-3.5" />
-              adryanekavandra@gmail.com
-            </a>
-            <a href="https://linkedin.com/in/adryanev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
-              <Linkedin className="h-3.5 w-3.5" />
-              linkedin.com/in/adryanev
-            </a>
-            <a href="https://github.com/adryanev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
-              <Github className="h-3.5 w-3.5" />
-              github.com/adryanev
-            </a>
-            <a href="https://adryanev.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-accent transition-colors">
-              <Globe className="h-3.5 w-3.5" />
-              adryanev.com
-            </a>
+    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
+      <Reveal>
+        <div className="mb-16 border-b-4 border-text-primary pb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div>
+            <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
+              CV
+            </h1>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="h-4 w-4 bg-text-primary brutal-border" />
+              <span className="font-mono text-sm text-text-secondary tracking-wider">
+                Curriculum Vitae · Experience & Education
+              </span>
+            </div>
           </div>
+          <button
+            onClick={handleDownload}
+            disabled={generating}
+            className="flex w-full md:w-auto items-center justify-center gap-2 bg-text-primary text-bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest brutal-border transition-colors hover:bg-accent hover:text-accent-fg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {generating ? 'Generating\u2026' : 'Download PDF'}
+          </button>
         </div>
-        <button
-          onClick={handleDownload}
-          disabled={generating}
-          className={cn(
-            'flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
-            'bg-accent text-slate-950 hover:bg-accent-hover',
-            'disabled:opacity-60',
-          )}
-        >
-          {generating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
-          {generating ? 'Generating...' : 'Download PDF'}
-        </button>
-      </div>
+      </Reveal>
 
-      {sections.length === 0 ? (
-        <div className="mt-12 text-center text-slate-500">
-          No resume entries yet.
-        </div>
-      ) : (
-        <div className="mt-10 space-y-12">
-          {sections.map(({ type, entries }) => {
-            const { label, icon: Icon } = typeConfig[type]
-
-            if (type === 'skill') {
-              return (
-                <section key={type}>
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-5 w-5 text-accent" />
-                    <h2 className="text-2xl font-bold">{label}</h2>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {entries.map((entry) => (
-                      <div key={entry.id}>
-                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{entry.title}</h3>
-                        {entry.technology && entry.technology.length > 0 ? (
-                          <div className="mt-1.5 flex flex-wrap gap-1.5">
-                            {entry.technology.map((tech) => (
-                              <span
-                                key={tech}
-                                className={cn(
-                                  'rounded-md px-2.5 py-1 text-xs font-medium',
-                                  'bg-slate-100 text-slate-700',
-                                  'dark:bg-slate-800 dark:text-slate-300',
-                                )}
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        ) : entry.description ? (
-                          <p className="mt-1 text-sm text-slate-500">{entry.description}</p>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )
-            }
-
-            return (
-              <section key={type}>
-                <div className="flex items-center gap-2">
-                  <Icon className="h-5 w-5 text-accent" />
-                  <h2 className="text-2xl font-bold">{label}</h2>
+      <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
+        <div className="space-y-8">
+          {resume.education.length > 0 && (
+            <Reveal>
+              <div className="brutal-border bg-bg-secondary p-6">
+                <h2 className="font-serif text-xl font-bold italic text-text-primary border-b-2 border-text-primary pb-2 mb-4">
+                  Education
+                </h2>
+                <div className="space-y-6 font-sans">
+                  {resume.education.map(edu => (
+                    <div key={edu.id}>
+                      <p className="font-bold text-text-primary">{edu.title}</p>
+                      <p className="text-text-secondary">{edu.organization}</p>
+                      <p className="font-mono text-xs text-text-secondary mt-1">
+                        {formatDateRange(edu.startDate, edu.endDate)}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div className="relative mt-6 ml-3 border-l-2 border-slate-200 pl-8 dark:border-slate-800">
-                  {entries.map((entry, i) => (
-                    <div
-                      key={entry.id}
-                      className={cn('relative', i < entries.length - 1 && 'pb-8')}
-                    >
-                      {/* Timeline dot */}
-                      <div className="absolute -left-[calc(2rem+5px)] top-1 h-2.5 w-2.5 rounded-full border-2 border-accent bg-white dark:bg-slate-950" />
+              </div>
+            </Reveal>
+          )}
 
-                      <h3 className="text-lg font-semibold">{entry.title}</h3>
-                      {entry.organization && (
-                        <p className="text-sm text-accent">
-                          {entry.organizationUrl ? (
-                            <a
-                              href={entry.organizationUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline decoration-accent/30 hover:decoration-accent"
-                            >
-                              {entry.organization}
-                            </a>
-                          ) : (
-                            entry.organization
-                          )}
-                        </p>
-                      )}
-                      <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
-                        {(entry.startDate || entry.endDate) && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {formatDateRange(entry.startDate, entry.endDate)}
-                          </span>
-                        )}
-                        {entry.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {entry.location}
-                          </span>
-                        )}
-                      </div>
-                      {entry.description && (
-                        <DescriptionList text={entry.description} />
-                      )}
-                      {entry.technology && entry.technology.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {entry.technology.map((tech) => (
-                            <span
-                              key={tech}
-                              className={cn(
-                                'rounded-md px-2 py-0.5 text-xs font-medium',
-                                'bg-slate-100 text-slate-600',
-                                'dark:bg-slate-800 dark:text-slate-400',
-                              )}
-                            >
+          {resume.certification.length > 0 && (
+            <Reveal delay={0.1}>
+              <div className="brutal-border bg-bg-secondary p-6">
+                <h2 className="font-serif text-xl font-bold italic text-text-primary border-b-2 border-text-primary pb-2 mb-4">
+                  Certifications
+                </h2>
+                <div className="space-y-6 font-sans">
+                  {resume.certification.map(cert => (
+                    <div key={cert.id}>
+                      <p className="font-bold text-text-primary">{cert.title}</p>
+                      <p className="text-text-secondary">{cert.organization}</p>
+                      <p className="font-mono text-xs text-text-secondary mt-1">
+                        {formatDateRange(cert.startDate, cert.endDate)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          )}
+
+          {resume.skill.length > 0 && (
+            <Reveal delay={0.15}>
+              <div className="brutal-border bg-bg-secondary p-6">
+                <h2 className="font-serif text-xl font-bold italic text-text-primary border-b-2 border-text-primary pb-2 mb-4">
+                  Skills
+                </h2>
+                <div className="space-y-6 font-sans">
+                  {resume.skill.map(skill => (
+                    <div key={skill.id}>
+                      <p className="font-bold text-text-primary mb-2">{skill.title}</p>
+                      {skill.technology && skill.technology.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {skill.technology.map(tech => (
+                            <span key={tech} className="bg-bg-primary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
                               {tech}
                             </span>
                           ))}
@@ -207,19 +127,51 @@ function ResumePage() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )
-          })}
+              </div>
+            </Reveal>
+          )}
         </div>
-      )}
+
+        <div className="space-y-12">
+          <Reveal>
+            <h2 className="font-serif text-3xl font-bold italic text-text-primary border-b-2 border-text-primary pb-4">
+              Experience
+            </h2>
+          </Reveal>
+
+          <StaggerChildren className="space-y-10 relative before:absolute before:top-0 before:bottom-0 before:left-[19px] before:w-[2px] before:bg-border">
+            {resume.experience.map((job) => (
+              <StaggerItem key={job.id}>
+                <div className="relative pl-14 group">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-bg-primary bg-accent group-hover:scale-125 transition-all text-accent-fg absolute left-0 top-0 z-10" />
+
+                  <div className="p-6 brutal-border bg-bg-primary group-hover:brutal-shadow transition-all">
+                    <div className="flex flex-col gap-1 mb-4">
+                      <span className="font-mono text-xs font-bold text-accent">{formatDateRange(job.startDate, job.endDate)}</span>
+                      <h3 className="font-serif text-3xl font-bold text-text-primary italic">{job.title}</h3>
+                      <span className="font-mono text-sm text-text-secondary">{job.organization}</span>
+                    </div>
+                    {job.description && <DescriptionList text={job.description} />}
+                    {job.technology && job.technology.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {job.technology.map(tech => (
+                          <span key={tech} className="bg-bg-secondary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
+        </div>
+      </div>
     </div>
   )
 }
 
-/**
- * Splits a description into sentences and renders the first as a summary
- * paragraph and the rest as bullet points for scannability.
- */
 function DescriptionList({ text }: { text: string }) {
   const sentences = text
     .split(/(?<=\.)\s+/)
@@ -228,16 +180,16 @@ function DescriptionList({ text }: { text: string }) {
 
   if (sentences.length <= 1) {
     return (
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{text}</p>
+      <p className="mt-2 text-text-secondary font-sans">{text}</p>
     )
   }
 
   return (
-    <div className="mt-2 space-y-1.5">
-      <p className="text-sm italic text-slate-500 dark:text-slate-500">
+    <div className="mt-2 space-y-2">
+      <p className="text-text-primary font-bold font-sans">
         {sentences[0]}
       </p>
-      <ul className="list-inside list-disc space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
+      <ul className="list-inside list-disc space-y-1 text-text-secondary font-sans pl-2">
         {sentences.slice(1).map((s, i) => (
           <li key={i}>{s}</li>
         ))}

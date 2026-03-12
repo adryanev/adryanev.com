@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import {
+  Terminal,
   LayoutDashboard,
   FileText,
   FolderOpen,
@@ -46,11 +47,11 @@ function AdminLayout() {
   })
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[var(--bg-primary)] font-mono selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-[var(--bg-primary)]/80 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -58,41 +59,39 @@ function AdminLayout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r transition-transform duration-200 md:static md:translate-x-0',
-          'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border-color)] bg-[var(--bg-secondary)] transition-transform duration-200 md:static md:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {/* Sidebar header */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
+        <div className="flex h-16 items-center justify-between border-b border-[var(--border-color)] px-4">
           <Link
             to="/admin"
-            className="font-mono text-sm font-bold text-accent"
+            className="flex items-center gap-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
           >
-            {'>'} admin_panel
+            <Terminal className="h-5 w-5" />
+            <span className="text-sm font-bold uppercase tracking-widest">Admin</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="rounded-md p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 md:hidden"
+            className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] md:hidden"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
           {sidebarItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               onClick={() => setSidebarOpen(false)}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-                'dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+                'flex items-center gap-3 px-3 py-2 text-sm transition-colors border-l-2 border-transparent hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)] text-[var(--text-secondary)]',
               )}
               activeProps={{
-                className: 'bg-accent/10 text-accent dark:text-accent',
+                className: 'border-[var(--accent)] bg-[var(--bg-primary)] text-[var(--text-primary)] font-semibold',
               }}
               activeOptions={{ exact: item.to === '/admin' }}
             >
@@ -103,43 +102,44 @@ function AdminLayout() {
         </nav>
 
         {/* User section */}
-        <div className="border-t border-slate-200 p-3 dark:border-slate-800">
-          <div className="mb-2 truncate px-3 text-xs text-slate-500 dark:text-slate-400">
+        <div className="border-t border-[var(--border-color)] p-4 bg-[var(--bg-primary)]">
+          <div className="mb-3 truncate text-xs text-[var(--text-secondary)] flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
             {user.email}
           </div>
           <button
             onClick={() => logoutMutation.mutate()}
             disabled={logoutMutation.isPending}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-              'text-slate-600 hover:bg-red-50 hover:text-red-600',
-              'dark:text-slate-400 dark:hover:bg-red-950 dark:hover:text-red-400',
-            )}
+            className="flex w-full items-center gap-2 border border-[var(--border-color)] px-3 py-2 text-sm transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 text-[var(--text-secondary)]"
           >
             <LogOut className="h-4 w-4" />
-            {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
+            {logoutMutation.isPending ? 'Signing out\u2026' : 'Sign Out'}
           </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden relative">
+        <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none" 
+             style={{ backgroundImage: 'linear-gradient(var(--text-primary) 1px, transparent 1px), linear-gradient(90deg, var(--text-primary) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        
         {/* Mobile header */}
-        <div className="flex h-16 items-center border-b border-slate-200 px-4 dark:border-slate-800 md:hidden">
+        <div className="flex h-16 items-center border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 md:hidden relative z-10">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-            aria-label="Open sidebar"
+            className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--border-color)] transition-colors"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="ml-3 font-mono text-sm font-bold text-accent">
-            admin
+          <span className="ml-3 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)]">
+            Admin
           </span>
         </div>
 
-        <main className="flex-1 p-6">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -15,7 +15,7 @@ export async function generateRssFeed(): Promise<string> {
     copyright: `All rights reserved ${new Date().getFullYear()}, Adryan Eka Vandra`,
     author: {
       name: 'Adryan Eka Vandra',
-      email: 'hello@adryanev.com',
+      email: 'me@adryanev.com',
       link: SITE_URL,
     },
   })

@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import { slugify } from '@/lib/slugify'
+import { FormInput } from './form/FormInput'
 
 export function SlugInput({
   title,
@@ -15,23 +15,21 @@ export function SlugInput({
 
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium">Slug</label>
+      <label className="mb-1.5 block text-xs font-semibold uppercase text-[var(--text-secondary)]">
+        Slug
+      </label>
       <div className="flex gap-2">
-        <input
+        <FormInput
           type="text"
           value={value || autoSlug}
           onChange={(e) => onChange(e.target.value)}
-          className={cn(
-            'flex-1 rounded-md border px-3 py-2 font-mono text-sm outline-none transition-colors',
-            'border-slate-300 bg-white focus:border-accent focus:ring-1 focus:ring-accent',
-            'dark:border-slate-700 dark:bg-slate-800 dark:focus:border-accent',
-          )}
+          className="flex-1 font-mono"
         />
         {isCustom && (
           <button
             type="button"
             onClick={() => onChange('')}
-            className="rounded-md px-3 py-2 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            className="border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-xs font-semibold uppercase text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors"
           >
             Reset
           </button>

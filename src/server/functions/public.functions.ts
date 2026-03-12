@@ -132,9 +132,18 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
 
 export const getAllTags = createServerFn({ method: 'GET' }).handler(
   async () => {
-    return db.query.tags.findMany({
-      orderBy: asc(tags.name),
-    })
+    const rows = await db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        slug: tags.slug,
+        postCount: count(postsToTags.postId),
+      })
+      .from(tags)
+      .leftJoin(postsToTags, eq(tags.id, postsToTags.tagId))
+      .groupBy(tags.id, tags.name, tags.slug)
+      .orderBy(asc(tags.name))
+    return rows
   },
 )
 

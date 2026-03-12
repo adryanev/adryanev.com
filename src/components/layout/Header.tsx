@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { MobileNav } from './MobileNav'
 
@@ -18,55 +17,54 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-40 w-full border-b backdrop-blur-sm',
-        'border-slate-200 bg-white/80',
-        'dark:border-slate-800 dark:bg-slate-950/80',
-      )}
-    >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-40 w-full border-b-2 border-text-primary dark:border-border bg-bg-primary/95 backdrop-blur-md">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link
           to="/"
-          className="font-mono text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100"
+          className="group flex items-center gap-3 font-mono text-xl font-bold uppercase tracking-widest text-text-primary"
         >
-          <span className="text-accent">{'>'}</span> adryanev
-          <span className="animate-pulse text-accent">_</span>
+          <span className="flex h-10 w-10 items-center justify-center bg-accent text-accent-fg brutal-border transition-transform group-hover:rotate-12">
+            <span aria-hidden="true">A</span>
+            <span className="sr-only">Adryan Eka Vandra</span>
+          </span>
+          <span className="hidden sm:inline-block">adryanev<span className="text-accent animate-pulse motion-reduce:animate-none">_</span></span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className={cn(
-                'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-                'dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800',
-              )}
+              className="group relative font-sans text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
               activeProps={{
-                className: 'text-accent dark:text-accent bg-accent/10',
+                className: '!text-accent !font-bold',
               }}
             >
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  {item.label}
+                  {isActive && (
+                    <span className="absolute -bottom-[6px] left-0 h-[3px] w-full bg-accent" />
+                  )}
+                  {!isActive && (
+                    <span className="absolute -bottom-[6px] left-0 h-[2px] w-0 bg-text-primary transition-all duration-300 group-hover:w-full" />
+                  )}
+                </>
+              )}
             </Link>
           ))}
-          <div className="ml-2 border-l border-slate-200 pl-2 dark:border-slate-800">
+          <div className="ml-4 border-l border-border pl-6 flex items-center">
             <ThemeToggle />
           </div>
         </nav>
 
         {/* Mobile controls */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-4 md:hidden">
           <ThemeToggle />
           <button
             onClick={() => setMobileOpen(true)}
-            className={cn(
-              'rounded-md p-2 transition-colors',
-              'text-slate-600 hover:bg-slate-100',
-              'dark:text-slate-400 dark:hover:bg-slate-800',
-            )}
+            className="flex h-11 w-11 items-center justify-center brutal-border bg-bg-secondary text-text-primary transition-colors hover:bg-accent hover:text-accent-fg active:scale-95"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />

@@ -161,6 +161,13 @@ export const deletePost = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+export const previewMarkdown = createServerFn({ method: 'POST' })
+  .inputValidator((data: { content: string }) => data)
+  .handler(async ({ data }) => {
+    const { renderMarkdown } = await import('@/lib/markdown')
+    return renderMarkdown(data.content)
+  })
+
 // Helper: upsert tags and create associations (batch)
 async function upsertTags(postId: number, tagNames: string[]) {
   const tagValues = tagNames.map((name) => ({

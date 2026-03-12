@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { Upload, X, Image } from 'lucide-react'
+import { Upload, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getUploadUrl } from '@/server/functions/upload.functions'
 
@@ -79,6 +79,7 @@ export function ImageUploader({
           <button
             type="button"
             onClick={() => onChange('')}
+            aria-label="Remove image"
             className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
           >
             <X className="h-3 w-3" />
@@ -108,7 +109,7 @@ export function ImageUploader({
           )}
           <span className="text-sm text-slate-500 dark:text-slate-400">
             {uploading
-              ? 'Uploading...'
+              ? 'Uploading\u2026'
               : 'Drop an image here or click to select'}
           </span>
           <span className="text-xs text-slate-400">

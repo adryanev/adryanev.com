@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -19,6 +19,7 @@ export const Route = createFileRoute('/admin/_layout/resume')({
 
 function ResumePage() {
   const entries = Route.useLoaderData()
+  const router = useRouter()
   const [showForm, setShowForm] = useState(false)
   const [type, setType] = useState<(typeof TYPES)[number]>('experience')
   const [title, setTitle] = useState('')
@@ -57,13 +58,13 @@ function ResumePage() {
       setTechnology('')
       setStartDate('')
       setEndDate('')
-      Route.router?.invalidate()
+      router.invalidate()
     },
   })
 
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   const grouped = TYPES.map((t) => ({

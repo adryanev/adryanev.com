@@ -54,7 +54,7 @@ async function seed() {
     { key: 'site_name', value: 'Adryan Eka Vandra' },
     { key: 'site_title', value: 'adryanev.com' },
     { key: 'site_description', value: 'Software Engineer & Developer' },
-    { key: 'contact_email', value: 'hello@adryanev.com' },
+    { key: 'contact_email', value: 'me@adryanev.com' },
     { key: 'github_url', value: 'https://github.com/adryanev' },
     { key: 'linkedin_url', value: 'https://linkedin.com/in/adryanev' },
   ]

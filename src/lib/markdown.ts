@@ -5,23 +5,79 @@ import remarkRehype from 'remark-rehype'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
 import rehypeShiki from '@shikijs/rehype'
+import type { Root, Element, Text } from 'hast'
+import { visit } from 'unist-util-visit'
 
-// Sanitization schema that allows Shiki-generated HTML attributes.
-// Shiki runs as a rehype plugin BEFORE sanitize, so all its output
-// passes through the sanitizer — no post-process bypass.
-const sanitizeSchema = {
+/**
+ * Custom sanitize schema that extends the defaults to allow
+ * Shiki's syntax-highlighting output (classes, inline styles, data-* attrs).
+ */
+const shikiSanitizeSchema: typeof defaultSchema = {
   ...defaultSchema,
   attributes: {
     ...defaultSchema.attributes,
-    code: [...(defaultSchema.attributes?.code ?? []), 'className', 'style'],
-    span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style'],
     pre: [
       ...(defaultSchema.attributes?.pre ?? []),
       'className',
       'style',
-      'tabindex',
+      ['dataLanguage', /^[a-zA-Z0-9_-]+$/],
+      ['dataTheme', /^[a-zA-Z0-9_-]+$/],
+    ],
+    code: [
+      ...(defaultSchema.attributes?.code ?? []),
+      'className',
+      'style',
+      ['dataLanguage', /^[a-zA-Z0-9_-]+$/],
+      ['dataTheme', /^[a-zA-Z0-9_-]+$/],
+    ],
+    span: [
+      ...(defaultSchema.attributes?.span ?? []),
+      'className',
+      'style',
+    ],
+    div: [
+      ...(defaultSchema.attributes?.div ?? []),
+      'className',
+      'dataMermaid',
     ],
   },
+}
+
+/**
+ * Extract mermaid code blocks into <div data-mermaid> elements
+ * BEFORE Shiki processes them, so they survive as raw source text.
+ */
+function rehypeMermaidPre() {
+  return (tree: Root) => {
+    visit(tree, 'element', (node: Element, index, parent) => {
+      if (
+        node.tagName !== 'pre' ||
+        index == null ||
+        !parent ||
+        !('children' in parent)
+      ) return
+
+      const code = node.children[0] as Element | undefined
+      if (
+        code?.tagName !== 'code' ||
+        !Array.isArray(code.properties?.className) ||
+        !code.properties.className.includes('language-mermaid')
+      ) return
+
+      // Collect the raw text content
+      const text = (code.children as Text[])
+        .map((c) => c.value ?? '')
+        .join('')
+
+      // Replace with a <div data-mermaid> containing the source
+      ;(parent.children as Element[])[index] = {
+        type: 'element',
+        tagName: 'div',
+        properties: { 'data-mermaid': 'true', className: ['mermaid-source'] },
+        children: [{ type: 'text', value: text }],
+      }
+    })
+  }
 }
 
 export async function renderMarkdown(content: string): Promise<string> {
@@ -29,7 +85,9 @@ export async function renderMarkdown(content: string): Promise<string> {
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype)
-    // Shiki runs inside the pipeline, before sanitize
+    // 1. Extract mermaid blocks before Shiki touches them
+    .use(rehypeMermaidPre)
+    // 2. Shiki syntax highlighting
     .use(rehypeShiki, {
       themes: { dark: 'github-dark', light: 'github-light' },
       defaultLanguage: 'text',
@@ -45,9 +103,19 @@ export async function renderMarkdown(content: string): Promise<string> {
         'yaml',
         'sql',
         'dockerfile',
+        'go',
+        'rust',
+        'python',
+        'ruby',
+        'dart',
+        'kotlin',
+        'swift',
+        'markdown',
       ],
     })
-    .use(rehypeSanitize, sanitizeSchema)
+    // 3. Sanitize AFTER Shiki so its output is also sanitized.
+    //    Custom schema whitelists Shiki's classes, styles, and data-* attrs.
+    .use(rehypeSanitize, shikiSanitizeSchema)
     .use(rehypeStringify)
     .process(content)
 

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { Plus, Edit, Trash2 } from 'lucide-react'
@@ -18,11 +18,12 @@ const statusColors = {
 
 function SaasListPage() {
   const listings = Route.useLoaderData()
+  const router = useRouter()
 
   const deleteFn = useServerFn(deleteSaasListing)
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   return (

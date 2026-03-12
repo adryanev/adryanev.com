@@ -161,6 +161,24 @@ export const deletePost = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+const MAX_PREVIEW_SIZE = 100 * 1024 // 100 KB
+
+export const previewMarkdown = createServerFn({ method: 'POST' })
+  .inputValidator((data: { content: string }) => data)
+  .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
+    if (data.content.length > MAX_PREVIEW_SIZE) {
+      throw new Error('Content exceeds maximum preview size of 100KB')
+    }
+
+    const { renderMarkdown } = await import('@/lib/markdown')
+    return renderMarkdown(data.content)
+  })
+
 // Helper: upsert tags and create associations (batch)
 async function upsertTags(postId: number, tagNames: string[]) {
   const tagValues = tagNames.map((name) => ({

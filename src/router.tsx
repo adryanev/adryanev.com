@@ -5,6 +5,7 @@ import { routeTree } from './routeTree.gen'
 
 export function createAppRouter() {
   const queryClient = new QueryClient()
+  // @ts-expect-error — routerWithQueryClient wrapper type is incompatible with Register
   return routerWithQueryClient(createRouter({ routeTree }), queryClient)
 }
 

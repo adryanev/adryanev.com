@@ -2,13 +2,11 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { LogIn } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Terminal, Lock, Mail, AlertTriangle } from 'lucide-react'
 import { login, getCurrentUser } from '@/server/functions/auth.functions'
 
 export const Route = createFileRoute('/admin/login')({
   beforeLoad: async () => {
-    // If already logged in, redirect to admin dashboard
     const user = await getCurrentUser()
     if (user) {
       throw redirect({ to: '/admin' })
@@ -29,8 +27,8 @@ function LoginPage() {
     onSuccess: () => {
       navigate({ to: '/admin' })
     },
-    onError: (err) => {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
+    onError: () => {
+      setError('Invalid username or password. Please try again.')
     },
   })
 
@@ -41,98 +39,88 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <div
-        className={cn(
-          'w-full max-w-sm rounded-lg border p-8',
-          'border-slate-200 bg-white',
-          'dark:border-slate-800 dark:bg-slate-900',
-        )}
-      >
-        <div className="mb-8 text-center">
-          <p className="font-mono text-sm text-accent">admin@adryanev.com</p>
-          <h1 className="mt-2 text-2xl font-bold">Sign In</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Enter your credentials to access the admin panel
-          </p>
-        </div>
+    <div className="flex min-h-screen items-center justify-center p-4 bg-[var(--bg-primary)] font-mono selection:bg-[var(--accent)] selection:text-[var(--accent-fg)] relative">
+      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none" 
+           style={{ backgroundImage: 'linear-gradient(var(--text-primary) 1px, transparent 1px), linear-gradient(90deg, var(--text-primary) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div
-              className={cn(
-                'rounded-md border px-4 py-3 text-sm',
-                'border-red-200 bg-red-50 text-red-700',
-                'dark:border-red-900 dark:bg-red-950 dark:text-red-400',
-              )}
-            >
-              {error}
+      <div className="relative w-full max-w-md z-10">
+        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-8 rounded-none shadow-sm">
+          <div className="mb-8 text-center border-b border-[var(--border-color)] pb-6">
+            <Terminal className="mx-auto h-8 w-8 text-[var(--accent)] mb-4" />
+            <h1 className="text-2xl font-bold tracking-tight uppercase">Admin Login</h1>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">
+              Please enter your credentials
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400 flex items-start gap-3">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase text-[var(--text-secondary)]">
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-[var(--text-secondary)]" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] px-3 py-2.5 pl-10 text-sm outline-none transition-colors focus-visible:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded-none"
+                    placeholder="email@address.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="password" className="mb-1.5 block text-xs font-semibold uppercase text-[var(--text-secondary)]">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-[var(--text-secondary)]" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] px-3 py-2.5 pl-10 text-sm outline-none transition-colors focus-visible:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
             </div>
-          )}
 
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-1.5 block text-sm font-medium"
+            <button
+              type="submit"
+              disabled={loginMutation.isPending}
+              className="mt-6 w-full flex items-center justify-center gap-2 border border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)] px-4 py-2.5 text-sm font-bold uppercase transition-colors hover:bg-transparent hover:text-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed rounded-none"
             >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className={cn(
-                'w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors',
-                'border-slate-300 bg-white focus:border-accent focus:ring-1 focus:ring-accent',
-                'dark:border-slate-700 dark:bg-slate-800 dark:focus:border-accent dark:focus:ring-accent',
+              {loginMutation.isPending ? (
+                <>
+                  <span className="inline-block h-4 w-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
+                  Authenticating\u2026
+                </>
+              ) : (
+                'Sign In'
               )}
-              placeholder="admin@adryanev.com"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1.5 block text-sm font-medium"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className={cn(
-                'w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors',
-                'border-slate-300 bg-white focus:border-accent focus:ring-1 focus:ring-accent',
-                'dark:border-slate-700 dark:bg-slate-800 dark:focus:border-accent dark:focus:ring-accent',
-              )}
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className={cn(
-              'flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors',
-              'bg-accent text-slate-950 hover:bg-accent-hover',
-              'disabled:cursor-not-allowed disabled:opacity-60',
-            )}
-          >
-            {loginMutation.isPending ? (
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            ) : (
-              <LogIn className="h-4 w-4" />
-            )}
-            {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

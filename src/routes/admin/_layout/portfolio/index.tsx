@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { Plus, Edit, Trash2 } from 'lucide-react'
@@ -12,11 +12,12 @@ export const Route = createFileRoute('/admin/_layout/portfolio/')({
 
 function ProjectListPage() {
   const projects = Route.useLoaderData()
+  const router = useRouter()
 
   const deleteFn = useServerFn(deleteProject)
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   return (

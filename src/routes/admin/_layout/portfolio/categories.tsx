@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 import {
   getCategories,
   createCategory,
-  updateCategory,
   deleteCategory,
 } from '@/server/functions/portfolio.functions'
 
@@ -18,12 +17,12 @@ export const Route = createFileRoute('/admin/_layout/portfolio/categories')({
 
 function CategoriesPage() {
   const categories = Route.useLoaderData()
+  const router = useRouter()
   const [showNew, setShowNew] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
 
   const createFn = useServerFn(createCategory)
-  const updateFn = useServerFn(updateCategory)
   const deleteFn = useServerFn(deleteCategory)
 
   const createMut = useMutation({
@@ -35,13 +34,13 @@ function CategoriesPage() {
       setNewName('')
       setNewDesc('')
       setShowNew(false)
-      Route.router?.invalidate()
+      router.invalidate()
     },
   })
 
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => Route.router?.invalidate(),
+    onSuccess: () => router.invalidate(),
   })
 
   return (

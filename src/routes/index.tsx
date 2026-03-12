@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Code2, Newspaper, Rocket } from 'lucide-react'
+import { ArrowRight, Terminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getHomePageData } from '@/server/functions/public.functions'
+import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { TextReveal } from '@/components/motion/TextReveal'
 
 export const Route = createFileRoute('/')({
   loader: () => getHomePageData(),
@@ -22,225 +24,270 @@ function HomePage() {
   const { latestPosts, featuredProjects, activeSaas } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6">
-      {/* Hero */}
-      <section className="py-20 text-center sm:py-28">
-        <p className="font-mono text-sm text-accent">Hello, world! I'm</p>
-        <h1 className="mt-4 text-5xl font-bold tracking-tight sm:text-6xl">
-          Adryan Eka Vandra
-        </h1>
-        <p className="mt-4 max-w-xl mx-auto text-lg text-slate-600 dark:text-slate-400">
-          Software Engineer building things for the web. I write code, ship
-          products, and share what I learn along the way.
-        </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            to="/portfolio"
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-medium text-slate-950 transition-colors hover:bg-accent-hover"
-          >
-            View my work <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            to="/contact"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            Get in touch
-          </Link>
-        </div>
-      </section>
+    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center overflow-hidden px-6 py-12 md:py-24 space-y-32">
+      {/* Hero Section */}
+      <div className="relative z-10 grid gap-12 lg:grid-cols-[1fr_400px]">
+        <div className="flex flex-col justify-center">
+          <Reveal delay={0}>
+            <div className="mb-8 inline-flex w-fit items-center gap-3 border-[2px] border-text-primary bg-accent px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-accent-fg brutal-shadow">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping motion-reduce:animate-none rounded-full bg-bg-primary opacity-75"></span>
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-bg-primary"></span>
+              </span>
+              Available for Work
+            </div>
+          </Reveal>
 
-      {/* Latest Blog Posts */}
-      {latestPosts.length > 0 && (
-        <section className="border-t border-slate-200 py-16 dark:border-slate-800">
-          <SectionHeader
-            icon={Newspaper}
-            title="Latest Posts"
-            linkTo="/blog"
-            linkLabel="All posts"
-          />
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post) => (
+          <h1 className="font-serif text-6xl font-medium leading-[1.05] tracking-tight md:text-8xl lg:text-[10rem]">
+            <TextReveal text="Software" delay={0.1} />
+            <br />
+            <span className="italic text-accent">
+              <TextReveal text="Engineer." delay={0.3} />
+            </span>
+          </h1>
+
+          <Reveal delay={0.5}>
+            <p className="mt-10 max-w-xl font-mono text-base leading-relaxed text-text-secondary md:text-lg">
+              I'm Adryan Eka Vandra. I build resilient, high-performance systems and distinctive user interfaces. No generic boilerplate — just crafted software.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.65}>
+            <div className="mt-12 flex flex-wrap items-center gap-6">
               <Link
-                key={post.id}
-                to="/blog/$slug"
-                params={{ slug: post.slug }}
-                className={cn(
-                  'group rounded-lg border p-5 transition-colors',
-                  'border-slate-200 hover:border-accent/30 hover:bg-accent/5',
-                  'dark:border-slate-800 dark:hover:border-accent/30 dark:hover:bg-accent/5',
-                )}
+                to="/portfolio"
+                className="group flex items-center gap-3 bg-text-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-bg-primary transition-all hover:bg-accent hover:text-accent-fg brutal-border border-text-primary"
               >
-                <p className="text-xs text-slate-500">
-                  {post.publishedAt
-                    ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })
-                    : ''}
-                </p>
-                <h3 className="mt-2 font-semibold group-hover:text-accent">
-                  {post.title}
-                </h3>
-                {post.excerpt && (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                    {post.excerpt}
-                  </p>
-                )}
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {post.postsToTags.map((pt) => (
-                    <span
-                      key={pt.tag.id}
-                      className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                    >
-                      {pt.tag.name}
-                    </span>
-                  ))}
-                </div>
+                View Work
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
-            ))}
+
+              <Link
+                to="/about"
+                className="group flex items-center gap-3 bg-bg-secondary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-text-primary transition-all hover:border-accent hover:text-accent brutal-border"
+              >
+                About Me
+              </Link>
+            </div>
+          </Reveal>
+        </div>
+
+        <Reveal direction="right" delay={0.4} className="hidden lg:flex flex-col justify-center">
+          <div className="brutal-border brutal-shadow-lg bg-bg-secondary p-8 relative">
+            <div className="absolute -top-3 -right-3 h-6 w-6 border-2 border-text-primary bg-accent" />
+            <div className="mb-6 flex items-center gap-3 border-b-2 border-border pb-4">
+              <Terminal className="h-5 w-5 text-text-primary" />
+              <span className="font-mono text-xs font-bold uppercase tracking-widest text-text-primary">
+                adryanev@web ~
+              </span>
+            </div>
+            <div className="font-mono text-sm leading-loose text-text-secondary space-y-1">
+              <p><span className="text-accent font-bold">$</span> init --sequence start</p>
+              <p className="text-text-primary">{'>'} Booting core modules...</p>
+              <p><span className="text-accent font-bold">$</span> load --module skills</p>
+              <p className="text-text-primary">{'>'} React, Node.js, Go, Postgres</p>
+              <p><span className="text-accent font-bold">$</span> status</p>
+              <p className="text-accent font-bold animate-pulse motion-reduce:animate-none">{'>'} Awaiting input_</p>
+            </div>
           </div>
+        </Reveal>
+      </div>
+
+      {/* Latest Blog Posts — #2: stronger card borders, #7: softer dividers, #9: better tag contrast */}
+      {latestPosts.length > 0 && (
+        <section className="border-t-2 border-text-primary dark:border-border pt-16">
+          <Reveal>
+            <SectionHeader
+              title="Latest Posts"
+              linkTo="/blog"
+              linkLabel="All Posts"
+            />
+          </Reveal>
+          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {latestPosts.map((post) => (
+              <StaggerItem key={post.id}>
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: post.slug }}
+                  className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
+                >
+                  <div>
+                    <time className="font-mono text-sm font-bold text-accent uppercase tracking-widest">
+                      {post.publishedAt
+                        ? new Intl.DateTimeFormat('en-CA').format(new Date(post.publishedAt)).replace(/-/g, '.')
+                        : 'DRAFT'}
+                    </time>
+                    <h3 className="mt-4 font-serif text-3xl font-bold leading-tight group-hover:italic transition-all">
+                      {post.title}
+                    </h3>
+                    {post.excerpt && (
+                      <p className="mt-4 font-sans text-text-secondary line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {post.postsToTags.map((pt) => (
+                      <span
+                        key={pt.tag.id}
+                        className="bg-bg-primary px-2 py-1 font-mono text-xs uppercase tracking-widest text-text-primary border border-border"
+                      >
+                        {pt.tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         </section>
       )}
 
       {/* Featured Projects */}
       {featuredProjects.length > 0 && (
-        <section className="border-t border-slate-200 py-16 dark:border-slate-800">
-          <SectionHeader
-            icon={Code2}
-            title="Featured Projects"
-            linkTo="/portfolio"
-            linkLabel="All projects"
-          />
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+        <section className="border-t-2 border-text-primary dark:border-border pt-16">
+          <Reveal>
+            <SectionHeader
+              title="Featured Projects"
+              linkTo="/portfolio"
+              linkLabel="All Projects"
+            />
+          </Reveal>
+          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2">
             {featuredProjects.map((project) => (
-              <Link
-                key={project.id}
-                to="/portfolio/$category"
-                params={{ category: project.category.slug }}
-                className={cn(
-                  'group rounded-lg border p-5 transition-colors',
-                  'border-slate-200 hover:border-accent/30 hover:bg-accent/5',
-                  'dark:border-slate-800 dark:hover:border-accent/30 dark:hover:bg-accent/5',
-                )}
-              >
-                <div className="flex items-start justify-between">
+              <StaggerItem key={project.id}>
+                <Link
+                  to="/portfolio/$category"
+                  params={{ category: project.category.slug }}
+                  className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
+                >
                   <div>
-                    <h3 className="font-semibold group-hover:text-accent">
-                      {project.title}
-                    </h3>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {project.role} at {project.workplace} · {project.year}
-                    </p>
+                    <div className="flex items-start justify-between border-b-2 border-border pb-4 group-hover:border-text-primary transition-colors">
+                      <div>
+                        <h3 className="font-serif text-4xl font-bold leading-tight group-hover:italic transition-all">
+                          {project.title}
+                        </h3>
+                        <p className="mt-2 font-mono text-sm text-text-secondary">
+                          {project.role} · {project.workplace} · {project.year}
+                        </p>
+                      </div>
+                      <span className="bg-accent px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-accent-fg brutal-border">
+                        {project.category.name}
+                      </span>
+                    </div>
                   </div>
-                  <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                    {project.category.name}
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {project.technology.slice(0, 5).map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded bg-accent/10 px-1.5 py-0.5 text-xs text-accent"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </Link>
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {project.technology.slice(0, 5).map((tech) => (
+                      <span
+                        key={tech}
+                        className="bg-bg-primary px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-text-primary border border-border group-hover:text-accent transition-colors"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         </section>
       )}
 
-      {/* Active SaaS */}
+      {/* Active SaaS — #5: show "Coming Soon" when no URL */}
       {activeSaas.length > 0 && (
-        <section className="border-t border-slate-200 py-16 dark:border-slate-800">
-          <SectionHeader
-            icon={Rocket}
-            title="SaaS Products"
-            linkTo="/saas"
-            linkLabel="View all"
-          />
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="border-t-2 border-text-primary dark:border-border pt-16">
+          <Reveal>
+            <SectionHeader
+              title="Products"
+              linkTo="/saas"
+              linkLabel="All Products"
+            />
+          </Reveal>
+          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {activeSaas.map((saas) => (
-              <div
-                key={saas.id}
-                className={cn(
-                  'rounded-lg border p-5',
-                  'border-slate-200 dark:border-slate-800',
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  {saas.logoUrl && (
-                    <img
-                      src={saas.logoUrl}
-                      alt={saas.name}
-                      className="h-8 w-8 rounded"
-                    />
+              <StaggerItem key={saas.id}>
+                <div className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8">
+                  <div>
+                    <div className="flex items-center gap-4 border-b-2 border-border pb-4">
+                      {saas.logoUrl && (
+                        <img
+                          src={saas.logoUrl}
+                          alt={saas.name}
+                          loading="lazy"
+                          className="h-10 w-10 brutal-border bg-bg-primary"
+                        />
+                      )}
+                      <h3 className="font-serif text-2xl font-bold">{saas.name}</h3>
+                      <StatusBadge status={saas.status} />
+                    </div>
+                    <p className="mt-6 font-sans text-text-secondary line-clamp-3">
+                      {saas.description}
+                    </p>
+                  </div>
+                  {saas.url ? (
+                    <a
+                      href={saas.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-8 inline-flex items-center gap-2 font-mono text-sm font-bold uppercase tracking-widest text-text-primary hover:text-accent transition-colors"
+                    >
+                      Visit <ArrowRight className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <span className="mt-8 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-text-secondary">
+                      Coming Soon
+                    </span>
                   )}
-                  <h3 className="font-semibold">{saas.name}</h3>
-                  <StatusBadge status={saas.status} />
                 </div>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                  {saas.description}
-                </p>
-                {saas.url && (
-                  <a
-                    href={saas.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-1 text-sm text-accent hover:underline"
-                  >
-                    Visit <ArrowRight className="h-3 w-3" />
-                  </a>
-                )}
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         </section>
       )}
+
+      {/* #4: Moved watermark behind hero only, not overlapping content sections */}
+      <div className="pointer-events-none absolute top-[60vh] right-0 overflow-hidden opacity-[0.02] z-0">
+        <span className="font-serif text-[25vw] font-bold leading-none tracking-tighter">
+          ADRYAN
+        </span>
+      </div>
     </div>
   )
 }
 
 function SectionHeader({
-  icon: Icon,
   title,
   linkTo,
   linkLabel,
 }: {
-  icon: React.ComponentType<{ className?: string }>
   title: string
   linkTo: string
   linkLabel: string
 }) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-accent" />
-        <h2 className="text-xl font-bold">{title}</h2>
-      </div>
+      <h2 className="font-serif text-3xl font-bold italic text-text-primary md:text-4xl">{title}</h2>
       <Link
         to={linkTo}
-        className="flex items-center gap-1 text-sm text-accent hover:underline"
+        className="group flex items-center gap-2 bg-bg-secondary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-text-primary transition-colors hover:text-accent active:scale-95 brutal-border"
       >
-        {linkLabel} <ArrowRight className="h-3 w-3" />
+        {linkLabel} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </Link>
     </div>
   )
 }
 
+{/* #1: StatusBadge — beta uses teal variant instead of yellow */}
 function StatusBadge({ status }: { status: string }) {
   const colors = {
-    active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    beta: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    retired: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500',
+    active: 'bg-accent text-accent-fg',
+    beta: 'bg-accent/20 text-accent border-accent',
+    retired: 'bg-text-secondary/20 text-text-secondary',
   }
   return (
     <span
       className={cn(
-        'ml-auto rounded-full px-2 py-0.5 text-xs font-medium',
+        'ml-auto px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest brutal-border',
         colors[status as keyof typeof colors] ?? colors.active,
       )}
     >

@@ -80,10 +80,14 @@ export function TerminalOverlay() {
   // Lock body scroll and focus input when opened
   useEffect(() => {
     if (!open) return
+    const locks = Number(document.body.dataset.scrollLocks || 0)
+    document.body.dataset.scrollLocks = String(locks + 1)
     document.body.style.overflow = 'hidden'
     inputRef.current?.focus()
     return () => {
-      document.body.style.overflow = ''
+      const remaining = Number(document.body.dataset.scrollLocks || 0) - 1
+      document.body.dataset.scrollLocks = String(remaining)
+      if (remaining <= 0) document.body.style.overflow = ''
     }
   }, [open])
 
@@ -107,7 +111,8 @@ export function TerminalOverlay() {
       setHistory((prev) => [...prev, trimmed])
       setHistoryIdx(-1)
 
-      const [command, ...args] = trimmed.toLowerCase().split(/\s+/)
+      const [rawCommand, ...args] = trimmed.split(/\s+/)
+      const command = rawCommand.toLowerCase()
       const arg = args.join(' ')
 
       switch (command) {
@@ -190,6 +195,12 @@ export function TerminalOverlay() {
             break
           }
           const url = arg.startsWith('http') ? arg : `https://${arg}`
+          try {
+            new URL(url)
+          } catch {
+            addLine('output', `err: invalid url '${arg}'`)
+            break
+          }
           window.open(url, '_blank')
           addLine('output', `opening ${url}...`)
           break
@@ -245,6 +256,9 @@ export function TerminalOverlay() {
 
       {/* Terminal window */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Terminal"
         className="relative w-full max-w-3xl brutal-border brutal-shadow-lg bg-bg-primary overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-300 overscroll-contain"
       >
         {/* Title bar */}

@@ -106,6 +106,7 @@ function PostListPage() {
                         params={{ id: String(post.id) }}
                         className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)] transition-colors"
                         title="Edit"
+                        aria-label={`Edit ${post.title}`}
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -117,6 +118,7 @@ function PostListPage() {
                         }}
                         className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-colors"
                         title="Delete"
+                        aria-label={`Delete ${post.title}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

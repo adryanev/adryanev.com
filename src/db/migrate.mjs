@@ -8,8 +8,14 @@ const pool = new pg.Pool({
 
 const db = drizzle(pool)
 
-console.log('Running migrations...')
-await migrate(db, { migrationsFolder: './drizzle' })
-console.log('Migrations complete.')
-
+const client = await pool.connect()
+try {
+  await client.query('SELECT pg_advisory_lock(1)')
+  console.log('Running migrations...')
+  await migrate(db, { migrationsFolder: './drizzle' })
+  console.log('Migrations complete.')
+} finally {
+  await client.query('SELECT pg_advisory_unlock(1)')
+  client.release()
+}
 await pool.end()

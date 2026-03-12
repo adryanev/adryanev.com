@@ -36,4 +36,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-CMD ["sh", "-c", "node migrate.mjs && node dist/server/server.js"]
+CMD ["sh", "-c", "node migrate.mjs && exec node dist/server/server.js"]

@@ -51,10 +51,12 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
       description !== (init?.description ?? '') ||
       url !== (init?.url ?? '') ||
       githubUrl !== (init?.githubUrl ?? '') ||
+      logoUrl !== (init?.logoUrl ?? '') ||
+      sortOrder !== (init?.sortOrder ?? 0) ||
       status !== (init?.status ?? 'active') ||
       JSON.stringify(technology) !== JSON.stringify(init?.technology ?? [])
     setDirty(changed)
-  }, [name, slug, description, url, githubUrl, status, technology])
+  }, [name, slug, description, url, githubUrl, logoUrl, sortOrder, status, technology])
 
   useUnsavedChanges(dirty)
 

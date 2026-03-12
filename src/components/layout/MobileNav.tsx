@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { X } from 'lucide-react'
+import { useCallback, useEffect, useRef } from 'react'
 
 interface MobileNavProps {
   open: boolean
@@ -8,6 +9,62 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ open, onClose, items }: MobileNavProps) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Auto-focus the close button when the panel opens
+  useEffect(() => {
+    if (open) {
+      closeButtonRef.current?.focus()
+    }
+  }, [open])
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
+  // Trap focus within the panel
+  const handleFocusTrap = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab') return
+
+    const panel = panelRef.current
+    if (!panel) return
+
+    const focusable = panel.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length === 0) return
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+
+    document.addEventListener('keydown', handleFocusTrap)
+    return () => document.removeEventListener('keydown', handleFocusTrap)
+  }, [open, handleFocusTrap])
+
   if (!open) return null
 
   return (
@@ -20,12 +77,19 @@ export function MobileNav({ open, onClose, items }: MobileNavProps) {
       />
 
       {/* Panel */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-sm border-l-4 border-text-primary bg-bg-primary p-6 brutal-shadow-lg flex flex-col overscroll-contain">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+        className="fixed inset-y-0 right-0 w-full max-w-sm border-l-4 border-text-primary bg-bg-primary p-6 brutal-shadow-lg flex flex-col overscroll-contain"
+      >
         <div className="flex items-center justify-between border-b border-border pb-4">
           <span className="font-mono text-sm text-text-secondary tracking-wider">
             Navigation
           </span>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             className="flex h-11 w-11 items-center justify-center brutal-border bg-accent text-accent-fg transition-transform active:scale-95"
             aria-label="Close menu"

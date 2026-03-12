@@ -108,6 +108,7 @@ function ContactPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault()
+              if (mutation.isPending) return
               setFieldErrors({})
               mutation.mutate()
             }}

@@ -27,8 +27,8 @@ function LoginPage() {
     onSuccess: () => {
       navigate({ to: '/admin' })
     },
-    onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+    onError: () => {
+      setError('Invalid username or password. Please try again.')
     },
   })
 

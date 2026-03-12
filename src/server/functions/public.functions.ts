@@ -137,10 +137,18 @@ export const getAllTags = createServerFn({ method: 'GET' }).handler(
         id: tags.id,
         name: tags.name,
         slug: tags.slug,
-        postCount: count(postsToTags.postId),
+        postCount: count(posts.id),
       })
       .from(tags)
       .leftJoin(postsToTags, eq(tags.id, postsToTags.tagId))
+      .leftJoin(
+        posts,
+        and(
+          eq(postsToTags.postId, posts.id),
+          eq(posts.status, 'published'),
+          isNull(posts.deletedAt),
+        ),
+      )
       .groupBy(tags.id, tags.name, tags.slug)
       .orderBy(asc(tags.name))
     return rows

@@ -9,6 +9,41 @@ import type { Root, Element, Text } from 'hast'
 import { visit } from 'unist-util-visit'
 
 /**
+ * Custom sanitize schema that extends the defaults to allow
+ * Shiki's syntax-highlighting output (classes, inline styles, data-* attrs).
+ */
+const shikiSanitizeSchema: typeof defaultSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    pre: [
+      ...(defaultSchema.attributes?.pre ?? []),
+      'className',
+      'style',
+      ['dataLanguage', /^[a-zA-Z0-9_-]+$/],
+      ['dataTheme', /^[a-zA-Z0-9_-]+$/],
+    ],
+    code: [
+      ...(defaultSchema.attributes?.code ?? []),
+      'className',
+      'style',
+      ['dataLanguage', /^[a-zA-Z0-9_-]+$/],
+      ['dataTheme', /^[a-zA-Z0-9_-]+$/],
+    ],
+    span: [
+      ...(defaultSchema.attributes?.span ?? []),
+      'className',
+      'style',
+    ],
+    div: [
+      ...(defaultSchema.attributes?.div ?? []),
+      'className',
+      'dataMermaid',
+    ],
+  },
+}
+
+/**
  * Extract mermaid code blocks into <div data-mermaid> elements
  * BEFORE Shiki processes them, so they survive as raw source text.
  */
@@ -50,11 +85,9 @@ export async function renderMarkdown(content: string): Promise<string> {
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype)
-    // 1. Sanitize raw HTML first (before Shiki adds its safe, deterministic output)
-    .use(rehypeSanitize, defaultSchema)
-    // 2. Extract mermaid blocks before Shiki touches them
+    // 1. Extract mermaid blocks before Shiki touches them
     .use(rehypeMermaidPre)
-    // 3. Shiki runs AFTER sanitize — its classes & styles won't be stripped
+    // 2. Shiki syntax highlighting
     .use(rehypeShiki, {
       themes: { dark: 'github-dark', light: 'github-light' },
       defaultLanguage: 'text',
@@ -80,6 +113,9 @@ export async function renderMarkdown(content: string): Promise<string> {
         'markdown',
       ],
     })
+    // 3. Sanitize AFTER Shiki so its output is also sanitized.
+    //    Custom schema whitelists Shiki's classes, styles, and data-* attrs.
+    .use(rehypeSanitize, shikiSanitizeSchema)
     .use(rehypeStringify)
     .process(content)
 

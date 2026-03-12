@@ -29,9 +29,10 @@ export function StatusRadio<T extends string>({
             className={cn(
               'flex items-center gap-3 border p-3 cursor-pointer transition-colors',
               isActive
-                ? `border-[${color}] bg-[var(--bg-secondary)]`
+                ? 'bg-[var(--bg-secondary)]'
                 : 'border-[var(--border-color)] hover:border-[var(--text-secondary)]',
             )}
+            style={isActive ? { borderColor: color } : undefined}
           >
             <input
               type="radio"
@@ -44,8 +45,9 @@ export function StatusRadio<T extends string>({
             <div
               className={cn(
                 'h-3 w-3 border flex items-center justify-center transition-colors rounded-none',
-                isActive ? `border-[${color}]` : 'border-[var(--border-color)]',
+                isActive ? '' : 'border-[var(--border-color)]',
               )}
+              style={isActive ? { borderColor: color } : undefined}
             >
               {isActive && (
                 <div

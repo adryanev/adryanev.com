@@ -62,6 +62,8 @@ function AdminLayout() {
           'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border-color)] bg-[var(--bg-secondary)] transition-transform duration-200 md:static md:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
+        {...(!sidebarOpen ? { inert: true } : {})}
+        {...(sidebarOpen ? { role: 'dialog', 'aria-modal': true } : {})}
       >
         {/* Sidebar header */}
         <div className="flex h-16 items-center justify-between border-b border-[var(--border-color)] px-4">
@@ -75,6 +77,7 @@ function AdminLayout() {
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] md:hidden"
+            aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -128,6 +131,7 @@ function AdminLayout() {
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--border-color)] transition-colors"
+            aria-label="Open sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>

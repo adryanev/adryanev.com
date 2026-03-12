@@ -57,10 +57,14 @@ export function CommandPalette() {
   // Lock body scroll and focus input when open
   useEffect(() => {
     if (open) {
+      const locks = Number(document.body.dataset.scrollLocks || 0)
+      document.body.dataset.scrollLocks = String(locks + 1)
       document.body.style.overflow = 'hidden'
       requestAnimationFrame(() => inputRef.current?.focus())
       return () => {
-        document.body.style.overflow = ''
+        const remaining = Number(document.body.dataset.scrollLocks || 0) - 1
+        document.body.dataset.scrollLocks = String(remaining)
+        if (remaining <= 0) document.body.style.overflow = ''
       }
     }
   }, [open])

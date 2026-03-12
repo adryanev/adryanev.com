@@ -209,7 +209,7 @@ function WritePane() {
         'w-full bg-[var(--bg-primary)] px-4 py-3 font-mono text-sm leading-relaxed outline-none resize-y overflow-y-auto',
         mode === 'split' && 'border-r border-[var(--border-color)]',
       )}
-      placeholder="Write your markdown here\u2026 (paste or drop images to upload)"
+      placeholder="Write your markdown here… (paste or drop images to upload)"
     />
   )
 }

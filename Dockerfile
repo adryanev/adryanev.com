@@ -25,10 +25,10 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy built output and migrations
+# Copy built output, migrations, and migrate script
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/drizzle ./drizzle
-COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/src/db/migrate.mjs ./migrate.mjs
 
 USER app
 EXPOSE 3000
@@ -36,4 +36,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-CMD ["node", "dist/server/server.js"]
+CMD ["sh", "-c", "node migrate.mjs && node dist/server/server.js"]

@@ -142,7 +142,7 @@ function ContactPage() {
                   'w-full brutal-border bg-bg-primary px-4 py-4 font-sans text-lg outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent transition-all',
                   fieldErrors.name && 'border-red-500'
                 )}
-                placeholder="Your Name\u2026"
+                placeholder="Your Name…"
               />
               {fieldErrors.name && (
                 <p className="mt-1 font-mono text-xs text-red-500">{fieldErrors.name}</p>
@@ -165,7 +165,7 @@ function ContactPage() {
                   'w-full brutal-border bg-bg-primary px-4 py-4 font-sans text-lg outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent transition-all',
                   fieldErrors.email && 'border-red-500'
                 )}
-                placeholder="you@domain.com\u2026"
+                placeholder="you@domain.com…"
               />
               {fieldErrors.email && (
                 <p className="mt-1 font-mono text-xs text-red-500">{fieldErrors.email}</p>
@@ -182,7 +182,7 @@ function ContactPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full brutal-border bg-bg-primary px-4 py-4 font-sans text-lg outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent transition-all"
-                placeholder="What is this regarding\u2026"
+                placeholder="What is this regarding…"
               />
             </div>
 
@@ -202,7 +202,7 @@ function ContactPage() {
                   'w-full brutal-border bg-bg-primary px-4 py-4 font-sans text-lg resize-none outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent transition-all',
                   fieldErrors.message && 'border-red-500'
                 )}
-                placeholder="Your message\u2026"
+                placeholder="Your message…"
               />
               <div className="mt-1 flex justify-between">
                 {fieldErrors.message ? (

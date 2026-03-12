@@ -40,6 +40,7 @@ export function CommandPalette() {
   const { setTheme } = useTheme()
   const searchFn = useServerFn(searchContent)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Keyboard shortcut
   useEffect(() => {
@@ -52,6 +53,17 @@ export function CommandPalette() {
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [])
+
+  // Lock body scroll and focus input when open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+      requestAnimationFrame(() => inputRef.current?.focus())
+      return () => {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [open])
 
   // Debounced search
   const handleSearch = useCallback(
@@ -98,9 +110,10 @@ export function CommandPalette() {
           <div className="flex items-center border-b-2 border-text-primary px-4 bg-bg-secondary">
             <Search className="h-5 w-5 text-text-secondary mr-3" />
             <Command.Input
+              ref={inputRef}
               value={query}
               onValueChange={handleSearch}
-              placeholder="Search pages, posts, projects\u2026"
+              placeholder="Search pages, posts, projects…"
               aria-label="Search"
               className="w-full py-5 font-sans text-base text-text-primary outline-none placeholder:text-text-secondary bg-transparent"
             />

@@ -27,3 +27,6 @@ export {
   webhooksRelations,
   webhookDeliveryLogsRelations,
 } from './schema/webhooks'
+export { postViews, postViewsRelations } from './schema/post-views'
+export { subscriberStatusEnum, subscribers } from './schema/subscribers'
+export { rateLimits } from './schema/rate-limits'

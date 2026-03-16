@@ -1,10 +1,12 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { Calendar, Clock, ArrowLeft, ArrowRight, Eye } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
 import { seoMeta, canonicalLink, articleJsonLd, breadcrumbJsonLd, jsonLdScript, SITE_URL } from '@/lib/seo'
+import { recordPostView, getPostViewCount } from '@/server/functions/views.functions'
+import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
 export const Route = createFileRoute('/blog/$slug')({
   loader: async ({ params }) => {
@@ -78,6 +80,17 @@ export const Route = createFileRoute('/blog/$slug')({
 function BlogPostPage() {
   const post = Route.useLoaderData()
   const contentRef = useRef<HTMLDivElement>(null)
+  const [viewCount, setViewCount] = useState<number | null>(null)
+
+  // Record view and fetch count
+  useEffect(() => {
+    let cancelled = false
+    recordPostView({ data: { postId: post.id } }).catch(() => {})
+    getPostViewCount({ data: { postId: post.id } }).then((result) => {
+      if (!cancelled) setViewCount(result.views)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [post.id])
 
   // Inject copy buttons into code blocks
   useEffect(() => {
@@ -153,6 +166,12 @@ function BlogPostPage() {
           <Clock className="h-4 w-4 text-accent" />
           {post.readingTime} min read
         </span>
+        {viewCount !== null && (
+          <span className="flex items-center gap-2">
+            <Eye className="h-4 w-4 text-accent" />
+            {viewCount.toLocaleString()} {viewCount === 1 ? 'view' : 'views'}
+          </span>
+        )}
       </div>
 
       {post.postsToTags.length > 0 && (
@@ -193,8 +212,11 @@ function BlogPostPage() {
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
 
+      {/* Newsletter */}
+      <SubscribeForm className="mt-16" />
+
       {/* Prev/Next navigation */}
-      <div className="mt-16 grid grid-cols-2 gap-6 border-t-2 border-text-primary dark:border-border pt-8">
+      <div className="mt-12 grid grid-cols-2 gap-6 border-t-2 border-text-primary dark:border-border pt-8">
         {post.prev ? (
           <Link
             to="/blog/$slug"

@@ -1,15 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { FileText, FolderOpen, Mail, PenLine, Rocket, Briefcase } from 'lucide-react'
+import { FileText, FolderOpen, Mail, PenLine, Rocket, Briefcase, Eye, TrendingUp, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getDashboardStats } from '@/server/functions/dashboard.functions'
+import { getViewAnalytics } from '@/server/functions/views.functions'
+import { getSubscriberStats } from '@/server/functions/subscribers.functions'
 
 export const Route = createFileRoute('/admin/_layout/')({
-  loader: () => getDashboardStats(),
+  loader: async () => {
+    const [stats, analytics, subscriberStats] = await Promise.all([
+      getDashboardStats(),
+      getViewAnalytics(),
+      getSubscriberStats(),
+    ])
+    return { stats, analytics, subscriberStats }
+  },
   component: DashboardPage,
 })
 
 function DashboardPage() {
-  const stats = Route.useLoaderData()
+  const { stats, analytics, subscriberStats } = Route.useLoaderData()
 
   return (
     <div className="space-y-8">
@@ -23,7 +32,7 @@ function DashboardPage() {
       </header>
 
       {/* Stats grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Total Posts"
           value={stats.totalPosts}
@@ -49,7 +58,57 @@ function DashboardPage() {
           icon={PenLine}
           href="/admin/posts"
         />
+        <StatCard
+          label="Total Views"
+          value={analytics.totalViews}
+          icon={Eye}
+          href="/admin/posts"
+        />
+        <StatCard
+          label="Views (7d)"
+          value={analytics.recentViews}
+          icon={TrendingUp}
+          href="/admin/posts"
+          accent={analytics.recentViews > 0}
+        />
+        <StatCard
+          label="Subscribers"
+          value={subscriberStats.confirmed}
+          icon={Users}
+          href="/admin/subscribers"
+          accent={subscriberStats.confirmed > 0}
+        />
       </div>
+
+      {/* Popular Posts */}
+      {analytics.popularPosts.length > 0 && (
+        <div className="pt-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-4">
+            Popular Posts
+          </h2>
+          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
+            {analytics.popularPosts.map((post, i) => (
+              <Link
+                key={post.postId}
+                to="/blog/$slug"
+                params={{ slug: post.slug }}
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[var(--bg-primary)]"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--border-color)] bg-[var(--bg-primary)] font-mono text-sm font-bold text-[var(--text-secondary)] group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
+                  {i + 1}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--text-primary)]">
+                  {post.title}
+                </span>
+                <span className="flex shrink-0 items-center gap-1.5 font-mono text-xs text-[var(--text-secondary)]">
+                  <Eye className="h-3.5 w-3.5" />
+                  {post.views.toLocaleString()}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick links */}
       <div className="pt-6">
@@ -86,6 +145,12 @@ function DashboardPage() {
             description={`${stats.unreadContacts} unread messages`}
             icon={Mail}
             to="/admin/contacts"
+          />
+          <QuickLink
+            label="Subscribers"
+            description={`${subscriberStats.confirmed} confirmed subscribers`}
+            icon={Users}
+            to="/admin/subscribers"
           />
         </div>
       </div>

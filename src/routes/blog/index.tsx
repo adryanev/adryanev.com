@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublishedPosts, getAllTags } from '@/server/functions/public.functions'
+import { getPostViewCounts } from '@/server/functions/views.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
 export const Route = createFileRoute('/blog/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -16,7 +18,11 @@ export const Route = createFileRoute('/blog/')({
       getPublishedPosts({ data: { page, tag: deps.tag } }),
       getAllTags(),
     ])
-    return { ...data, tags, currentTag: deps.tag }
+    const postIds = data.posts.map((p) => p.id)
+    const { views } = postIds.length > 0
+      ? await getPostViewCounts({ data: { postIds } })
+      : { views: {} as Record<number, number> }
+    return { ...data, tags, currentTag: deps.tag, views }
   },
   component: BlogListPage,
   head: () => ({
@@ -31,7 +37,7 @@ export const Route = createFileRoute('/blog/')({
 })
 
 function BlogListPage() {
-  const { posts, total, page, totalPages, tags, currentTag } = Route.useLoaderData()
+  const { posts, total, page, totalPages, tags, currentTag, views } = Route.useLoaderData()
   const navigate = Route.useNavigate()
 
   return (
@@ -95,9 +101,17 @@ function BlogListPage() {
                 className="group relative grid gap-6 brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 group-hover:border-text-primary transition-colors">
-                  <time className="font-mono text-sm font-bold text-accent">
-                    {post.publishedAt ? new Intl.DateTimeFormat('en-CA').format(new Date(post.publishedAt)).replace(/-/g, '.') : 'DRAFT'}
-                  </time>
+                  <div className="flex items-center gap-4">
+                    <time className="font-mono text-sm font-bold text-accent">
+                      {post.publishedAt ? new Intl.DateTimeFormat('en-CA').format(new Date(post.publishedAt)).replace(/-/g, '.') : 'DRAFT'}
+                    </time>
+                    {(views as Record<number, number>)[post.id] > 0 && (
+                      <span className="flex items-center gap-1.5 font-mono text-xs text-text-secondary">
+                        <Eye className="h-3.5 w-3.5" />
+                        {(views as Record<number, number>)[post.id].toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     {post.postsToTags.map((pt) => (
                       <span key={pt.tag.id} className="font-mono text-xs text-text-secondary">
@@ -162,6 +176,11 @@ function BlogListPage() {
           </div>
         </Reveal>
       )}
+
+      {/* Newsletter */}
+      <Reveal>
+        <SubscribeForm className="mt-16" />
+      </Reveal>
     </div>
   )
 }

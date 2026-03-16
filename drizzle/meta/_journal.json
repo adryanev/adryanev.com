@@ -29,6 +29,20 @@
       "when": 1773198795213,
       "tag": "0003_aberrant_random",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773657439385,
+      "tag": "0004_brief_wind_dancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773658599590,
+      "tag": "0005_chubby_nomad",
+      "breakpoints": true
     }
   ]
 }

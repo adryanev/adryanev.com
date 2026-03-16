@@ -9,6 +9,7 @@ import {
   Rocket,
   Briefcase,
   Mail,
+  Users,
   LogOut,
   Menu,
   X,
@@ -35,6 +36,7 @@ const sidebarItems = [
   { label: 'SaaS', to: '/admin/saas', icon: Rocket },
   { label: 'Resume', to: '/admin/resume', icon: Briefcase },
   { label: 'Contacts', to: '/admin/contacts', icon: Mail },
+  { label: 'Subscribers', to: '/admin/subscribers', icon: Users },
 ] as const
 
 function AdminLayout() {

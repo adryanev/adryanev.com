@@ -93,7 +93,7 @@ function CategoryPage() {
         </div>
       ) : (
         <StaggerChildren className="grid gap-8">
-          {projects.map((project, index) => (
+          {projects.map((project: { id: number; slug: string; title: string; role: string; workplace: string; year: number; technology: string[]; githubUrl: string | null; externalUrl: string | null }, index: number) => (
             <StaggerItem key={project.id}>
               <div
                 className="group relative grid gap-8 border-b-2 border-border pb-8 md:grid-cols-[1fr_3fr_1fr] md:items-center transition-colors hover:border-text-primary"
@@ -119,10 +119,10 @@ function CategoryPage() {
                     <span>·</span>
                     <span>{project.workplace}</span>
                     <span>·</span>
-                    <span>{project.year}</span>
+                    <span>{project.year.toString()}</span>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
-                    {project.technology.map((t) => (
+                    {project.technology.map((t: string) => (
                       <span key={t} className="px-2 py-1 bg-bg-secondary text-text-secondary border border-border text-xs font-mono">
                         {t}
                       </span>

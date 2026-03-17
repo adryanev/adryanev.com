@@ -18,6 +18,11 @@ export const Route = createFileRoute('/resume')({
   }),
 })
 
+type Education = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null }
+type Certification = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null }
+type Skill = { id: number; title: string; technology: string[] | null }
+type Experience = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null; description: string | null; technology: string[] | null }
+
 function ResumePage() {
   const resume = Route.useLoaderData()
   const [generating, setGenerating] = useState(false)
@@ -69,7 +74,7 @@ function ResumePage() {
                   Education
                 </h2>
                 <div className="space-y-6 font-sans">
-                  {resume.education.map(edu => (
+                  {resume.education.map((edu: Education) => (
                     <div key={edu.id}>
                       <p className="font-bold text-text-primary">{edu.title}</p>
                       <p className="text-text-secondary">{edu.organization}</p>
@@ -90,7 +95,7 @@ function ResumePage() {
                   Certifications
                 </h2>
                 <div className="space-y-6 font-sans">
-                  {resume.certification.map(cert => (
+                  {resume.certification.map((cert: Certification) => (
                     <div key={cert.id}>
                       <p className="font-bold text-text-primary">{cert.title}</p>
                       <p className="text-text-secondary">{cert.organization}</p>
@@ -111,12 +116,12 @@ function ResumePage() {
                   Skills
                 </h2>
                 <div className="space-y-6 font-sans">
-                  {resume.skill.map(skill => (
+                  {resume.skill.map((skill: Skill) => (
                     <div key={skill.id}>
                       <p className="font-bold text-text-primary mb-2">{skill.title}</p>
                       {skill.technology && skill.technology.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {skill.technology.map(tech => (
+                          {skill.technology.map((tech: string) => (
                             <span key={tech} className="bg-bg-primary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
                               {tech}
                             </span>
@@ -139,7 +144,7 @@ function ResumePage() {
           </Reveal>
 
           <StaggerChildren className="space-y-10 relative before:absolute before:top-0 before:bottom-0 before:left-[19px] before:w-[2px] before:bg-border">
-            {resume.experience.map((job) => (
+            {resume.experience.map((job: Experience) => (
               <StaggerItem key={job.id}>
                 <div className="relative pl-14 group">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-bg-primary bg-accent group-hover:scale-125 transition-all text-accent-fg absolute left-0 top-0 z-10" />
@@ -153,7 +158,7 @@ function ResumePage() {
                     {job.description && <DescriptionList text={job.description} />}
                     {job.technology && job.technology.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {job.technology.map(tech => (
+                        {job.technology.map((tech: string) => (
                           <span key={tech} className="bg-bg-secondary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
                             {tech}
                           </span>

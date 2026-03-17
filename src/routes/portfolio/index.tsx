@@ -47,7 +47,7 @@ function PortfolioPage() {
         </div>
       ) : (
         <StaggerChildren className="grid gap-8">
-          {categories.map((cat, index) => (
+          {categories.map((cat: { id: number; name: string; slug: string; description: string | null; projectCount: number }, index: number) => (
             <StaggerItem key={cat.id}>
               <div
                 className="group relative grid gap-8 border-b-2 border-border pb-8 md:grid-cols-[1fr_3fr_1fr] md:items-center transition-colors hover:border-text-primary"

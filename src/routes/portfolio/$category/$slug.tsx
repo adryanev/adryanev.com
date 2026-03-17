@@ -152,7 +152,7 @@ function ProjectDetailPage() {
               <div className="space-y-8 pt-8 border-t-2 border-border">
                 <h3 className="font-serif text-2xl font-bold italic text-text-primary mb-8">Gallery</h3>
                 <StaggerChildren className="grid gap-8">
-                  {project.images.map((img) => (
+                  {project.images.map((img: { id: number; url: string; alt: string | null }) => (
                     <StaggerItem key={img.id}>
                       <figure className="relative group brutal-border bg-bg-secondary">
                         <img

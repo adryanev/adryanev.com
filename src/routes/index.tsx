@@ -18,6 +18,35 @@ export const Route = createFileRoute('/')({
   }),
 })
 
+type Post = {
+  id: number
+  slug: string
+  title: string
+  publishedAt: Date | null
+  excerpt: string | null
+  postsToTags: { tag: { id: number; name: string } }[]
+}
+
+type Project = {
+  id: number
+  title: string
+  slug: string
+  role: string
+  workplace: string
+  year: number
+  technology: string[]
+  category: { slug: string; name: string }
+}
+
+type Saas = {
+  id: number
+  name: string
+  description: string
+  status: string
+  url: string | null
+  logoUrl: string | null
+}
+
 function HomePage() {
   const { latestPosts, featuredProjects, activeSaas } = Route.useLoaderData()
 
@@ -102,7 +131,7 @@ function HomePage() {
             />
           </Reveal>
           <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post) => (
+            {latestPosts.map((post: Post) => (
               <StaggerItem key={post.id}>
                 <Link
                   to="/blog/$slug"
@@ -152,7 +181,7 @@ function HomePage() {
             />
           </Reveal>
           <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2">
-            {featuredProjects.map((project) => (
+            {featuredProjects.map((project: Project) => (
               <StaggerItem key={project.id}>
                 <Link
                   to="/portfolio/$category"
@@ -166,7 +195,7 @@ function HomePage() {
                           {project.title}
                         </h3>
                         <p className="mt-2 font-mono text-sm text-text-secondary">
-                          {project.role} · {project.workplace} · {project.year}
+                          {project.role} · {project.workplace} · {project.year.toString()}
                         </p>
                       </div>
                       <span className="bg-accent px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-accent-fg brutal-border">
@@ -202,7 +231,7 @@ function HomePage() {
             />
           </Reveal>
           <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {activeSaas.map((saas) => (
+            {activeSaas.map((saas: Saas) => (
               <StaggerItem key={saas.id}>
                 <div className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8">
                   <div>
@@ -275,9 +304,8 @@ function SectionHeader({
   )
 }
 
-{/* #1: StatusBadge — beta uses teal variant instead of yellow */}
 function StatusBadge({ status }: { status: string }) {
-  const colors = {
+  const colors: Record<string, string> = {
     active: 'bg-accent text-accent-fg',
     beta: 'bg-accent/20 text-accent border-accent',
     retired: 'bg-text-secondary/20 text-text-secondary',
@@ -286,7 +314,7 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         'ml-auto px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest brutal-border',
-        colors[status as keyof typeof colors] ?? colors.active,
+        colors[status] ?? colors.active,
       )}
     >
       {status}

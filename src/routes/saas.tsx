@@ -3,18 +3,18 @@ import { Github, Zap, Server } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublicSaas } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/saas')({
   loader: () => getPublicSaas(),
   component: SaasPage,
   head: () => ({
-    meta: [
-      { title: 'SaaS Products — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content: 'Active SaaS products built by Adryan Eka Vandra.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'SaaS Products — Adryan Eka Vandra',
+      description: 'Active SaaS products built by Adryan Eka Vandra.',
+      path: '/saas',
+    }),
+    links: [canonicalLink('/saas')],
   }),
 })
 

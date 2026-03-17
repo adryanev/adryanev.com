@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublishedPosts, getAllTags } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/blog/')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -20,13 +21,12 @@ export const Route = createFileRoute('/blog/')({
   },
   component: BlogListPage,
   head: () => ({
-    meta: [
-      { title: 'Blog — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content: 'Technical blog posts about software engineering, web development, and more.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'Blog — Adryan Eka Vandra',
+      description: 'Technical blog posts about software engineering, web development, and more.',
+      path: '/blog',
+    }),
+    links: [canonicalLink('/blog')],
   }),
 })
 

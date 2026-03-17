@@ -3,19 +3,18 @@ import { useState } from 'react'
 import { Download, Loader2 } from 'lucide-react'
 import { getPublicResume } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/resume')({
   loader: () => getPublicResume(),
   component: ResumePage,
   head: () => ({
-    meta: [
-      { title: 'Resume — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content:
-          'Resume of Adryan Eka Vandra — Software Engineer. Experience, education, certifications, and skills.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'Resume — Adryan Eka Vandra',
+      description: 'Resume of Adryan Eka Vandra — Software Engineer. Experience, education, certifications, and skills.',
+      path: '/resume',
+    }),
+    links: [canonicalLink('/resume')],
   }),
 })
 

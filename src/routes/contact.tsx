@@ -6,17 +6,17 @@ import { Send, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { submitContact } from '@/server/functions/public.functions'
 import { Reveal } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/contact')({
   component: ContactPage,
   head: () => ({
-    meta: [
-      { title: 'Contact — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content: 'Get in touch with Adryan Eka Vandra.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'Contact — Adryan Eka Vandra',
+      description: 'Get in touch with Adryan Eka Vandra.',
+      path: '/contact',
+    }),
+    links: [canonicalLink('/contact')],
   }),
 })
 

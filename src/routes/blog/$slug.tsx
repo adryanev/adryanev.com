@@ -3,6 +3,9 @@ import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
+import { seoMeta, canonicalLink, articleJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo'
+
+const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
 
 export const Route = createFileRoute('/blog/$slug')({
   loader: async ({ params }) => {
@@ -24,21 +27,53 @@ export const Route = createFileRoute('/blog/$slug')({
       </Link>
     </div>
   ),
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: loaderData ? `${loaderData.title} — Adryan Eka Vandra` : 'Post Not Found' },
-      {
-        name: 'description',
-        content: loaderData?.excerpt ?? '',
-      },
-      { property: 'og:title', content: loaderData?.title ?? '' },
-      { property: 'og:description', content: loaderData?.excerpt ?? '' },
-      { property: 'og:type', content: 'article' },
-      ...(loaderData?.coverImage
-        ? [{ property: 'og:image', content: loaderData.coverImage }]
-        : []),
-    ],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: 'Post Not Found' }] }
+    }
+    const path = `/blog/${loaderData.slug}`
+    return {
+      meta: seoMeta({
+        title: `${loaderData.title} — Adryan Eka Vandra`,
+        description: loaderData.excerpt ?? '',
+        path,
+        type: 'article',
+        image: loaderData.coverImage ?? undefined,
+        article: {
+          publishedTime: loaderData.publishedAt
+            ? new Date(loaderData.publishedAt).toISOString()
+            : undefined,
+          modifiedTime: loaderData.updatedAt
+            ? new Date(loaderData.updatedAt).toISOString()
+            : undefined,
+          tags: loaderData.postsToTags.map((pt) => pt.tag.name),
+        },
+      }),
+      links: [canonicalLink(path)],
+      scripts: [
+        jsonLdScript([
+          articleJsonLd({
+            title: loaderData.title,
+            description: loaderData.excerpt ?? '',
+            url: `${SITE_URL}${path}`,
+            image: loaderData.coverImage ?? undefined,
+            publishedTime: loaderData.publishedAt
+              ? new Date(loaderData.publishedAt).toISOString()
+              : undefined,
+            modifiedTime: loaderData.updatedAt
+              ? new Date(loaderData.updatedAt).toISOString()
+              : undefined,
+            tags: loaderData.postsToTags.map((pt) => pt.tag.name),
+          }),
+          breadcrumbJsonLd([
+            { name: 'Home', path: '/' },
+            { name: 'Blog', path: '/blog' },
+            { name: loaderData.title, path },
+          ]),
+        ]),
+      ],
+    }
+  },
 })
 
 function BlogPostPage() {
@@ -128,6 +163,8 @@ function BlogPostPage() {
         <img
           src={post.coverImage}
           alt={post.title}
+          loading="eager"
+          fetchPriority="high"
           className="mt-8 w-full brutal-border object-cover"
         />
       )}

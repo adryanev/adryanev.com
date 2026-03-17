@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft, ArrowUpRight, Github, Globe } from 'lucide-react'
 import { getCategoryWithProjects } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo'
 
 export const Route = createFileRoute('/portfolio/$category/')({
   loader: async ({ params }) => {
@@ -28,15 +29,27 @@ export const Route = createFileRoute('/portfolio/$category/')({
       </div>
     </div>
   ),
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.category.name} — Portfolio — Adryan Eka Vandra`
-          : 'Category Not Found',
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: 'Category Not Found' }] }
+    }
+    const path = `/portfolio/${loaderData.category.slug}`
+    return {
+      meta: seoMeta({
+        title: `${loaderData.category.name} — Portfolio — Adryan Eka Vandra`,
+        description: loaderData.category.description || `${loaderData.category.name} projects by Adryan Eka Vandra.`,
+        path,
+      }),
+      links: [canonicalLink(path)],
+      scripts: [
+        jsonLdScript(breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Portfolio', path: '/portfolio' },
+          { name: loaderData.category.name, path },
+        ])),
+      ],
+    }
+  },
 })
 
 function CategoryPage() {

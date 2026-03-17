@@ -9,6 +9,7 @@ import { lazy, Suspense } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { websiteJsonLd, personJsonLd, jsonLdScript } from '@/lib/seo'
 import '../app.css'
 
 const CommandPalette = lazy(() =>
@@ -69,6 +70,7 @@ export const Route = createRootRoute({
       {
         children: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
       },
+      jsonLdScript([websiteJsonLd(), personJsonLd()]),
     ],
   }),
 })

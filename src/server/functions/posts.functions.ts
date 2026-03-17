@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { posts, tags, postsToTags } from '@/db/schema/posts'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
+import { fireWebhooks } from '@/lib/webhooks'
 
 export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
   const user = await getCurrentUser()
@@ -82,6 +83,8 @@ export const createPost = createServerFn({ method: 'POST' })
       await upsertTags(post.id, data.tags)
     }
 
+    fireWebhooks('post.created', { id: post.id, title: post.title, slug: post.slug, status: post.status })
+
     return { success: true, id: post.id }
   })
 
@@ -143,6 +146,8 @@ export const updatePost = createServerFn({ method: 'POST' })
       await upsertTags(data.id, data.tags)
     }
 
+    fireWebhooks('post.updated', { id: data.id, title: data.title, slug, status: data.status })
+
     return { success: true }
   })
 
@@ -154,10 +159,19 @@ export const deletePost = createServerFn({ method: 'POST' })
       throw new Error('Unauthorized')
     }
 
+    const post = await db.query.posts.findFirst({
+      where: eq(posts.id, data.id),
+    })
+
     await db
       .update(posts)
       .set({ deletedAt: new Date() })
       .where(eq(posts.id, data.id))
+
+    if (post) {
+      fireWebhooks('post.deleted', { id: post.id, title: post.title, slug: post.slug })
+    }
+
     return { success: true }
   })
 

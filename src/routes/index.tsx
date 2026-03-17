@@ -4,19 +4,17 @@ import { cn } from '@/lib/utils'
 import { getHomePageData } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 import { TextReveal } from '@/components/motion/TextReveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
   loader: () => getHomePageData(),
   component: HomePage,
   head: () => ({
-    meta: [
-      { title: 'Adryan Eka Vandra — Software Engineer' },
-      {
-        name: 'description',
-        content:
-          'Personal website of Adryan Eka Vandra — Software Engineer. Portfolio, blog, resume, and active SaaS projects.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'Adryan Eka Vandra — Software Engineer',
+      path: '/',
+    }),
+    links: [canonicalLink('/')],
   }),
 })
 

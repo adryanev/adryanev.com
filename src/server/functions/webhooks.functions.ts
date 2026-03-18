@@ -4,14 +4,16 @@ import { randomBytes } from 'crypto'
 import { db } from '@/db'
 import { webhooks, webhookDeliveryLogs } from '@/db/schema/webhooks'
 import { getCurrentUser } from '@/server/functions/auth.functions'
+import { validateWebhookUrl, WEBHOOK_EVENTS } from '@/lib/webhooks'
 
 export const getWebhooks = createServerFn({ method: 'GET' }).handler(async () => {
   const user = await getCurrentUser()
   if (!user) throw new Error('Unauthorized')
 
-  return db.query.webhooks.findMany({
+  const rows = await db.query.webhooks.findMany({
     orderBy: desc(webhooks.createdAt),
   })
+  return rows.map(({ secret, ...rest }) => rest)
 })
 
 export const getWebhookById = createServerFn({ method: 'GET' })
@@ -23,7 +25,9 @@ export const getWebhookById = createServerFn({ method: 'GET' })
     const webhook = await db.query.webhooks.findFirst({
       where: eq(webhooks.id, data.id),
     })
-    return webhook ?? null
+    if (!webhook) return null
+    const { secret, ...rest } = webhook
+    return rest
   })
 
 export const createWebhook = createServerFn({ method: 'POST' })
@@ -39,7 +43,16 @@ export const createWebhook = createServerFn({ method: 'POST' })
     if (!user) throw new Error('Unauthorized')
 
     if (!data.url) throw new Error('URL is required')
+
+    const urlError = validateWebhookUrl(data.url)
+    if (urlError) throw new Error(urlError)
+
     if (data.events.length === 0) throw new Error('At least one event is required')
+
+    const invalidEvent = data.events.find(
+      (e) => !(WEBHOOK_EVENTS as readonly string[]).includes(e),
+    )
+    if (invalidEvent) throw new Error('Invalid event type: ' + invalidEvent)
 
     const secret = randomBytes(32).toString('hex')
 
@@ -70,7 +83,16 @@ export const updateWebhook = createServerFn({ method: 'POST' })
     if (!user) throw new Error('Unauthorized')
 
     if (!data.url) throw new Error('URL is required')
+
+    const urlError = validateWebhookUrl(data.url)
+    if (urlError) throw new Error(urlError)
+
     if (data.events.length === 0) throw new Error('At least one event is required')
+
+    const invalidEvent = data.events.find(
+      (e) => !(WEBHOOK_EVENTS as readonly string[]).includes(e),
+    )
+    if (invalidEvent) throw new Error('Invalid event type: ' + invalidEvent)
 
     await db
       .update(webhooks)
@@ -95,21 +117,6 @@ export const deleteWebhook = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
-export const regenerateWebhookSecret = createServerFn({ method: 'POST' })
-  .inputValidator((data: { id: number }) => data)
-  .handler(async ({ data }) => {
-    const user = await getCurrentUser()
-    if (!user) throw new Error('Unauthorized')
-
-    const secret = randomBytes(32).toString('hex')
-    await db
-      .update(webhooks)
-      .set({ secret, updatedAt: new Date() })
-      .where(eq(webhooks.id, data.id))
-
-    return { success: true, secret }
-  })
-
 export const getWebhookDeliveryLogs = createServerFn({ method: 'GET' })
   .inputValidator((data: { webhookId: number }) => data)
   .handler(async ({ data }) => {
@@ -120,5 +127,15 @@ export const getWebhookDeliveryLogs = createServerFn({ method: 'GET' })
       where: eq(webhookDeliveryLogs.webhookId, data.webhookId),
       orderBy: desc(webhookDeliveryLogs.createdAt),
       limit: 100,
+      columns: {
+        id: true,
+        webhookId: true,
+        event: true,
+        statusCode: true,
+        response: true,
+        attempt: true,
+        success: true,
+        createdAt: true,
+      },
     })
   })

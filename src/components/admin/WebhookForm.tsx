@@ -8,19 +8,19 @@ import { FormInput } from './form/FormInput'
 import { FormError } from './form/FormError'
 import { FormActions } from './form/FormActions'
 import { createWebhook, updateWebhook } from '@/server/functions/webhooks.functions'
+import { WEBHOOK_EVENTS, type WebhookEvent } from '@/lib/webhooks'
 
-const WEBHOOK_EVENTS = [
-  { value: 'post.created', label: 'Post Created' },
-  { value: 'post.updated', label: 'Post Updated' },
-  { value: 'post.deleted', label: 'Post Deleted' },
-] as const
+const WEBHOOK_EVENT_LABELS: Record<WebhookEvent, string> = {
+  'post.created': 'Post Created',
+  'post.updated': 'Post Updated',
+  'post.deleted': 'Post Deleted',
+}
 
 type WebhookData = {
   id?: number
   url: string
-  events: string[]
+  events: WebhookEvent[]
   active: boolean
-  secret?: string
 }
 
 export function WebhookForm({ initial }: { initial?: WebhookData }) {
@@ -28,7 +28,7 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
   const isEditing = !!initial?.id
 
   const [url, setUrl] = useState(initial?.url ?? '')
-  const [events, setEvents] = useState<string[]>(initial?.events ?? ['post.created', 'post.updated', 'post.deleted'])
+  const [events, setEvents] = useState<WebhookEvent[]>(initial?.events ?? ['post.created', 'post.updated', 'post.deleted'])
   const [active, setActive] = useState(initial?.active ?? true)
   const [error, setError] = useState('')
   const [newSecret, setNewSecret] = useState('')
@@ -55,8 +55,8 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
       return createFn({ data })
     },
     onSuccess: (result) => {
-      if (!isEditing && result && 'secret' in result) {
-        setNewSecret(result.secret as string)
+      if (!isEditing && result && 'secret' in result && typeof result.secret === 'string') {
+        setNewSecret(result.secret)
       } else {
         navigate({ to: '/admin/webhooks' })
       }
@@ -64,7 +64,7 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
     onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save'),
   })
 
-  function toggleEvent(event: string) {
+  function toggleEvent(event: WebhookEvent) {
     setEvents((prev) =>
       prev.includes(event)
         ? prev.filter((e) => e !== event)
@@ -116,18 +116,18 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
       <FormField label="Events">
         <div className="space-y-2">
           {WEBHOOK_EVENTS.map((evt) => (
-            <label key={evt.value} className="flex items-center gap-3 cursor-pointer">
+            <label key={evt} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                checked={events.includes(evt.value)}
-                onChange={() => toggleEvent(evt.value)}
+                checked={events.includes(evt)}
+                onChange={() => toggleEvent(evt)}
                 className="h-4 w-4 accent-[var(--accent)]"
               />
               <span className="text-sm">
                 <code className="text-xs bg-[var(--bg-secondary)] border border-[var(--border-color)] px-1.5 py-0.5">
-                  {evt.value}
+                  {evt}
                 </code>
-                <span className="ml-2 text-[var(--text-secondary)]">{evt.label}</span>
+                <span className="ml-2 text-[var(--text-secondary)]">{WEBHOOK_EVENT_LABELS[evt]}</span>
               </span>
             </label>
           ))}
@@ -145,14 +145,6 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
           <span className="text-sm">Active</span>
         </label>
       </FormField>
-
-      {isEditing && initial?.secret && (
-        <FormField label="Signing Secret">
-          <code className="block break-all border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3 text-sm font-mono text-[var(--text-secondary)]">
-            {initial.secret.slice(0, 8)}{'•'.repeat(24)}
-          </code>
-        </FormField>
-      )}
 
       <FormActions
         isPending={saveMutation.isPending}

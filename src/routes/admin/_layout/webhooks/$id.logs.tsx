@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { MAX_RETRIES } from '@/lib/webhooks'
 import { getWebhookById, getWebhookDeliveryLogs } from '@/server/functions/webhooks.functions'
 
 export const Route = createFileRoute('/admin/_layout/webhooks/$id/logs')({
@@ -71,7 +72,7 @@ function WebhookLogsPage() {
                     </span>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell text-[var(--text-secondary)]">
-                    {log.attempt}/3
+                    {log.attempt}/{MAX_RETRIES}
                   </td>
                   <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">
                     {new Date(log.createdAt).toLocaleString()}

@@ -1,4 +1,4 @@
-const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
+export const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
 const SITE_NAME = 'Adryan Eka Vandra'
 const DEFAULT_DESCRIPTION =
   'Personal website of Adryan Eka Vandra — Software Engineer. Portfolio, blog, resume, and active SaaS projects.'
@@ -83,13 +83,12 @@ export function websiteJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     description: DEFAULT_DESCRIPTION,
-    author: personJsonLd(),
+    author: personData(),
   }
 }
 
-export function personJsonLd() {
+function personData() {
   return {
-    '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'Adryan Eka Vandra',
     url: SITE_URL,
@@ -98,6 +97,13 @@ export function personJsonLd() {
       'https://github.com/adryanev',
       'https://linkedin.com/in/adryanev',
     ],
+  }
+}
+
+export function personJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    ...personData(),
   }
 }
 
@@ -120,16 +126,8 @@ export function articleJsonLd(opts: {
     ...(opts.publishedTime && { datePublished: opts.publishedTime }),
     ...(opts.modifiedTime && { dateModified: opts.modifiedTime }),
     ...(opts.tags && { keywords: opts.tags.join(', ') }),
-    author: {
-      '@type': 'Person',
-      name: 'Adryan Eka Vandra',
-      url: SITE_URL,
-    },
-    publisher: {
-      '@type': 'Person',
-      name: 'Adryan Eka Vandra',
-      url: SITE_URL,
-    },
+    author: personData(),
+    publisher: personData(),
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': opts.url,

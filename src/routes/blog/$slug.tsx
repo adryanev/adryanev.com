@@ -3,9 +3,7 @@ import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
-import { seoMeta, canonicalLink, articleJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo'
-
-const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
+import { seoMeta, canonicalLink, articleJsonLd, breadcrumbJsonLd, jsonLdScript, SITE_URL } from '@/lib/seo'
 
 export const Route = createFileRoute('/blog/$slug')({
   loader: async ({ params }) => {

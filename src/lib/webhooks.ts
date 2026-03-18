@@ -1,9 +1,17 @@
 import { createHmac } from 'crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq, arrayContains } from 'drizzle-orm'
 import { db } from '@/db'
 import { webhooks, webhookDeliveryLogs } from '@/db/schema/webhooks'
 
 export type WebhookEvent = 'post.created' | 'post.updated' | 'post.deleted'
+
+export const WEBHOOK_EVENTS: readonly WebhookEvent[] = [
+  'post.created',
+  'post.updated',
+  'post.deleted',
+] as const
+
+export const MAX_RETRIES = 3
 
 type WebhookPayload = {
   event: WebhookEvent
@@ -15,12 +23,47 @@ function signPayload(payload: string, secret: string): string {
   return createHmac('sha256', secret).update(payload).digest('hex')
 }
 
+const BLOCKED_IP_PREFIXES = [
+  '127.', '10.', '0.', '169.254.',
+  '192.168.',
+]
+const BLOCKED_IP_STARTS_172 = { min: 16, max: 31 }
+
+function isPrivateIp(hostname: string): boolean {
+  if (hostname === 'localhost' || hostname === '[::1]') return true
+  if (BLOCKED_IP_PREFIXES.some((p) => hostname.startsWith(p))) return true
+  if (hostname.startsWith('172.')) {
+    const second = parseInt(hostname.split('.')[1], 10)
+    if (second >= BLOCKED_IP_STARTS_172.min && second <= BLOCKED_IP_STARTS_172.max) return true
+  }
+  return false
+}
+
+export function validateWebhookUrl(url: string): string | null {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return 'Invalid URL format'
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    return 'URL must use https:// or http://'
+  }
+
+  if (isPrivateIp(parsed.hostname)) {
+    return 'URL must not point to private or internal addresses'
+  }
+
+  return null
+}
+
 async function deliverWebhook(
   webhookId: number,
   url: string,
   secret: string,
   payload: WebhookPayload,
-  maxRetries = 3,
+  maxRetries = MAX_RETRIES,
 ) {
   const body = JSON.stringify(payload)
   const signature = signPayload(body, secret)
@@ -49,15 +92,20 @@ async function deliverWebhook(
       responseText = err instanceof Error ? err.message : 'Unknown error'
     }
 
-    await db.insert(webhookDeliveryLogs).values({
-      webhookId,
-      event: payload.event,
-      payload: body,
-      statusCode,
-      response: responseText?.slice(0, 2000) ?? null,
-      attempt,
-      success,
-    })
+    try {
+      await db.insert(webhookDeliveryLogs).values({
+        webhookId,
+        event: payload.event,
+        payload: body,
+        statusCode,
+        response: responseText?.slice(0, 2000) ?? null,
+        attempt,
+        success,
+      })
+    } catch {
+      // Webhook may have been deleted mid-delivery; skip logging
+      return
+    }
 
     if (success) return
 
@@ -68,24 +116,27 @@ async function deliverWebhook(
   }
 }
 
-export async function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>) {
-  const activeWebhooks = await db.query.webhooks.findMany({
-    where: eq(webhooks.active, true),
-  })
+export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>) {
+  // Fire-and-forget: intentionally not returning or awaiting the promise
+  void (async () => {
+    try {
+      const matching = await db.query.webhooks.findMany({
+        where: and(eq(webhooks.active, true), arrayContains(webhooks.events, [event])),
+      })
 
-  const matching = activeWebhooks.filter((wh) => wh.events.includes(event))
-  if (matching.length === 0) return
+      if (matching.length === 0) return
 
-  const payload: WebhookPayload = {
-    event,
-    timestamp: new Date().toISOString(),
-    data,
-  }
+      const payload: WebhookPayload = {
+        event,
+        timestamp: new Date().toISOString(),
+        data,
+      }
 
-  // Fire all deliveries concurrently, don't block the caller
-  Promise.allSettled(
-    matching.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload)),
-  ).catch(() => {
-    // Swallow errors — delivery logs capture failures
-  })
+      await Promise.allSettled(
+        matching.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload)),
+      )
+    } catch (err) {
+      console.error('[webhooks] delivery error:', err)
+    }
+  })()
 }

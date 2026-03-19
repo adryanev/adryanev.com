@@ -12,6 +12,7 @@ export const WEBHOOK_EVENTS: readonly WebhookEvent[] = [
 ] as const
 
 export const MAX_RETRIES = 3
+const MAX_CONCURRENT_DELIVERIES = 5
 
 type WebhookPayload = {
   event: WebhookEvent
@@ -132,9 +133,16 @@ export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>)
         data,
       }
 
-      await Promise.allSettled(
-        matching.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload)),
-      )
+      // Limit concurrency to avoid overwhelming the server
+      const batches = []
+      for (let i = 0; i < matching.length; i += MAX_CONCURRENT_DELIVERIES) {
+        batches.push(matching.slice(i, i + MAX_CONCURRENT_DELIVERIES))
+      }
+      for (const batch of batches) {
+        await Promise.allSettled(
+          batch.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload)),
+        )
+      }
     } catch (err) {
       console.error('[webhooks] delivery error:', err)
     }

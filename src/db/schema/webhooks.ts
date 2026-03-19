@@ -30,8 +30,7 @@ export const webhookDeliveryLogs = pgTable('webhook_delivery_logs', {
     .notNull()
     .defaultNow(),
 }, (table) => [
-  index('webhook_delivery_logs_webhook_id_idx').on(table.webhookId),
-  index('webhook_delivery_logs_event_idx').on(table.event),
+  index('webhook_delivery_logs_webhook_id_created_idx').on(table.webhookId, table.createdAt),
 ])
 
 export const webhooksRelations = relations(webhooks, ({ many }) => ({

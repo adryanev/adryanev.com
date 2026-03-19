@@ -19,27 +19,27 @@ export const Route = createFileRoute('/admin/_layout/webhooks/$id/logs')({
 function WebhookLogsPage() {
   const { webhook, logs } = Route.useLoaderData()
 
-  if (!webhook) return <div className="py-12 text-center text-slate-500">Webhook not found</div>
+  if (!webhook) return <div className="py-12 text-center text-[var(--text-secondary)]">Webhook not found</div>
 
   return (
     <div>
       <div className="flex items-center gap-3">
-        <Link to="/admin/webhooks" className="rounded p-1 text-slate-500 hover:text-accent">
+        <Link to="/admin/webhooks" className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--accent)]">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-2xl font-bold">Delivery Logs</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 break-all">{webhook.url}</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)] break-all">{webhook.url}</p>
         </div>
       </div>
 
       {logs.length === 0 ? (
-        <div className="mt-12 text-center text-slate-500">No delivery attempts yet.</div>
+        <div className="mt-12 text-center text-[var(--text-secondary)]">No delivery attempts yet.</div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Event</th>
                 <th className="hidden px-4 py-3 font-medium sm:table-cell">HTTP</th>
@@ -50,7 +50,7 @@ function WebhookLogsPage() {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b border-slate-100 dark:border-slate-800/50">
+                <tr key={log.id} className="border-b border-[var(--border-color)]">
                   <td className="px-4 py-3">
                     {log.success ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />

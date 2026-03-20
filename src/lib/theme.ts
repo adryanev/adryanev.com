@@ -1,6 +1,6 @@
 export type Theme = 'light' | 'dark' | 'system'
 
-const STORAGE_KEY = 'theme'
+const THEME_KEY = 'theme:v1'
 
 export function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'dark'
@@ -11,10 +11,12 @@ export function getSystemTheme(): 'light' | 'dark' {
 
 export function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'system'
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'dark' || stored === 'system') {
-    return stored
-  }
+  try {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+      return stored
+    }
+  } catch { /* private browsing or storage unavailable */ }
   return 'system'
 }
 
@@ -24,11 +26,16 @@ export function applyTheme(theme: Theme) {
 }
 
 export function setTheme(theme: Theme) {
-  localStorage.setItem(STORAGE_KEY, theme)
+  try {
+    localStorage.setItem(THEME_KEY, theme)
+  } catch { /* quota exceeded or private browsing */ }
   applyTheme(theme)
 }
 
 export function isSystemTheme(): boolean {
-  return localStorage.getItem(STORAGE_KEY) === 'system'
-    || !localStorage.getItem(STORAGE_KEY)
+  try {
+    return localStorage.getItem(THEME_KEY) === 'system'
+      || !localStorage.getItem(THEME_KEY)
+  } catch { /* private browsing or storage unavailable */ }
+  return true
 }

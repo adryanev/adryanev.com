@@ -234,12 +234,17 @@ export const getPublicResume = createServerFn({ method: 'GET' }).handler(
     const entries = await db.query.resumeEntries.findMany({
       orderBy: asc(resumeEntries.sortOrder),
     })
-    return {
-      experience: entries.filter((e) => e.type === 'experience'),
-      education: entries.filter((e) => e.type === 'education'),
-      certification: entries.filter((e) => e.type === 'certification'),
-      skill: entries.filter((e) => e.type === 'skill'),
+
+    const grouped: Record<string, typeof entries> = {
+      experience: [],
+      education: [],
+      certification: [],
+      skill: [],
     }
+    for (const entry of entries) {
+      grouped[entry.type]?.push(entry)
+    }
+    return grouped
   },
 )
 

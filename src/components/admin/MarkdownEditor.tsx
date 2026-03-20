@@ -418,12 +418,6 @@ function EditorProvider({
     }
   }, [value, onChange, getUrlFn])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) uploadImage(file)
-    e.target.value = ''
-  }
-
   const ctx: EditorContextValue = {
     state: {
       value,
@@ -438,18 +432,31 @@ function EditorProvider({
 
   return (
     <EditorContext.Provider value={ctx}>
-      <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)]">
-        {children}
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-      </div>
+      {children}
     </EditorContext.Provider>
+  )
+}
+
+function EditorFrame({ children }: { children: ReactNode }) {
+  const { refs: { fileInputRef }, actions: { uploadImage } } = useEditor()
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) uploadImage(file)
+    e.target.value = ''
+  }
+
+  return (
+    <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)]">
+      {children}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+    </div>
   )
 }
 
@@ -464,11 +471,13 @@ export function MarkdownEditor({
 }) {
   return (
     <EditorProvider value={value} onChange={onChange}>
-      <Toolbar />
-      <div className={cn('grid')}>
-        <EditorBody />
-      </div>
-      <Footer />
+      <EditorFrame>
+        <Toolbar />
+        <div className={cn('grid')}>
+          <EditorBody />
+        </div>
+        <Footer />
+      </EditorFrame>
     </EditorProvider>
   )
 }

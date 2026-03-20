@@ -25,7 +25,7 @@ type PostData = {
   tags: string[]
 }
 
-const AUTOSAVE_KEY = 'admin_post_draft'
+const AUTOSAVE_KEY = 'admin_post_draft:v1'
 
 const STATUS_OPTIONS = [
   { value: 'draft' as const, label: 'Draft' },
@@ -45,21 +45,15 @@ export function PostForm({ initial }: { initial?: PostData }) {
   const [tags, setTags] = useState<string[]>(initial?.tags ?? [])
   const [error, setError] = useState('')
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const [dirty, setDirty] = useState(false)
   const initialRef = useRef(initial)
 
-  // Mark dirty when any field changes from initial values
-  useEffect(() => {
-    const init = initialRef.current
-    const changed = title !== (init?.title ?? '') ||
-      slug !== (init?.slug ?? '') ||
-      content !== (init?.content ?? '') ||
-      excerpt !== (init?.excerpt ?? '') ||
-      coverImage !== (init?.coverImage ?? '') ||
-      status !== (init?.status ?? 'draft') ||
-      JSON.stringify(tags) !== JSON.stringify(init?.tags ?? [])
-    setDirty(changed)
-  }, [title, slug, content, excerpt, coverImage, status, tags])
+  const dirty = title !== (initialRef.current?.title ?? '') ||
+    slug !== (initialRef.current?.slug ?? '') ||
+    content !== (initialRef.current?.content ?? '') ||
+    excerpt !== (initialRef.current?.excerpt ?? '') ||
+    coverImage !== (initialRef.current?.coverImage ?? '') ||
+    status !== (initialRef.current?.status ?? 'draft') ||
+    JSON.stringify(tags) !== JSON.stringify(initialRef.current?.tags ?? [])
 
   useUnsavedChanges(dirty)
 
@@ -83,7 +77,9 @@ export function PostForm({ initial }: { initial?: PostData }) {
       return createFn({ data })
     },
     onSuccess: () => {
-      localStorage.removeItem(AUTOSAVE_KEY)
+      try {
+        localStorage.removeItem(AUTOSAVE_KEY)
+      } catch { /* private browsing or storage unavailable */ }
       navigate({ to: '/admin/posts' })
     },
     onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save post'),
@@ -98,8 +94,10 @@ export function PostForm({ initial }: { initial?: PostData }) {
     const interval = setInterval(() => {
       const data = formDataRef.current
       if (data.title || data.content) {
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data))
-        setLastSaved(new Date())
+        try {
+          localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data))
+          setLastSaved(new Date())
+        } catch { /* quota exceeded or private browsing */ }
       }
     }, 30000)
     return () => clearInterval(interval)
@@ -108,9 +106,9 @@ export function PostForm({ initial }: { initial?: PostData }) {
   // Restore autosave
   useEffect(() => {
     if (isEditing) return
-    const saved = localStorage.getItem(AUTOSAVE_KEY)
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem(AUTOSAVE_KEY)
+      if (saved) {
         const data = JSON.parse(saved)
         if (data.title || data.content) {
           setTitle(data.title || '')
@@ -122,8 +120,8 @@ export function PostForm({ initial }: { initial?: PostData }) {
           setTags(data.tags || [])
           setLastSaved(new Date())
         }
-      } catch { /* ignore */ }
-    }
+      }
+    } catch { /* private browsing or storage unavailable */ }
   }, [isEditing])
 
   const handleSubmit = useCallback((e: React.FormEvent) => {

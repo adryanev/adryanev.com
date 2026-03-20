@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestIP } from '@tanstack/react-start/server'
 import { eq, and, isNull, desc, asc, count, lt, gt, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, postsToTags, tags } from '@/db/schema/posts'
@@ -167,6 +168,7 @@ export const getPublicCategories = createServerFn({ method: 'GET' }).handler(
             eq(portfolioProjects.status, 'published'),
             isNull(portfolioProjects.deletedAt),
           ),
+          columns: { id: true },
         },
       },
     })
@@ -232,12 +234,17 @@ export const getPublicResume = createServerFn({ method: 'GET' }).handler(
     const entries = await db.query.resumeEntries.findMany({
       orderBy: asc(resumeEntries.sortOrder),
     })
-    return {
-      experience: entries.filter((e) => e.type === 'experience'),
-      education: entries.filter((e) => e.type === 'education'),
-      certification: entries.filter((e) => e.type === 'certification'),
-      skill: entries.filter((e) => e.type === 'skill'),
+
+    const grouped: Record<string, typeof entries> = {
+      experience: [],
+      education: [],
+      certification: [],
+      skill: [],
     }
+    for (const entry of entries) {
+      grouped[entry.type]?.push(entry)
+    }
+    return grouped
   },
 )
 
@@ -284,8 +291,9 @@ export const submitContact = createServerFn({ method: 'POST' })
 
     if (Object.keys(errors).length > 0) return { errors }
 
-    // Rate limit: 3 per hour per "session" (simplified, no IP in server fn context)
-    const key = data.email.toLowerCase()
+    // Rate limit: 3 per hour per IP
+    const ip = getRequestIP({ xForwardedFor: false }) ?? 'unknown'
+    const key = ip
     const now = Date.now()
 
     // Prune expired entries to prevent memory leak

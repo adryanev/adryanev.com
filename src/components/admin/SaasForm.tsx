@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
@@ -41,22 +41,17 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
   const [status, setStatus] = useState<'active' | 'beta' | 'retired'>(initial?.status ?? 'active')
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
   const [error, setError] = useState('')
-  const [dirty, setDirty] = useState(false)
   const initialRef = useRef(initial)
 
-  useEffect(() => {
-    const init = initialRef.current
-    const changed = name !== (init?.name ?? '') ||
-      slug !== (init?.slug ?? '') ||
-      description !== (init?.description ?? '') ||
-      url !== (init?.url ?? '') ||
-      githubUrl !== (init?.githubUrl ?? '') ||
-      logoUrl !== (init?.logoUrl ?? '') ||
-      sortOrder !== (init?.sortOrder ?? 0) ||
-      status !== (init?.status ?? 'active') ||
-      JSON.stringify(technology) !== JSON.stringify(init?.technology ?? [])
-    setDirty(changed)
-  }, [name, slug, description, url, githubUrl, logoUrl, sortOrder, status, technology])
+  const dirty = name !== (initialRef.current?.name ?? '') ||
+    slug !== (initialRef.current?.slug ?? '') ||
+    description !== (initialRef.current?.description ?? '') ||
+    url !== (initialRef.current?.url ?? '') ||
+    githubUrl !== (initialRef.current?.githubUrl ?? '') ||
+    logoUrl !== (initialRef.current?.logoUrl ?? '') ||
+    sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
+    status !== (initialRef.current?.status ?? 'active') ||
+    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? [])
 
   useUnsavedChanges(dirty)
 

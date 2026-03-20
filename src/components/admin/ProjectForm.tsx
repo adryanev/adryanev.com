@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
@@ -65,21 +65,16 @@ export function ProjectForm({
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
   const [images, setImages] = useState<{ url: string; alt?: string }[]>(initial?.images ?? [])
   const [error, setError] = useState('')
-  const [dirty, setDirty] = useState(false)
   const initialRef = useRef(initial)
 
-  useEffect(() => {
-    const init = initialRef.current
-    const changed = title !== (init?.title ?? '') ||
-      slug !== (init?.slug ?? '') ||
-      description !== (init?.description ?? '') ||
-      categoryId !== (init?.categoryId ?? categories[0]?.id ?? 0) ||
-      role !== (init?.role ?? '') ||
-      workplace !== (init?.workplace ?? '') ||
-      status !== (init?.status ?? 'draft') ||
-      JSON.stringify(technology) !== JSON.stringify(init?.technology ?? [])
-    setDirty(changed)
-  }, [title, slug, description, categoryId, role, workplace, status, technology, categories])
+  const dirty = title !== (initialRef.current?.title ?? '') ||
+    slug !== (initialRef.current?.slug ?? '') ||
+    description !== (initialRef.current?.description ?? '') ||
+    categoryId !== (initialRef.current?.categoryId ?? categories[0]?.id ?? 0) ||
+    role !== (initialRef.current?.role ?? '') ||
+    workplace !== (initialRef.current?.workplace ?? '') ||
+    status !== (initialRef.current?.status ?? 'draft') ||
+    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? [])
 
   useUnsavedChanges(dirty)
 

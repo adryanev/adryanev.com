@@ -106,18 +106,19 @@ export const updatePost = createServerFn({ method: 'POST' })
 
     const slug = data.slug || slugify(data.title)
 
-    // Check slug uniqueness (exclude current post)
-    const existing = await db.query.posts.findFirst({
-      where: and(eq(posts.slug, slug), isNull(posts.deletedAt)),
-    })
+    // Check slug uniqueness and fetch current post in parallel
+    const [existing, currentPost] = await Promise.all([
+      db.query.posts.findFirst({
+        where: and(eq(posts.slug, slug), isNull(posts.deletedAt)),
+      }),
+      db.query.posts.findFirst({
+        where: eq(posts.id, data.id),
+      }),
+    ])
+
     if (existing && existing.id !== data.id) {
       throw new Error('A post with this slug already exists')
     }
-
-    // If changing to published and no publishedAt, set it now
-    const currentPost = await db.query.posts.findFirst({
-      where: eq(posts.id, data.id),
-    })
     const publishedAt =
       data.status === 'published' && !currentPost?.publishedAt
         ? new Date()

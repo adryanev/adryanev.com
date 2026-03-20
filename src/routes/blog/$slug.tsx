@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
 
@@ -78,41 +79,7 @@ function BlogPostPage() {
   }, [post.html])
 
   // Client-side mermaid rendering
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
-
-    const mermaidBlocks = el.querySelectorAll<HTMLElement>('[data-mermaid]')
-    if (mermaidBlocks.length === 0) return
-
-    let cancelled = false
-    import('mermaid').then(({ default: mermaid }) => {
-      if (cancelled) return
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-        fontFamily: 'JetBrains Mono, monospace',
-      })
-
-      mermaidBlocks.forEach(async (block, i) => {
-        if (cancelled) return
-
-        const source = block.textContent ?? ''
-        const id = `mermaid-${post.slug}-${i}`
-
-        try {
-          const { svg } = await mermaid.render(id, source)
-          block.className = 'mermaid-diagram my-8 flex justify-center overflow-x-auto'
-          block.removeAttribute('data-mermaid')
-          block.innerHTML = svg
-        } catch {
-          // Leave as-is if rendering fails — shows raw source
-        }
-      })
-    })
-
-    return () => { cancelled = true }
-  }, [post.slug])
+  useMermaidRenderer(contentRef, post.html, true)
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12 md:py-24">

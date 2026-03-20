@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   type Theme,
@@ -9,9 +9,11 @@ import {
 } from '@/lib/theme'
 
 interface ThemeContextValue {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  cycleTheme: () => void
+  state: { theme: Theme }
+  actions: {
+    setTheme: (theme: Theme) => void
+    cycleTheme: () => void
+  }
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -46,8 +48,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const value = useMemo(
+    () => ({ state: { theme }, actions: { setTheme, cycleTheme } }),
+    [theme, setTheme, cycleTheme],
+  )
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, cycleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   )
@@ -56,5 +63,5 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext)
   if (!context) throw new Error('useTheme must be used within a ThemeProvider')
-  return context
+  return { ...context.state, ...context.actions }
 }

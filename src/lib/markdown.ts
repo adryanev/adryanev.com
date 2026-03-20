@@ -80,8 +80,8 @@ function rehypeMermaidPre() {
   }
 }
 
-export async function renderMarkdown(content: string): Promise<string> {
-  const result = await unified()
+function createProcessor() {
+  return unified()
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype)
@@ -117,8 +117,20 @@ export async function renderMarkdown(content: string): Promise<string> {
     //    Custom schema whitelists Shiki's classes, styles, and data-* attrs.
     .use(rehypeSanitize, shikiSanitizeSchema)
     .use(rehypeStringify)
-    .process(content)
+}
 
+let cachedProcessor: ReturnType<typeof createProcessor> | null = null
+
+function getProcessor() {
+  if (!cachedProcessor) {
+    cachedProcessor = createProcessor()
+  }
+  return cachedProcessor
+}
+
+export async function renderMarkdown(content: string): Promise<string> {
+  const processor = getProcessor()
+  const result = await processor.process(content)
   return String(result)
 }
 

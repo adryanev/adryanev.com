@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { X, Terminal as TerminalIcon, Minimize2 } from 'lucide-react'
+import { X, Terminal as TerminalIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useScrollLock } from '@/hooks/useScrollLock'
 
 const HELP_TEXT = `Available commands:
   help      - Show this help message
@@ -77,17 +78,13 @@ export function TerminalOverlay() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
-  // Lock body scroll and focus input when opened
+  // Lock body scroll when opened
+  useScrollLock(open)
+
+  // Focus input when opened
   useEffect(() => {
-    if (!open) return
-    const locks = Number(document.body.dataset.scrollLocks || 0)
-    document.body.dataset.scrollLocks = String(locks + 1)
-    document.body.style.overflow = 'hidden'
-    inputRef.current?.focus()
-    return () => {
-      const remaining = Number(document.body.dataset.scrollLocks || 0) - 1
-      document.body.dataset.scrollLocks = String(remaining)
-      if (remaining <= 0) document.body.style.overflow = ''
+    if (open) {
+      inputRef.current?.focus()
     }
   }, [open])
 
@@ -271,22 +268,13 @@ export function TerminalOverlay() {
               Terminal
             </span>
           </div>
-          <div className="flex items-center gap-4">
-             <button
-              onClick={() => setOpen(false)}
-              className="text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Minimize terminal"
-            >
-              <Minimize2 className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-text-secondary hover:text-accent transition-colors"
-              aria-label="Close terminal"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="text-text-secondary hover:text-accent transition-colors"
+            aria-label="Close terminal"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Terminal body */}

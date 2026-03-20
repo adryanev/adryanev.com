@@ -7,6 +7,13 @@ const ALLOWED_TYPES = [
   'image/webp',
   'image/gif',
 ]
+
+const EXT_MAP: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 const s3 = new S3Client({
@@ -31,13 +38,14 @@ export async function createPresignedUploadUrl(
     throw new Error('File too large. Maximum size: 10MB')
   }
 
-  const ext = filename.split('.').pop() ?? 'bin'
+  const ext = EXT_MAP[contentType] ?? 'bin'
   const key = `uploads/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
   const command = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET!,
     Key: key,
     ContentType: contentType,
+    ContentLength: fileSize,
   })
 
   const url = await getSignedUrl(s3, command, { expiresIn: 300 }) // 5 minutes

@@ -31,6 +31,12 @@ const WINDOW_MS = 15 * 60 * 1000 // 15 minutes
 
 function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds?: number } {
   const now = Date.now()
+
+  // Prune expired entries to prevent memory leak
+  for (const [k, v] of loginAttempts) {
+    if (now > v.resetAt) loginAttempts.delete(k)
+  }
+
   const entry = loginAttempts.get(ip)
 
   if (!entry || now > entry.resetAt) {
@@ -52,7 +58,7 @@ export const login = createServerFn({ method: 'POST' })
   .inputValidator((data: { email: string; password: string }) => data)
   .handler(async ({ data }) => {
     // Rate limiting by IP
-    const ip = getRequestIP({ xForwardedFor: true }) ?? '127.0.0.1'
+    const ip = getRequestIP({ xForwardedFor: false }) ?? '127.0.0.1'
     const rateCheck = checkRateLimit(ip)
     if (!rateCheck.allowed) {
       throw new Error(`Too many login attempts. Try again in ${rateCheck.retryAfterSeconds} seconds.`)
@@ -134,12 +140,15 @@ export const getCurrentUser = createServerFn({ method: 'GET' }).handler(
       return null
     }
 
-    // Sliding renewal: extend expiry by 7 days
-    const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    await db
-      .update(sessions)
-      .set({ expiresAt: newExpiresAt })
-      .where(eq(sessions.id, sessionId))
+    // Sliding renewal: only extend if within 1 day of expiry
+    const ONE_DAY = 24 * 60 * 60 * 1000
+    if (dbSession.expiresAt.getTime() - Date.now() < ONE_DAY) {
+      const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      await db
+        .update(sessions)
+        .set({ expiresAt: newExpiresAt })
+        .where(eq(sessions.id, sessionId))
+    }
 
     return {
       id: dbSession.user.id,

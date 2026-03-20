@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, createContext, useContext } from 'react'
+import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 import type { ReactNode } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
@@ -155,10 +156,6 @@ function WritePane() {
     refs: { textareaRef },
   } = useEditor()
 
-  const handleEditorScroll = useCallback(() => {
-    // Sync scrolling handled by parent
-  }, [])
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault()
@@ -203,7 +200,6 @@ function WritePane() {
       onPaste={handlePaste}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      onScroll={handleEditorScroll}
       style={{ height: EDITOR_HEIGHT }}
       className={cn(
         'w-full bg-[var(--bg-primary)] px-4 py-3 font-mono text-sm leading-relaxed outline-none resize-y overflow-y-auto',
@@ -218,33 +214,7 @@ function PreviewPane() {
   const { state: { mode, previewHtml, isRendering }, refs: { previewRef } } = useEditor()
 
   // Render mermaid diagrams
-  useEffect(() => {
-    const el = previewRef.current
-    if (!el || mode === 'write') return
-    const blocks = el.querySelectorAll<HTMLElement>('[data-mermaid]')
-    if (blocks.length === 0) return
-    let cancelled = false
-    import('mermaid').then(({ default: mermaid }) => {
-      if (cancelled) return
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-        fontFamily: 'JetBrains Mono, monospace',
-      })
-      blocks.forEach(async (block, i) => {
-        if (cancelled) return
-        const source = block.textContent ?? ''
-        const id = `editor-mermaid-${Date.now()}-${i}`
-        try {
-          const { svg } = await mermaid.render(id, source)
-          block.className = 'mermaid-diagram my-8 flex justify-center overflow-x-auto'
-          block.removeAttribute('data-mermaid')
-          block.innerHTML = svg
-        } catch { /* leave as source text */ }
-      })
-    })
-    return () => { cancelled = true }
-  }, [previewHtml, mode, previewRef])
+  useMermaidRenderer(previewRef, previewHtml, mode !== 'write')
 
   if (mode === 'write') return null
 
@@ -513,11 +483,3 @@ function EditorBody() {
     </div>
   )
 }
-
-// Export compound parts for custom compositions
-MarkdownEditor.Provider = EditorProvider
-MarkdownEditor.Toolbar = Toolbar
-MarkdownEditor.ModeToggle = ModeToggle
-MarkdownEditor.WritePane = WritePane
-MarkdownEditor.PreviewPane = PreviewPane
-MarkdownEditor.Footer = Footer

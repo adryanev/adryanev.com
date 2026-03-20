@@ -74,13 +74,13 @@ export function ImageUploader({
           <img
             src={value}
             alt="Uploaded"
-            className="h-32 w-auto rounded-md border border-slate-200 object-cover dark:border-slate-700"
+            className="h-32 w-auto border border-[var(--border-color)] object-cover"
           />
           <button
             type="button"
             onClick={() => onChange('')}
             aria-label="Remove image"
-            className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+            className="absolute -right-2 -top-2 bg-red-500 p-1 text-white hover:bg-red-600"
           >
             <X className="h-3 w-3" />
           </button>
@@ -95,24 +95,24 @@ export function ImageUploader({
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={cn(
-            'flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors',
+            'flex cursor-pointer flex-col items-center gap-2 border-2 border-dashed p-8 text-center transition-colors',
             dragOver
-              ? 'border-accent bg-accent/5'
-              : 'border-slate-300 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600',
+              ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+              : 'border-[var(--border-color)] hover:border-[var(--text-secondary)]',
             uploading && 'pointer-events-none opacity-60',
           )}
         >
           {uploading ? (
-            <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+            <span className="inline-block h-6 w-6 animate-spin border-2 border-[var(--accent)] border-t-transparent" />
           ) : (
-            <Upload className="h-6 w-6 text-slate-400" />
+            <Upload className="h-6 w-6 text-[var(--text-secondary)]" />
           )}
-          <span className="text-sm text-slate-500 dark:text-slate-400">
+          <span className="text-sm text-[var(--text-secondary)]">
             {uploading
               ? 'Uploading\u2026'
               : 'Drop an image here or click to select'}
           </span>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-[var(--text-secondary)]">
             JPEG, PNG, WebP, GIF — max 10MB
           </span>
         </div>

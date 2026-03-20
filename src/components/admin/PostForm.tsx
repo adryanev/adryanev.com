@@ -90,19 +90,20 @@ export function PostForm({ initial }: { initial?: PostData }) {
   })
 
   // Autosave
+  const formDataRef = useRef({ title, slug, content, excerpt, coverImage, status, tags })
+  formDataRef.current = { title, slug, content, excerpt, coverImage, status, tags }
+
   useEffect(() => {
     if (isEditing) return
     const interval = setInterval(() => {
-      if (title || content) {
-        localStorage.setItem(
-          AUTOSAVE_KEY,
-          JSON.stringify({ title, slug, content, excerpt, coverImage, status, tags }),
-        )
+      const data = formDataRef.current
+      if (data.title || data.content) {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data))
         setLastSaved(new Date())
       }
     }, 30000)
     return () => clearInterval(interval)
-  }, [isEditing, title, slug, content, excerpt, coverImage, status, tags])
+  }, [isEditing])
 
   // Restore autosave
   useEffect(() => {

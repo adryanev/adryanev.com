@@ -1,6 +1,7 @@
 import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { contentStatusEnum } from './enums'
+import { postViews } from './post-views'
 
 export const posts = pgTable('posts', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
@@ -43,6 +44,7 @@ export const postsToTags = pgTable(
 
 export const postsRelations = relations(posts, ({ many }) => ({
   postsToTags: many(postsToTags),
+  views: many(postViews),
 }))
 
 export const tagsRelations = relations(tags, ({ many }) => ({

@@ -10,6 +10,7 @@ import {
   Briefcase,
   Mail,
   Webhook,
+  Users,
   LogOut,
   Menu,
   X,
@@ -37,6 +38,7 @@ const sidebarItems = [
   { label: 'Resume', to: '/admin/resume', icon: Briefcase },
   { label: 'Contacts', to: '/admin/contacts', icon: Mail },
   { label: 'Webhooks', to: '/admin/webhooks', icon: Webhook },
+  { label: 'Subscribers', to: '/admin/subscribers', icon: Users },
 ] as const
 
 function AdminLayout() {

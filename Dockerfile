@@ -15,18 +15,12 @@ RUN pnpm build
 
 # Stage 3: Production
 FROM node:22-alpine AS runner
-RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 app
 WORKDIR /app
 
-# Copy package files and install production dependencies only
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
-
-# Copy built output, migrations, and migrate script
-COPY --from=builder /app/dist ./dist
+# Nitro bundles all dependencies — only copy the output and migrations
+COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/src/db/migrate.mjs ./migrate.mjs
 
@@ -36,4 +30,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-CMD ["sh", "-c", "node migrate.mjs && exec node dist/server/server.js"]
+CMD ["sh", "-c", "node migrate.mjs && exec node .output/server/index.mjs"]

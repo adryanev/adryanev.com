@@ -2,16 +2,9 @@ import { createHmac } from 'crypto'
 import { and, eq, arrayContains } from 'drizzle-orm'
 import { db } from '@/db'
 import { webhooks, webhookDeliveryLogs } from '@/db/schema/webhooks'
+import { MAX_RETRIES, type WebhookEvent } from '@/lib/webhook-events'
 
-export type WebhookEvent = 'post.created' | 'post.updated' | 'post.deleted'
-
-export const WEBHOOK_EVENTS: readonly WebhookEvent[] = [
-  'post.created',
-  'post.updated',
-  'post.deleted',
-] as const
-
-export const MAX_RETRIES = 3
+export { type WebhookEvent, WEBHOOK_EVENTS, MAX_RETRIES } from '@/lib/webhook-events'
 const MAX_CONCURRENT_DELIVERIES = 5
 
 type WebhookPayload = {

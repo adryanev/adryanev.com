@@ -8,7 +8,7 @@ import { FormInput } from './form/FormInput'
 import { FormError } from './form/FormError'
 import { FormActions } from './form/FormActions'
 import { createWebhook, updateWebhook } from '@/server/functions/webhooks.functions'
-import { WEBHOOK_EVENTS, type WebhookEvent } from '@/lib/webhooks'
+import { WEBHOOK_EVENTS, type WebhookEvent } from '@/lib/webhook-events'
 
 const WEBHOOK_EVENT_LABELS: Record<WebhookEvent, string> = {
   'post.created': 'Post Created',

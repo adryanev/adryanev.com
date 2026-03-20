@@ -27,7 +27,7 @@ const s3 = new S3Client({
 })
 
 export async function createPresignedUploadUrl(
-  filename: string,
+  _filename: string,
   contentType: string,
   fileSize: number,
 ): Promise<{ url: string; key: string }> {

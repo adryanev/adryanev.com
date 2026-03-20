@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { WebhookForm } from '@/components/admin/WebhookForm'
 import { getWebhookById } from '@/server/functions/webhooks.functions'
-import type { WebhookEvent } from '@/lib/webhooks'
+import type { WebhookEvent } from '@/lib/webhook-events'
 
 export const Route = createFileRoute('/admin/_layout/webhooks/$id/edit')({
   loader: ({ params }) => getWebhookById({ data: { id: Number(params.id) } }),

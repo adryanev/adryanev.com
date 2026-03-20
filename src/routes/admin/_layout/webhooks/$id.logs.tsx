@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { MAX_RETRIES } from '@/lib/webhooks'
+import { MAX_RETRIES } from '@/lib/webhook-events'
 import { getWebhookById, getWebhookDeliveryLogs } from '@/server/functions/webhooks.functions'
 
 export const Route = createFileRoute('/admin/_layout/webhooks/$id/logs')({

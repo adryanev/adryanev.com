@@ -235,11 +235,11 @@ export const getPublicResume = createServerFn({ method: 'GET' }).handler(
       orderBy: asc(resumeEntries.sortOrder),
     })
 
-    const grouped: Record<string, typeof entries> = {
-      experience: [],
-      education: [],
-      certification: [],
-      skill: [],
+    const grouped = {
+      experience: [] as typeof entries,
+      education: [] as typeof entries,
+      certification: [] as typeof entries,
+      skill: [] as typeof entries,
     }
     for (const entry of entries) {
       grouped[entry.type]?.push(entry)

@@ -26,32 +26,34 @@ export async function generateSitemap(): Promise<string> {
     }),
   ])
 
-  const urls: { loc: string; lastmod?: string; priority?: string }[] = [
-    { loc: '/', priority: '1.0' },
-    { loc: '/about', priority: '0.8' },
-    { loc: '/blog', priority: '0.9' },
-    { loc: '/portfolio', priority: '0.9' },
-    { loc: '/resume', priority: '0.7' },
-    { loc: '/saas', priority: '0.7' },
-    { loc: '/contact', priority: '0.6' },
+  const urls: { loc: string; lastmod?: string; changefreq?: string; priority?: string }[] = [
+    { loc: '/', changefreq: 'weekly', priority: '1.0' },
+    { loc: '/about', changefreq: 'monthly', priority: '0.8' },
+    { loc: '/blog', changefreq: 'weekly', priority: '0.9' },
+    { loc: '/portfolio', changefreq: 'monthly', priority: '0.9' },
+    { loc: '/resume', changefreq: 'monthly', priority: '0.7' },
+    { loc: '/saas', changefreq: 'monthly', priority: '0.7' },
+    { loc: '/contact', changefreq: 'yearly', priority: '0.6' },
   ]
 
   for (const post of publishedPosts) {
     urls.push({
       loc: `/blog/${post.slug}`,
       lastmod: post.updatedAt.toISOString().split('T')[0],
+      changefreq: 'monthly',
       priority: '0.8',
     })
   }
 
   for (const cat of categories) {
-    urls.push({ loc: `/portfolio/${cat.slug}`, priority: '0.7' })
+    urls.push({ loc: `/portfolio/${cat.slug}`, changefreq: 'monthly', priority: '0.7' })
   }
 
   for (const project of projects) {
     urls.push({
       loc: `/portfolio/${project.category.slug}/${project.slug}`,
       lastmod: project.updatedAt.toISOString().split('T')[0],
+      changefreq: 'monthly',
       priority: '0.6',
     })
   }
@@ -61,7 +63,7 @@ export async function generateSitemap(): Promise<string> {
 ${urls
   .map(
     (u) => `  <url>
-    <loc>${SITE_URL}${u.loc}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ''}${u.priority ? `\n    <priority>${u.priority}</priority>` : ''}
+    <loc>${SITE_URL}${u.loc}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ''}${u.changefreq ? `\n    <changefreq>${u.changefreq}</changefreq>` : ''}${u.priority ? `\n    <priority>${u.priority}</priority>` : ''}
   </url>`,
   )
   .join('\n')}

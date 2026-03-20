@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft, Github, Globe } from 'lucide-react'
 import { getPublicProject } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo'
 
 export const Route = createFileRoute('/portfolio/$category/$slug')({
   loader: async ({ params }) => {
@@ -31,19 +32,30 @@ export const Route = createFileRoute('/portfolio/$category/$slug')({
       </div>
     </div>
   ),
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.title} — Portfolio — Adryan Eka Vandra`
-          : 'Project Not Found',
-      },
-      {
-        name: 'description',
-        content: loaderData?.description.slice(0, 160) ?? '',
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: 'Project Not Found' }] }
+    }
+    const path = `/portfolio/${loaderData.category.slug}/${loaderData.slug}`
+    const firstImage = loaderData.images[0]?.url
+    return {
+      meta: seoMeta({
+        title: `${loaderData.title} — Portfolio — Adryan Eka Vandra`,
+        description: loaderData.description.slice(0, 160),
+        path,
+        image: firstImage,
+      }),
+      links: [canonicalLink(path)],
+      scripts: [
+        jsonLdScript(breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Portfolio', path: '/portfolio' },
+          { name: loaderData.category.name, path: `/portfolio/${loaderData.category.slug}` },
+          { name: loaderData.title, path },
+        ])),
+      ],
+    }
+  },
 })
 
 function ProjectDetailPage() {
@@ -140,7 +152,7 @@ function ProjectDetailPage() {
               <div className="space-y-8 pt-8 border-t-2 border-border">
                 <h3 className="font-serif text-2xl font-bold italic text-text-primary mb-8">Gallery</h3>
                 <StaggerChildren className="grid gap-8">
-                  {project.images.map((img) => (
+                  {project.images.map((img: { id: number; url: string; alt: string | null }) => (
                     <StaggerItem key={img.id}>
                       <figure className="relative group brutal-border bg-bg-secondary">
                         <img

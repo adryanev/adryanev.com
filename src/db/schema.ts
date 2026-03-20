@@ -21,3 +21,9 @@ export { resumeEntries } from './schema/resume'
 export { saasListings } from './schema/saas'
 export { contacts } from './schema/contacts'
 export { siteSettings } from './schema/settings'
+export {
+  webhooks,
+  webhookDeliveryLogs,
+  webhooksRelations,
+  webhookDeliveryLogsRelations,
+} from './schema/webhooks'

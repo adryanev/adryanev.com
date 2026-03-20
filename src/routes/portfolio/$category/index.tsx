@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft, ArrowUpRight, Github, Globe } from 'lucide-react'
 import { getCategoryWithProjects } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo'
 
 export const Route = createFileRoute('/portfolio/$category/')({
   loader: async ({ params }) => {
@@ -28,15 +29,27 @@ export const Route = createFileRoute('/portfolio/$category/')({
       </div>
     </div>
   ),
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.category.name} — Portfolio — Adryan Eka Vandra`
-          : 'Category Not Found',
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: 'Category Not Found' }] }
+    }
+    const path = `/portfolio/${loaderData.category.slug}`
+    return {
+      meta: seoMeta({
+        title: `${loaderData.category.name} — Portfolio — Adryan Eka Vandra`,
+        description: loaderData.category.description || `${loaderData.category.name} projects by Adryan Eka Vandra.`,
+        path,
+      }),
+      links: [canonicalLink(path)],
+      scripts: [
+        jsonLdScript(breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Portfolio', path: '/portfolio' },
+          { name: loaderData.category.name, path },
+        ])),
+      ],
+    }
+  },
 })
 
 function CategoryPage() {
@@ -80,7 +93,7 @@ function CategoryPage() {
         </div>
       ) : (
         <StaggerChildren className="grid gap-8">
-          {projects.map((project, index) => (
+          {projects.map((project: { id: number; slug: string; title: string; role: string; workplace: string; year: number; technology: string[]; githubUrl: string | null; externalUrl: string | null }, index: number) => (
             <StaggerItem key={project.id}>
               <div
                 className="group relative grid gap-8 border-b-2 border-border pb-8 md:grid-cols-[1fr_3fr_1fr] md:items-center transition-colors hover:border-text-primary"
@@ -106,10 +119,10 @@ function CategoryPage() {
                     <span>·</span>
                     <span>{project.workplace}</span>
                     <span>·</span>
-                    <span>{project.year}</span>
+                    <span>{project.year.toString()}</span>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
-                    {project.technology.map((t) => (
+                    {project.technology.map((t: string) => (
                       <span key={t} className="px-2 py-1 bg-bg-secondary text-text-secondary border border-border text-xs font-mono">
                         {t}
                       </span>

@@ -1,18 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Github, Linkedin, Mail } from 'lucide-react'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/about')({
   component: AboutPage,
   head: () => ({
-    meta: [
-      { title: 'About — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content:
-          'About Adryan Eka Vandra — Software Engineer specializing in web and mobile development.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'About — Adryan Eka Vandra',
+      description: 'About Adryan Eka Vandra — Software Engineer specializing in web and mobile development.',
+      path: '/about',
+    }),
+    links: [canonicalLink('/about')],
   }),
 })
 

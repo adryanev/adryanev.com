@@ -3,28 +3,39 @@ import { Github, Zap, Server } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPublicSaas } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/saas')({
   loader: () => getPublicSaas(),
   component: SaasPage,
   head: () => ({
-    meta: [
-      { title: 'SaaS Products — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content: 'Active SaaS products built by Adryan Eka Vandra.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'SaaS Products — Adryan Eka Vandra',
+      description: 'Active SaaS products built by Adryan Eka Vandra.',
+      path: '/saas',
+    }),
+    links: [canonicalLink('/saas')],
   }),
 })
+
+type SaasListing = {
+  id: number
+  name: string
+  description: string
+  status: string
+  url: string | null
+  githubUrl: string | null
+  logoUrl: string | null
+  technology: string[] | null
+}
 
 function SaasPage() {
   const listings = Route.useLoaderData()
 
   const grouped = {
-    active: listings.filter((l) => l.status === 'active'),
-    beta: listings.filter((l) => l.status === 'beta'),
-    retired: listings.filter((l) => l.status === 'retired'),
+    active: listings.filter((l: SaasListing) => l.status === 'active'),
+    beta: listings.filter((l: SaasListing) => l.status === 'beta'),
+    retired: listings.filter((l: SaasListing) => l.status === 'retired'),
   }
 
   const ordered = [...grouped.active, ...grouped.beta, ...grouped.retired]
@@ -51,7 +62,7 @@ function SaasPage() {
         </div>
       ) : (
         <StaggerChildren className="grid gap-8 md:grid-cols-2">
-          {ordered.map((product) => (
+          {ordered.map((product: SaasListing) => (
             <StaggerItem key={product.id}>
               <div
                 className={cn(
@@ -82,7 +93,7 @@ function SaasPage() {
 
                   {product.technology && product.technology.length > 0 && (
                     <div className="space-y-3 mb-8">
-                      {product.technology.map(tech => (
+                      {product.technology.map((tech: string) => (
                         <div key={tech} className="flex items-center gap-3 font-mono text-sm text-text-primary">
                           <Zap className="h-4 w-4 text-accent" />
                           {tech}

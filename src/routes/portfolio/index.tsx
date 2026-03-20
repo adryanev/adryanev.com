@@ -2,19 +2,18 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowUpRight } from 'lucide-react'
 import { getPublicCategories } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/portfolio/')({
   loader: () => getPublicCategories(),
   component: PortfolioPage,
   head: () => ({
-    meta: [
-      { title: 'Portfolio — Adryan Eka Vandra' },
-      {
-        name: 'description',
-        content:
-          'Portfolio of projects by Adryan Eka Vandra, organized by career phase.',
-      },
-    ],
+    meta: seoMeta({
+      title: 'Portfolio — Adryan Eka Vandra',
+      description: 'Portfolio of projects by Adryan Eka Vandra, organized by career phase.',
+      path: '/portfolio',
+    }),
+    links: [canonicalLink('/portfolio')],
   }),
 })
 
@@ -48,7 +47,7 @@ function PortfolioPage() {
         </div>
       ) : (
         <StaggerChildren className="grid gap-8">
-          {categories.map((cat, index) => (
+          {categories.map((cat: { id: number; name: string; slug: string; description: string | null; projectCount: number }, index: number) => (
             <StaggerItem key={cat.id}>
               <div
                 className="group relative grid gap-8 border-b-2 border-border pb-8 md:grid-cols-[1fr_3fr_1fr] md:items-center transition-colors hover:border-text-primary"

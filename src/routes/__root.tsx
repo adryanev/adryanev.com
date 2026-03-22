@@ -76,7 +76,7 @@ export const Route = createRootRoute({
             {
               src: process.env.UMAMI_URL,
               'data-website-id': process.env.UMAMI_WEBSITE_ID,
-              'data-domains': 'adryanev.com',
+              'data-domains': new URL(process.env.SITE_URL || 'https://adryanev.com').hostname,
               'data-do-not-track': 'true',
               defer: true,
             },

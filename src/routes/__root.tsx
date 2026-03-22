@@ -71,6 +71,15 @@ export const Route = createRootRoute({
         children: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
       },
       jsonLdScript([websiteJsonLd(), personJsonLd()]),
+      ...(process.env.UMAMI_URL && process.env.UMAMI_WEBSITE_ID
+        ? [
+            {
+              src: process.env.UMAMI_URL,
+              'data-website-id': process.env.UMAMI_WEBSITE_ID,
+              defer: true,
+            },
+          ]
+        : []),
     ],
   }),
 })

@@ -25,6 +25,9 @@ COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/src/db/migrate.mjs ./migrate.mjs
 
+# Install only migration dependencies (drizzle-orm + pg)
+RUN npm install --no-save drizzle-orm pg
+
 USER app
 EXPOSE 3000
 

@@ -1,6 +1,7 @@
 services:
   app:
     image: ghcr.io/adryanev/adryanev.com:latest
+    pull_policy: always
     restart: unless-stopped
     environment:
       DATABASE_URL: ${DATABASE_URL}

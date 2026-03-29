@@ -1,5 +1,4 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -23,14 +22,14 @@ const s3 = new S3Client({
     accessKeyId: process.env.S3_ACCESS_KEY!,
     secretAccessKey: process.env.S3_SECRET_KEY!,
   },
-  forcePathStyle: true, // Required for S3-compatible providers like MinIO
+  forcePathStyle: true,
 })
 
-export async function createPresignedUploadUrl(
-  _filename: string,
+export async function uploadFile(
   contentType: string,
   fileSize: number,
-): Promise<{ url: string; key: string }> {
+  body: Uint8Array,
+): Promise<{ key: string; publicUrl: string }> {
   if (!ALLOWED_TYPES.includes(contentType)) {
     throw new Error(`File type not allowed. Allowed: ${ALLOWED_TYPES.join(', ')}`)
   }
@@ -41,16 +40,14 @@ export async function createPresignedUploadUrl(
   const ext = EXT_MAP[contentType] ?? 'bin'
   const key = `uploads/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
-  const command = new PutObjectCommand({
+  await s3.send(new PutObjectCommand({
     Bucket: process.env.S3_BUCKET!,
     Key: key,
     ContentType: contentType,
-    ContentLength: fileSize,
-  })
+    Body: body,
+  }))
 
-  const url = await getSignedUrl(s3, command, { expiresIn: 300 }) // 5 minutes
-
-  return { url, key }
+  return { key, publicUrl: getPublicUrl(key) }
 }
 
 export function getPublicUrl(key: string): string {

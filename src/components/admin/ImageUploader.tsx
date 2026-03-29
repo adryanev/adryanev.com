@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Upload, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getUploadUrl } from '@/server/functions/upload.functions'
+import { upload } from '@/server/functions/upload.functions'
 
 export function ImageUploader({
   value,
@@ -18,32 +18,21 @@ export function ImageUploader({
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const getUrlFn = useServerFn(getUploadUrl)
+  const uploadFn = useServerFn(upload)
 
   const uploadFile = async (file: File) => {
     setError('')
     setUploading(true)
 
     try {
-      const result = await getUrlFn({
+      const buffer = await file.arrayBuffer()
+      const result = await uploadFn({
         data: {
-          filename: file.name,
           contentType: file.type,
           fileSize: file.size,
+          bytes: Array.from(new Uint8Array(buffer)),
         },
       })
-
-      // Upload directly to S3
-      const uploadResponse = await fetch(result.uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
-      })
-
-      if (!uploadResponse.ok) {
-        setError('Upload failed. Please try again.')
-        return
-      }
 
       onChange(result.publicUrl)
     } catch (err) {
@@ -109,7 +98,7 @@ export function ImageUploader({
           )}
           <span className="text-sm text-[var(--text-secondary)]">
             {uploading
-              ? 'Uploading\u2026'
+              ? 'Uploading...'
               : 'Drop an image here or click to select'}
           </span>
           <span className="text-xs text-[var(--text-secondary)]">

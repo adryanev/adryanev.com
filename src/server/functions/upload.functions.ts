@@ -1,10 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
-import { createPresignedUploadUrl, getPublicUrl } from '@/lib/storage'
+import { uploadFile } from '@/lib/storage'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 
-export const getUploadUrl = createServerFn({ method: 'POST' })
+export const upload = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: { filename: string; contentType: string; fileSize: number }) => data,
+    (data: { contentType: string; fileSize: number; bytes: number[] }) => data,
   )
   .handler(async ({ data }) => {
     const user = await getCurrentUser()
@@ -12,15 +12,11 @@ export const getUploadUrl = createServerFn({ method: 'POST' })
       throw new Error('Unauthorized')
     }
 
-    const result = await createPresignedUploadUrl(
-      data.filename,
-      data.contentType,
-      data.fileSize,
-    )
+    const body = new Uint8Array(data.bytes)
+    const result = await uploadFile(data.contentType, data.fileSize, body)
 
     return {
-      uploadUrl: result.url,
-      publicUrl: getPublicUrl(result.key),
+      publicUrl: result.publicUrl,
       key: result.key,
     }
   })

@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { previewMarkdown } from '@/server/functions/posts.functions'
-import { getUploadUrl } from '@/server/functions/upload.functions'
+import { upload } from '@/server/functions/upload.functions'
 
 type EditorMode = 'write' | 'preview' | 'split'
 
@@ -282,7 +282,7 @@ function EditorProvider({
   valueRef.current = value
 
   const previewFn = useServerFn(previewMarkdown)
-  const getUrlFn = useServerFn(getUploadUrl)
+  const uploadFn = useServerFn(upload)
 
   const renderMut = useMutation({
     mutationFn: (content: string) => previewFn({ data: { content } }),
@@ -400,15 +400,14 @@ function EditorProvider({
     setUploadingCount((c) => c + 1)
 
     try {
-      const result = await getUrlFn({
-        data: { filename: file.name, contentType: file.type, fileSize: file.size },
+      const buffer = await file.arrayBuffer()
+      const result = await uploadFn({
+        data: {
+          contentType: file.type,
+          fileSize: file.size,
+          bytes: Array.from(new Uint8Array(buffer)),
+        },
       })
-      const uploadResponse = await fetch(result.uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
-      })
-      if (!uploadResponse.ok) throw new Error('Upload failed')
       const markdown = `![${file.name}](${result.publicUrl})`
       onChange(valueRef.current.replace(placeholder, markdown))
     } catch {
@@ -416,7 +415,7 @@ function EditorProvider({
     } finally {
       setUploadingCount((c) => c - 1)
     }
-  }, [value, onChange, getUrlFn])
+  }, [value, onChange, uploadFn])
 
   const ctx: EditorContextValue = {
     state: {

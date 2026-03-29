@@ -82,8 +82,8 @@ function ContactPage() {
         <Reveal delay={0.1}>
           <div>
             <p className="font-serif text-3xl leading-relaxed text-text-primary md:text-5xl italic mb-8">
-              Looking to build a highly performant system or distinctive interface? <br />
-              <span className="text-accent underline decoration-4 underline-offset-8">Let's build it.</span>
+              Have a project in mind or just want to say hello? <br />
+              <span className="text-accent underline decoration-4 underline-offset-8">Let's talk.</span>
             </p>
 
             <div className="space-y-6 mt-12 font-mono text-lg">

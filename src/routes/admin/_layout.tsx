@@ -120,7 +120,7 @@ function AdminLayout() {
             className="flex w-full items-center gap-2 border border-[var(--border-color)] px-3 py-2 text-sm transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 text-[var(--text-secondary)]"
           >
             <LogOut className="h-4 w-4" />
-            {logoutMutation.isPending ? 'Signing out\u2026' : 'Sign Out'}
+            {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
           </button>
         </div>
       </aside>

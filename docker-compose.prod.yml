@@ -12,8 +12,6 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY}
       S3_BUCKET: ${S3_BUCKET}
       S3_REGION: ${S3_REGION:-us-east-1}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID}
       UMAMI_URL: ${UMAMI_URL}
       NODE_ENV: production

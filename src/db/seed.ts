@@ -1,8 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { hash } from 'argon2'
 import { eq } from 'drizzle-orm'
-import { users } from './schema/users'
 import { portfolioCategories, portfolioProjects } from './schema/portfolio'
 import { siteSettings } from './schema/settings'
 import { posts, tags, postsToTags } from './schema/posts'
@@ -17,18 +15,6 @@ async function seed() {
   const db = drizzle(pool)
 
   console.log('Seeding database...')
-
-  // ── Admin user ──────────────────────────────────────────────
-  const email = process.env.ADMIN_EMAIL ?? 'admin@adryanev.com'
-  const password = process.env.ADMIN_PASSWORD ?? 'changeme'
-  const passwordHash = await hash(password)
-
-  await db
-    .insert(users)
-    .values({ email, passwordHash })
-    .onConflictDoNothing({ target: users.email })
-
-  console.log(`Admin user seeded: ${email}`)
 
   // ── Portfolio categories ────────────────────────────────────
   const categories = [

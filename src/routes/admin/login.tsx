@@ -113,7 +113,7 @@ function LoginPage() {
               {loginMutation.isPending ? (
                 <>
                   <span className="inline-block h-4 w-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
-                  Authenticating\u2026
+                  Authenticating...
                 </>
               ) : (
                 'Sign In'

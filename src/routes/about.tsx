@@ -104,13 +104,13 @@ function AboutPage() {
           <Reveal>
             <div className="font-serif text-2xl leading-relaxed text-text-primary md:text-4xl">
               <p className="mb-8">
-                <span className="text-accent font-bold font-sans">01.</span> I engineer systems that don't just work — they <span className="italic">perform</span> under pressure. With a foundation in robust backend architectures and a keen eye for distinctive frontend experiences, I build software that commands attention.
+                <span className="text-accent font-bold font-sans">01.</span> I'm a software engineer who enjoys working across the full stack, from building <span className="italic">fast</span> backend services to creating frontend interfaces that feel snappy and responsive.
               </p>
               <p className="mb-8 text-text-secondary">
-                <span className="text-accent font-bold font-sans">02.</span> My approach is rooted in the belief that digital products should feel tactile, responsive, and undeniably fast. I reject generic boilerplate in favor of crafted, purpose-built solutions.
+                <span className="text-accent font-bold font-sans">02.</span> I care about performance, shipping quickly, and making sure what I build actually moves the needle for the business. I'd rather get something working and into users' hands than spend weeks perfecting abstractions nobody asked for.
               </p>
               <p>
-                <span className="text-accent font-bold font-sans">03.</span> Whether it's architecting a high-throughput API or designing an unforgettable user interface, my goal remains the same: to create software that leaves a lasting impact.
+                <span className="text-accent font-bold font-sans">03.</span> Whether it's an API, a web app, or a mobile experience, I focus on making things fast: both the software itself and the pace at which it gets built.
               </p>
             </div>
           </Reveal>

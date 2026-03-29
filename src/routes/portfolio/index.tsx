@@ -36,7 +36,7 @@ function PortfolioPage() {
             </div>
           </div>
           <p className="font-sans text-base max-w-sm text-text-secondary">
-            A collection of systems and interfaces built for performance and impact across different organizations.
+            A collection of projects I've worked on across different roles and organizations.
           </p>
         </div>
       </Reveal>

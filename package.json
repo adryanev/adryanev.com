@@ -11,6 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file=.env src/db/seed.ts",
+    "db:seed-user": "tsx --env-file=.env src/db/seed-user.ts",
     "db:seed-resume": "tsx --env-file=.env src/db/seed-resume.ts",
     "db:seed-portfolio": "tsx --env-file=.env src/db/seed-portfolio.ts",
     "db:studio": "drizzle-kit studio"

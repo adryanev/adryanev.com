@@ -75,7 +75,7 @@ function HomePage() {
 
           <Reveal delay={0.5}>
             <p className="mt-10 max-w-xl font-mono text-base leading-relaxed text-text-secondary md:text-lg">
-              I'm Adryan Eka Vandra. I build resilient, high-performance systems and distinctive user interfaces. No generic boilerplate — just crafted software.
+              I'm Adryan Eka Vandra. I build web and mobile applications with a focus on performance, shipping fast, and creating real business impact.
             </p>
           </Reveal>
 

@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "ln -sf \"$CONDUCTOR_ROOT_PATH/.env\" .env && pnpm install",
+    "run": "pnpm dev --port $CONDUCTOR_PORT"
+  },
+  "runScriptMode": "nonconcurrent"
+}

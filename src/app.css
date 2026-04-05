@@ -384,29 +384,33 @@
     border-color: var(--border-color);
   }
 
-  /* Tables */
-  .editorjs-container .tc-table {
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-  .editorjs-container .tc-row:first-child .tc-cell {
-    background: var(--bg-secondary);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--accent);
-    border-bottom: 2px solid var(--accent);
-  }
-  .dark .editorjs-container .tc-row:first-child .tc-cell {
-    background: rgba(45, 212, 191, 0.15);
-  }
-
   /* Warning block */
   .editorjs-container .cdx-warning {
     border-left: 4px solid var(--accent);
   }
+}
+
+/* EditorJS table: override plugin's CSS custom properties */
+.editorjs-container .tc-wrap {
+  --color-background: var(--bg-primary) !important;
+  --color-border: var(--border-color) !important;
+  --color-text-secondary: var(--text-secondary) !important;
+  --color-background-hover: var(--bg-secondary) !important;
+}
+/* EditorJS table heading row */
+.editorjs-container .tc-table--heading .tc-row:first-child .tc-cell {
+  --color-background: var(--bg-secondary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--text-primary) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+.dark .editorjs-container .tc-table--heading .tc-row:first-child .tc-cell {
+  --color-background: rgba(45, 212, 191, 0.15) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ── Editor.js (unlayered: must beat EditorJS injected styles) ── */

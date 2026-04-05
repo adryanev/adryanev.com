@@ -8,7 +8,8 @@ import { SlugInput } from './SlugInput'
 import { ImageUploader } from './ImageUploader'
 import { FormField } from './form/FormField'
 import { FormInput } from './form/FormInput'
-import { FormTextarea } from './form/FormTextarea'
+import { EditorJsEditor } from './EditorJsEditor'
+import type { OutputData } from '@editorjs/editorjs'
 import { FormSelect } from './form/FormSelect'
 import { FormError } from './form/FormError'
 import { FormActions } from './form/FormActions'
@@ -176,13 +177,10 @@ export function ProjectForm({
         </FormField>
       </div>
 
-      <FormField label="Description (Markdown)">
-        <FormTextarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={10}
-          className="font-mono"
+      <FormField label="Description">
+        <EditorJsEditor
+          value={(() => { try { return description ? JSON.parse(description) as OutputData : null } catch { return null } })()}
+          onChange={(data) => setDescription(JSON.stringify(data))}
         />
       </FormField>
 

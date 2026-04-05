@@ -4,7 +4,8 @@ import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { SlugInput } from './SlugInput'
-import { MarkdownEditor } from './MarkdownEditor'
+import { EditorJsEditor } from './EditorJsEditor'
+import type { OutputData } from '@editorjs/editorjs'
 import { FormField } from './form/FormField'
 import { FormInput } from './form/FormInput'
 import { FormTextarea } from './form/FormTextarea'
@@ -131,7 +132,13 @@ export function PostForm({ initial }: { initial?: PostData }) {
       setError('Title is required')
       return
     }
-    if (!content.trim()) {
+    try {
+      const parsed = JSON.parse(content) as OutputData
+      if (!parsed.blocks || parsed.blocks.length === 0) {
+        setError('Content is required')
+        return
+      }
+    } catch {
       setError('Content is required')
       return
     }
@@ -156,8 +163,11 @@ export function PostForm({ initial }: { initial?: PostData }) {
 
         <SlugInput title={title} value={slug} onChange={setSlug} />
 
-        <FormField label="Content (Markdown)">
-          <MarkdownEditor value={content} onChange={setContent} />
+        <FormField label="Content">
+          <EditorJsEditor
+            value={(() => { try { return content ? JSON.parse(content) as OutputData : null } catch { return null } })()}
+            onChange={(data) => setContent(JSON.stringify(data))}
+          />
         </FormField>
 
         <div className="grid md:grid-cols-2 gap-6">

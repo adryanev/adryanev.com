@@ -196,3 +196,55 @@
     border-color: var(--text-primary);
   }
 }
+
+/* ── Editor.js ─────────────────────────────── */
+@layer components {
+  .editorjs-container .ce-block__content,
+  .editorjs-container .ce-toolbar__content {
+    max-width: unset;
+  }
+  .editorjs-container .codex-editor {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+  }
+  .editorjs-container .ce-header {
+    font-family: var(--font-serif);
+  }
+  .editorjs-container .ce-code__textarea {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+  }
+  .editorjs-container .ce-toolbar__plus,
+  .editorjs-container .ce-toolbar__settings-btn {
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+  .editorjs-container .ce-toolbar__plus:hover,
+  .editorjs-container .ce-toolbar__settings-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+  }
+  .editorjs-container .ce-inline-toolbar {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  .editorjs-container .ce-conversion-toolbar {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  .editorjs-container .ce-popover {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  .editorjs-container .cdx-block {
+    padding: 0.4em 0;
+  }
+}

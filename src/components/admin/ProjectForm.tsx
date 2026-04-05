@@ -109,6 +109,24 @@ export function ProjectForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!title.trim()) {
+      setError('Title is required')
+      return
+    }
+    if (!description.trim()) {
+      setError('Description is required')
+      return
+    }
+    try {
+      const parsed = JSON.parse(description) as OutputData
+      if (!parsed.blocks || parsed.blocks.length === 0) {
+        setError('Description is required')
+        return
+      }
+    } catch {
+      setError('Description is required')
+      return
+    }
     saveMutation.mutate()
   }
 

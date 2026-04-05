@@ -20,17 +20,21 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
 
   const createUploader = useCallback(() => ({
     async uploadByFile(file: File) {
-      const buffer = await file.arrayBuffer()
-      const result = await uploadFn({
-        data: {
-          contentType: file.type,
-          fileSize: file.size,
-          bytes: Array.from(new Uint8Array(buffer)),
-        },
-      })
-      return {
-        success: 1,
-        file: { url: result.publicUrl },
+      try {
+        const buffer = await file.arrayBuffer()
+        const result = await uploadFn({
+          data: {
+            contentType: file.type,
+            fileSize: file.size,
+            bytes: Array.from(new Uint8Array(buffer)),
+          },
+        })
+        return {
+          success: 1,
+          file: { url: result.publicUrl },
+        }
+      } catch {
+        return { success: 0, file: { url: '' } }
       }
     },
   }), [uploadFn])
@@ -110,7 +114,9 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
       editorRef.current = editor
     }
 
-    init()
+    init().catch(() => {
+      initializedRef.current = false
+    })
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)

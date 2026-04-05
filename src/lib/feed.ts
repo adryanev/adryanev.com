@@ -34,7 +34,7 @@ export async function generateRssFeed(): Promise<string> {
       const parsed = JSON.parse(post.content) as OutputData
       html = await renderEditorJs(parsed)
       text = extractText(parsed)
-    } catch { continue }
+    } catch { /* keep html/text as empty strings */ }
     feed.addItem({
       title: post.title,
       id: `${SITE_URL}/blog/${post.slug}`,

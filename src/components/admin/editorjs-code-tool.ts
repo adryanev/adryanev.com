@@ -107,6 +107,7 @@ export default class CodeTool implements BlockTool {
           this.textarea!.selectionEnd = end + (indented.length - selected.length)
         }
         this.data.code = this.textarea!.value
+        this.textarea!.dispatchEvent(new Event('input', { bubbles: true }))
       }
     })
 

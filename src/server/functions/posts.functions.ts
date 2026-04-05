@@ -10,9 +10,10 @@ import { extractText, type OutputData } from '@/lib/editorjs-renderer'
 function autoExcerpt(content: string): string {
   try {
     const data = JSON.parse(content) as OutputData
+    if (!data.blocks || !Array.isArray(data.blocks)) return ''
     return extractText(data).slice(0, 160)
   } catch {
-    return content.slice(0, 160)
+    return ''
   }
 }
 

@@ -8,7 +8,8 @@ import { SlugInput } from './SlugInput'
 import { ImageUploader } from './ImageUploader'
 import { FormField } from './form/FormField'
 import { FormInput } from './form/FormInput'
-import { FormTextarea } from './form/FormTextarea'
+import { EditorJsEditor } from './EditorJsEditor'
+import type { OutputData } from '@editorjs/editorjs'
 import { FormSelect } from './form/FormSelect'
 import { FormError } from './form/FormError'
 import { FormActions } from './form/FormActions'
@@ -108,6 +109,24 @@ export function ProjectForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!title.trim()) {
+      setError('Title is required')
+      return
+    }
+    if (!description.trim()) {
+      setError('Description is required')
+      return
+    }
+    try {
+      const parsed = JSON.parse(description) as OutputData
+      if (!parsed.blocks || parsed.blocks.length === 0) {
+        setError('Description is required')
+        return
+      }
+    } catch {
+      setError('Description is required')
+      return
+    }
     saveMutation.mutate()
   }
 
@@ -176,13 +195,10 @@ export function ProjectForm({
         </FormField>
       </div>
 
-      <FormField label="Description (Markdown)">
-        <FormTextarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={10}
-          className="font-mono"
+      <FormField label="Description">
+        <EditorJsEditor
+          value={(() => { try { return description ? JSON.parse(description) as OutputData : null } catch { return null } })()}
+          onChange={(data) => setDescription(JSON.stringify(data))}
         />
       </FormField>
 

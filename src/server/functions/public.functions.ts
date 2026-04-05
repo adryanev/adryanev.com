@@ -11,7 +11,7 @@ import {
 import { resumeEntries } from '@/db/schema/resume'
 import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
-import { renderMarkdown, estimateReadingTime } from '@/lib/markdown'
+import { renderEditorJs, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
 
@@ -73,7 +73,10 @@ export const getPublishedPosts = createServerFn({ method: 'GET' })
 
     // Compute reading time server-side and strip content from response
     const postsWithReadingTime = paginatedPosts.map((post) => {
-      const readingTime = estimateReadingTime(post.content)
+      let readingTime = 1
+      try {
+        readingTime = estimateReadingTime(JSON.parse(post.content) as OutputData)
+      } catch { /* corrupted content, use default */ }
       const { content: _content, ...rest } = post
       return { ...rest, readingTime }
     })
@@ -99,8 +102,13 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     })
     if (!post) return null
 
-    const html = await renderMarkdown(post.content)
-    const readingTime = estimateReadingTime(post.content)
+    let html = ''
+    let readingTime = 1
+    try {
+      const parsed = JSON.parse(post.content) as OutputData
+      html = await renderEditorJs(parsed)
+      readingTime = estimateReadingTime(parsed)
+    } catch { /* corrupted content, render empty */ }
 
     // Get prev/next posts relative to the current post's publishedAt
     const [prev, next] = await Promise.all([
@@ -223,7 +231,10 @@ export const getPublicProject = createServerFn({ method: 'GET' })
     })
     if (!project) return null
 
-    const descriptionHtml = await renderMarkdown(project.description)
+    let descriptionHtml = ''
+    try {
+      descriptionHtml = await renderEditorJs(JSON.parse(project.description) as OutputData)
+    } catch { /* corrupted content, render empty */ }
     return { ...project, descriptionHtml }
   })
 

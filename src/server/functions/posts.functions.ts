@@ -5,6 +5,17 @@ import { posts, tags, postsToTags } from '@/db/schema/posts'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
 import { fireWebhooks } from '@/lib/webhooks'
+import { extractText, type OutputData } from '@/lib/editorjs-renderer'
+
+function autoExcerpt(content: string): string {
+  try {
+    const data = JSON.parse(content) as OutputData
+    if (!data.blocks || !Array.isArray(data.blocks)) return ''
+    return extractText(data).slice(0, 160)
+  } catch {
+    return ''
+  }
+}
 
 export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
   const user = await getCurrentUser()
@@ -71,7 +82,7 @@ export const createPost = createServerFn({ method: 'POST' })
         title: data.title,
         slug,
         content: data.content,
-        excerpt: data.excerpt || data.content.slice(0, 160),
+        excerpt: data.excerpt || autoExcerpt(data.content),
         coverImage: data.coverImage,
         status: data.status,
         publishedAt,
@@ -133,7 +144,7 @@ export const updatePost = createServerFn({ method: 'POST' })
         title: data.title,
         slug,
         content: data.content,
-        excerpt: data.excerpt || data.content.slice(0, 160),
+        excerpt: data.excerpt || autoExcerpt(data.content),
         coverImage: data.coverImage,
         status: data.status,
         publishedAt,
@@ -174,24 +185,6 @@ export const deletePost = createServerFn({ method: 'POST' })
     }
 
     return { success: true }
-  })
-
-const MAX_PREVIEW_SIZE = 100 * 1024 // 100 KB
-
-export const previewMarkdown = createServerFn({ method: 'POST' })
-  .inputValidator((data: { content: string }) => data)
-  .handler(async ({ data }) => {
-    const user = await getCurrentUser()
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
-
-    if (data.content.length > MAX_PREVIEW_SIZE) {
-      throw new Error('Content exceeds maximum preview size of 100KB')
-    }
-
-    const { renderMarkdown } = await import('@/lib/markdown')
-    return renderMarkdown(data.content)
   })
 
 // Helper: upsert tags and create associations (batch)

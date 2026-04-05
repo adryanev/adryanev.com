@@ -1,4 +1,5 @@
 import type { BlockTool, BlockToolConstructorOptions, BlockToolData } from '@editorjs/editorjs'
+import type { Highlighter } from 'shiki'
 
 interface CodeData extends BlockToolData {
   code: string
@@ -28,10 +29,26 @@ const LANGUAGES = [
   'markdown',
 ] as const
 
+let highlighterPromise: Promise<Highlighter> | null = null
+
+function getHighlighter(): Promise<Highlighter> {
+  if (!highlighterPromise) {
+    highlighterPromise = import('shiki').then(({ createHighlighter }) =>
+      createHighlighter({
+        themes: ['github-dark', 'github-light'],
+        langs: [...LANGUAGES].filter((l) => l !== 'text'),
+      }),
+    )
+  }
+  return highlighterPromise
+}
+
 export default class CodeTool implements BlockTool {
   private data: CodeData
   private wrapper: HTMLDivElement | null = null
   private textarea: HTMLTextAreaElement | null = null
+  private preview: HTMLDivElement | null = null
+  private highlightTimer: ReturnType<typeof setTimeout> | null = null
 
   static get toolbox() {
     return {
@@ -77,17 +94,24 @@ export default class CodeTool implements BlockTool {
     }
     select.addEventListener('change', () => {
       this.data.language = select.value
+      this.scheduleHighlight()
     })
 
     toolbar.appendChild(label)
     toolbar.appendChild(select)
 
+    // Editing textarea (hidden when preview is shown)
     this.textarea = document.createElement('textarea')
     this.textarea.value = this.data.code
     this.textarea.placeholder = 'Enter code...'
-    this.textarea.style.cssText = 'width: 100%; min-height: 120px; padding: 12px; font-family: var(--font-mono, monospace); font-size: 14px; border: none; outline: none; resize: vertical; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; tab-size: 2;'
+    this.textarea.style.cssText = 'width: 100%; min-height: 120px; padding: 12px; font-family: var(--font-mono, monospace); font-size: 14px; line-height: 1.5; border: none; outline: none; resize: vertical; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; tab-size: 2;'
     this.textarea.addEventListener('input', () => {
       this.data.code = this.textarea!.value
+      this.scheduleHighlight()
+    })
+    this.textarea.addEventListener('focus', () => {
+      this.textarea!.style.display = 'block'
+      if (this.preview) this.preview.style.display = 'none'
     })
     this.textarea.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
@@ -111,10 +135,63 @@ export default class CodeTool implements BlockTool {
       }
     })
 
+    // Highlighted preview (click to edit)
+    this.preview = document.createElement('div')
+    this.preview.style.cssText = 'display: none; cursor: text; min-height: 120px;'
+    this.preview.addEventListener('click', () => {
+      if (this.preview) this.preview.style.display = 'none'
+      this.textarea!.style.display = 'block'
+      this.textarea!.focus()
+    })
+
     this.wrapper.appendChild(toolbar)
     this.wrapper.appendChild(this.textarea)
+    this.wrapper.appendChild(this.preview)
+
+    // Show highlighted preview for existing code
+    if (this.data.code) {
+      this.renderHighlight()
+    }
 
     return this.wrapper
+  }
+
+  private scheduleHighlight() {
+    if (this.highlightTimer) clearTimeout(this.highlightTimer)
+    this.highlightTimer = setTimeout(() => this.renderHighlight(), 500)
+  }
+
+  private async renderHighlight() {
+    if (!this.preview || !this.data.code.trim() || this.data.language === 'text') {
+      return
+    }
+
+    try {
+      const highlighter = await getHighlighter()
+      const supported = highlighter.getLoadedLanguages().includes(this.data.language)
+      if (!supported) return
+
+      const html = highlighter.codeToHtml(this.data.code, {
+        themes: { dark: 'github-dark', light: 'github-light' },
+        lang: this.data.language,
+        defaultColor: false,
+      })
+      this.preview.innerHTML = html
+
+      // Style the generated <pre> to match the textarea
+      const pre = this.preview.querySelector('pre')
+      if (pre) {
+        pre.style.cssText = 'margin: 0; padding: 12px; font-family: var(--font-mono, monospace); font-size: 14px; line-height: 1.5; overflow-x: auto; tab-size: 2;'
+      }
+
+      // Show preview, hide textarea (only if not focused)
+      if (document.activeElement !== this.textarea) {
+        this.preview.style.display = 'block'
+        this.textarea!.style.display = 'none'
+      }
+    } catch {
+      // Highlight failed, keep textarea visible
+    }
   }
 
   save(): CodeData {

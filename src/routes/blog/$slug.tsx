@@ -206,8 +206,7 @@ function BlogPostPage() {
           'prose-img:brutal-border prose-img:rounded-none',
           'prose-hr:border-border',
           'prose-li:text-text-secondary prose-li:font-sans',
-          'prose-th:font-mono prose-th:text-text-primary prose-td:text-text-secondary',
-          'prose-table:brutal-border',
+          'prose-li:marker:text-accent',
         )}
         dangerouslySetInnerHTML={{ __html: post.html }}
       />

@@ -81,7 +81,16 @@
   background: var(--accent);
 }
 
-/* Shiki dual-theme: switch to dark palette in dark mode */
+/* Shiki dual-theme: light mode uses --shiki-light vars */
+.shiki,
+.shiki span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
+}
+/* Shiki dual-theme: dark mode uses --shiki-dark vars */
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark) !important;
@@ -169,6 +178,60 @@
   height: auto;
 }
 
+/* Prose table styling */
+.prose table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 0.875rem !important;
+  border: 2px solid var(--border-color) !important;
+}
+.prose th,
+.prose td {
+  padding: 0.625rem 0.75rem !important;
+  border: 1px solid var(--border-color) !important;
+  text-align: left !important;
+}
+.prose thead th {
+  background: var(--bg-secondary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+.dark .prose thead th {
+  background: rgba(45, 212, 191, 0.15) !important;
+}
+.prose tbody td {
+  color: var(--text-secondary) !important;
+}
+.prose tbody tr:hover {
+  background: var(--bg-secondary) !important;
+}
+
+/* Prose inline code styling */
+.prose :not(pre) > code {
+  background: var(--bg-secondary);
+  color: var(--accent);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  border: 1px solid var(--border-color);
+}
+/* Inline code inside headings: just mono font, no box */
+.prose h1 code, .prose h2 code, .prose h3 code,
+.prose h4 code, .prose h5 code, .prose h6 code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--accent) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.9em !important;
+}
+
 /* Utilities for striking visual elements */
 @layer utilities {
   .brutal-border {
@@ -197,7 +260,7 @@
   }
 }
 
-/* ── Editor.js ─────────────────────────────── */
+/* ── Editor.js (layered: container layout & fonts) ── */
 @layer components {
   .editorjs-container .ce-block__content,
   .editorjs-container .ce-toolbar__content {
@@ -209,7 +272,15 @@
   }
   .editorjs-container .ce-header {
     font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.2;
   }
+  .editorjs-container h1.ce-header { font-size: 2.25rem; }
+  .editorjs-container h2.ce-header { font-size: 1.875rem; }
+  .editorjs-container h3.ce-header { font-size: 1.5rem; }
+  .editorjs-container h4.ce-header { font-size: 1.25rem; }
+  .editorjs-container h5.ce-header { font-size: 1.125rem; }
+  .editorjs-container h6.ce-header { font-size: 1rem; font-weight: 600; }
   .editorjs-container .ce-code__textarea {
     font-family: var(--font-mono);
     font-size: 14px;
@@ -218,33 +289,226 @@
     border: 1px solid var(--border-color);
     border-radius: 4px;
   }
-  .editorjs-container .ce-toolbar__plus,
-  .editorjs-container .ce-toolbar__settings-btn {
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-  }
-  .editorjs-container .ce-toolbar__plus:hover,
-  .editorjs-container .ce-toolbar__settings-btn:hover {
-    color: var(--text-primary);
-    background: var(--bg-primary);
-  }
-  .editorjs-container .ce-inline-toolbar {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-  }
-  .editorjs-container .ce-conversion-toolbar {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-  }
-  .editorjs-container .ce-popover {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-  }
   .editorjs-container .cdx-block {
     padding: 0.4em 0;
   }
+}
+
+/* ── Editor.js (unlayered: must beat EditorJS injected styles) ── */
+.editorjs-container .ce-toolbar__plus,
+.editorjs-container .ce-toolbar__settings-btn {
+  color: var(--text-secondary) !important;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.editorjs-container .ce-toolbar__plus:hover,
+.editorjs-container .ce-toolbar__settings-btn:hover {
+  color: var(--accent) !important;
+  background: var(--bg-primary) !important;
+}
+
+/* Popover (toolbox dropdown, block settings) */
+.ce-popover {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+.ce-popover__container {
+  background: var(--bg-secondary) !important;
+}
+.ce-popover__search {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 4px;
+}
+.ce-popover__search::placeholder {
+  color: var(--text-secondary) !important;
+}
+.ce-popover__nothing-found-message {
+  color: var(--text-secondary) !important;
+}
+
+/* Popover items */
+.ce-popover-item {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+.ce-popover-item:hover,
+.ce-popover-item--focused {
+  background: var(--bg-primary) !important;
+}
+.ce-popover-item--active {
+  background: var(--bg-primary) !important;
+  color: var(--accent) !important;
+}
+.ce-popover-item__icon {
+  color: var(--text-secondary) !important;
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+.ce-popover-item__title {
+  color: var(--text-primary) !important;
+}
+.ce-popover-item__secondary-title {
+  color: var(--text-secondary) !important;
+}
+.ce-popover-item-separator__line {
+  background: var(--border-color) !important;
+}
+.ce-popover-header {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+.ce-popover-header__back-button {
+  color: var(--text-secondary) !important;
+}
+
+/* Inline toolbar */
+.ce-inline-toolbar {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+.ce-inline-tool {
+  color: var(--text-primary) !important;
+}
+.ce-inline-tool:hover {
+  background: var(--bg-primary) !important;
+}
+.ce-inline-tool--active {
+  color: var(--accent) !important;
+}
+.ce-inline-tool-input {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.ce-inline-toolbar__dropdown {
+  background: var(--bg-secondary) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+.ce-inline-toolbar__dropdown:hover {
+  background: var(--bg-primary) !important;
+}
+
+/* Conversion toolbar */
+.ce-conversion-toolbar {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+.ce-conversion-tool {
+  color: var(--text-primary) !important;
+}
+.ce-conversion-tool:hover {
+  background: var(--bg-primary) !important;
+}
+.ce-conversion-tool--focused {
+  background: var(--bg-primary) !important;
+}
+.ce-conversion-tool__icon {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+/* EditorJS Table tool */
+.tc-table {
+  border: 1px solid var(--border-color) !important;
+}
+.tc-row {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+.tc-cell {
+  border-right: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+.tc-cell--selected {
+  background: var(--bg-secondary) !important;
+}
+.tc-add-row,
+.tc-add-column {
+  color: var(--text-secondary) !important;
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+.tc-add-row:hover,
+.tc-add-column:hover {
+  background: var(--bg-primary) !important;
+  color: var(--accent) !important;
+}
+
+/* EditorJS Warning tool */
+.cdx-warning {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-left: 4px solid var(--accent) !important;
+  color: var(--text-primary) !important;
+}
+.cdx-warning__title {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+.cdx-warning__message {
+  color: var(--text-secondary) !important;
+}
+.cdx-warning [contentEditable]::before {
+  color: var(--text-secondary) !important;
+}
+.cdx-warning::before {
+  filter: var(--icon-filter, none);
+}
+.dark .cdx-warning::before {
+  --icon-filter: invert(1);
+}
+
+/* EditorJS Embed tool */
+.embed-tool {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.embed-tool__caption {
+  color: var(--text-secondary) !important;
+}
+.embed-tool__caption[contentEditable]::before {
+  color: var(--text-secondary) !important;
+}
+
+/* EditorJS Raw tool */
+.ce-rawtool__textarea {
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+}
+.ce-rawtool__textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+/* Warning block (public article rendering) */
+.warning-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+}
+.warning-block__title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+/* Embed block (public article rendering) */
+.embed-block iframe {
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
 }

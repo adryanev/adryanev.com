@@ -14,9 +14,10 @@ export function useMermaidRenderer(
     let cancelled = false
     import('mermaid').then(({ default: mermaid }) => {
       if (cancelled) return
+      const isDark = document.documentElement.classList.contains('dark')
       mermaid.initialize({
         startOnLoad: false,
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+        theme: isDark ? 'dark' : 'neutral',
         fontFamily: 'JetBrains Mono, monospace',
       })
       blocks.forEach(async (block, i) => {

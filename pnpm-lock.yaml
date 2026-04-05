@@ -17,6 +17,9 @@ importers:
       '@editorjs/editorjs':
         specifier: ^2.31.5
         version: 2.31.5
+      '@editorjs/embed':
+        specifier: ^2.8.0
+        version: 2.8.0
       '@editorjs/header':
         specifier: ^2.8.8
         version: 2.8.8
@@ -26,12 +29,27 @@ importers:
       '@editorjs/inline-code':
         specifier: ^1.5.2
         version: 1.5.2
+      '@editorjs/marker':
+        specifier: ^1.4.0
+        version: 1.4.0
       '@editorjs/nested-list':
         specifier: ^1.4.3
         version: 1.4.3
       '@editorjs/quote':
         specifier: ^2.7.6
         version: 2.7.6
+      '@editorjs/raw':
+        specifier: ^2.5.1
+        version: 2.5.1
+      '@editorjs/table':
+        specifier: ^2.4.5
+        version: 2.4.5
+      '@editorjs/underline':
+        specifier: ^1.2.1
+        version: 1.2.1
+      '@editorjs/warning':
+        specifier: ^1.4.1
+        version: 1.4.1
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@18.3.18)(react@18.3.1)
@@ -427,8 +445,14 @@ packages:
   '@codexteam/icons@0.0.2':
     resolution: {integrity: sha512-KdeKj3TwaTHqM3IXd5YjeJP39PBUZTb+dtHjGlf5+b0VgsxYD4qzsZkb11lzopZbAuDsHaZJmAYQ8LFligIT6Q==}
 
+  '@codexteam/icons@0.0.4':
+    resolution: {integrity: sha512-V8N/TY2TGyas4wLrPIFq7bcow68b3gu8DfDt1+rrHPtXxcexadKauRJL6eQgfG7Z0LCrN4boLRawR4S9gjIh/Q==}
+
   '@codexteam/icons@0.0.5':
     resolution: {integrity: sha512-s6H2KXhLz2rgbMZSkRm8dsMJvyUNZsEjxobBEg9ztdrb1B2H3pEzY6iTwI4XUPJWJ3c3qRKwV4TrO3J5jUdoQA==}
+
+  '@codexteam/icons@0.0.6':
+    resolution: {integrity: sha512-L7Q5PET8PjKcBT5wp7VR+FCjwCi5PUp7rd/XjsgQ0CI5FJz0DphyHGRILMuDUdCW2MQT9NHbVr4QP31vwAkS/A==}
 
   '@codexteam/icons@0.3.3':
     resolution: {integrity: sha512-cp7mkZPgmBuSxigTm3Vb+DtVHYeX7qXfQd7o05vcLD8Ag5WvRlol2QSn5P10k0CDAJwmkH9nQGQLBycErS9lsQ==}
@@ -451,6 +475,10 @@ packages:
   '@editorjs/editorjs@2.31.5':
     resolution: {integrity: sha512-pEwYE4HzE63DlSSCErV2foTak7Wp9fd7SGkG+WcwiYD0cPmuCowhEsqL+9MF4/ZIjc/KJzDEvhB3NC1B8gQkpQ==}
 
+  '@editorjs/embed@2.8.0':
+    resolution: {integrity: sha512-GkgL07M1GmRXq+vtYPkP9RLoij19mIMeyr5GrNo/0Km2XHmvDz2h6KHsDbiHXbq/5hZ5UgWi86kr+/aK165OBg==}
+    engines: {node: '>=24.0.0'}
+
   '@editorjs/header@2.8.8':
     resolution: {integrity: sha512-bsMSs34u2hoi0UBuRoc5EGWXIFzJiwYgkFUYQGVm63y5FU+s8zPBmVx5Ip2sw1xgs0fqfDROqmteMvvmbCy62w==}
 
@@ -466,11 +494,26 @@ packages:
   '@editorjs/inline-code@1.5.2':
     resolution: {integrity: sha512-IpEvwMTP3q89T/6vTi3ACoSMOcTdywtMsci1w19+Z/lxQn/NVuVah++ro93wQ/1ZVTyCr+TPUCchxwzY1/xaMg==}
 
+  '@editorjs/marker@1.4.0':
+    resolution: {integrity: sha512-5ipEXfL44jTTRzgNp/p/YjMO7jT08S5z4V8qA3FFJTfdhKgQyM3mvP1zpdYKw47ZZpVWMCncvk5Nto3BxihEtg==}
+
   '@editorjs/nested-list@1.4.3':
     resolution: {integrity: sha512-3jTJd6H2Zwe8SeiI9li9AolkCxFVitEnCpJjDI6+la/HslSJC827fHivc9hue6JmC8esA4yri0KCMyp8N4ykww==}
 
   '@editorjs/quote@2.7.6':
     resolution: {integrity: sha512-D01KUMSDj2r+6Z+xjDkQqI+y6URpeHCvj0+P4pah+GtkG040lWjFb2H4pgHFXuol2cbfyAoraYSw85fuPheCvw==}
+
+  '@editorjs/raw@2.5.1':
+    resolution: {integrity: sha512-h7CjXtfSTe4Bj1CL84ch5NW0q0CdrlWsLzQ/kbaFTgx914CzKz4Ug+xgdvytVO1dd1QzB5/HCW0ic1VxtgkhMQ==}
+
+  '@editorjs/table@2.4.5':
+    resolution: {integrity: sha512-pF48R2wc5m0c+N+RjtCLXBGZd23Rl7EjfSFpmcSViwNsu5RwMgYGrEiQ8mzVh98mbvYQwXm/NYBi9DEUUs970A==}
+
+  '@editorjs/underline@1.2.1':
+    resolution: {integrity: sha512-LjJ01ia6Pj0Z/elifycp9+T1bQs0eXNnIcEYKOlk0sGHLy88DPcBOh9oz1i+uWarZ4AjGsvSMaptpWe+yQNsjQ==}
+
+  '@editorjs/warning@1.4.1':
+    resolution: {integrity: sha512-7A+irJ6gIh6li4DC7qw/NiWCThlBgtoPUeeIVdldVjoATAu+a1GjS+w/5L24ReacgQJNPVQPPCoMaS1nB83agw==}
 
   '@emnapi/core@1.8.1':
     resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
@@ -4325,7 +4368,11 @@ snapshots:
 
   '@codexteam/icons@0.0.2': {}
 
+  '@codexteam/icons@0.0.4': {}
+
   '@codexteam/icons@0.0.5': {}
+
+  '@codexteam/icons@0.0.6': {}
 
   '@codexteam/icons@0.3.3': {}
 
@@ -4353,6 +4400,10 @@ snapshots:
       codex-notifier: 1.1.2
       codex-tooltip: 1.0.5
 
+  '@editorjs/embed@2.8.0':
+    dependencies:
+      '@editorjs/editorjs': 2.31.5
+
   '@editorjs/header@2.8.8':
     dependencies:
       '@codexteam/icons': 0.0.5
@@ -4370,6 +4421,10 @@ snapshots:
     dependencies:
       '@codexteam/icons': 0.3.3
 
+  '@editorjs/marker@1.4.0':
+    dependencies:
+      '@codexteam/icons': 0.0.5
+
   '@editorjs/nested-list@1.4.3':
     dependencies:
       '@codexteam/icons': 0.0.2
@@ -4378,6 +4433,23 @@ snapshots:
     dependencies:
       '@codexteam/icons': 0.3.3
       '@editorjs/dom': 0.0.5
+
+  '@editorjs/raw@2.5.1':
+    dependencies:
+      '@codexteam/icons': 0.0.4
+
+  '@editorjs/table@2.4.5':
+    dependencies:
+      '@codexteam/icons': 0.0.6
+
+  '@editorjs/underline@1.2.1':
+    dependencies:
+      '@codexteam/icons': 0.3.3
+
+  '@editorjs/warning@1.4.1':
+    dependencies:
+      '@codexteam/icons': 0.3.3
+      '@editorjs/editorjs': 2.31.5
 
   '@emnapi/core@1.8.1':
     dependencies:

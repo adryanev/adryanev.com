@@ -119,6 +119,38 @@ async function renderBlock(block: Block, highlighter: Highlighter): Promise<stri
       return `<figure><img src="${escapeHtml(url)}" alt="${escapeHtml(stripHtml(alt))}" loading="lazy" />${captionHtml}</figure>`
     }
 
+    case 'table': {
+      const content = data.content as string[][]
+      const withHeadings = data.withHeadings as boolean
+      if (!content || content.length === 0) return ''
+      const rows = content.map((row, i) => {
+        const tag = withHeadings && i === 0 ? 'th' : 'td'
+        const cells = row.map((cell) => `<${tag}>${sanitizeInlineHtml(cell)}</${tag}>`).join('')
+        return `<tr>${cells}</tr>`
+      })
+      const headRow = withHeadings ? `<thead>${rows.shift()}</thead>` : ''
+      const body = rows.length ? `<tbody>${rows.join('')}</tbody>` : ''
+      return `<table>${headRow}${body}</table>`
+    }
+
+    case 'embed': {
+      const src = data.embed as string
+      const caption = (data.caption as string) || ''
+      const captionHtml = caption
+        ? `<figcaption>${sanitizeInlineHtml(caption)}</figcaption>`
+        : ''
+      return `<figure class="embed-block"><iframe src="${escapeHtml(src)}" frameborder="0" allowfullscreen loading="lazy"></iframe>${captionHtml}</figure>`
+    }
+
+    case 'warning': {
+      const title = (data.title as string) || ''
+      const message = (data.message as string) || ''
+      return `<div class="warning-block"><div class="warning-block__title">${sanitizeInlineHtml(title)}</div><p>${sanitizeInlineHtml(message)}</p></div>`
+    }
+
+    case 'raw':
+      return data.html as string
+
     case 'mermaid':
       return `<div data-mermaid="true" class="mermaid-source">${escapeHtml(data.code as string)}</div>`
 
@@ -156,7 +188,11 @@ export function extractText(data: OutputData): string {
         }
         case 'code':
           return d.code as string
+        case 'warning':
+          return [stripHtml(d.title as string), stripHtml(d.message as string)].filter(Boolean).join(' ')
         case 'mermaid':
+        case 'embed':
+        case 'raw':
           return ''
         default:
           return ''

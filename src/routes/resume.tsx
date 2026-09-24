@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Download, Loader2 } from 'lucide-react'
 import { getPublicResume } from '@/server/functions/public.functions'
 import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { ResumeWorktable } from '@/components/resume/ResumeWorktable'
+import { experiencePoints } from '@/components/resume/experience-points'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/resume')({
@@ -64,6 +66,8 @@ function ResumePage() {
           </button>
         </div>
       </Reveal>
+
+      <ResumeWorktable experience={resume.experience} />
 
       <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-8">
@@ -177,10 +181,7 @@ function ResumePage() {
 }
 
 function DescriptionList({ text }: { text: string }) {
-  const sentences = text
-    .split(/(?<=\.)\s+/)
-    .map((s) => s.trim())
-    .filter(Boolean)
+  const sentences = experiencePoints(text)
 
   if (sentences.length <= 1) {
     return (

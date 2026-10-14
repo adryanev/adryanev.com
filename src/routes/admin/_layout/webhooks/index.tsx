@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, Activity, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getWebhooks, deleteWebhook } from '@/server/functions/webhooks.functions'
 
+import { FormError } from '@/components/admin/form/FormError'
 export const Route = createFileRoute('/admin/_layout/webhooks/')({
   loader: () => getWebhooks(),
   component: WebhookListPage,
@@ -22,6 +23,7 @@ function WebhookListPage() {
 
   return (
     <div>
+      <FormError message={deleteMut.isError ? 'The item could not be removed. Please try again.' : ''} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Webhooks</h1>
@@ -35,13 +37,13 @@ function WebhookListPage() {
       {webhooks.length === 0 ? (
         <div className="mt-12 text-center text-[var(--text-secondary)]">No webhooks configured yet.</div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]">
+        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]" role="region" aria-label="Webhooks table, scroll for all columns" tabIndex={0}>
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
                 <th className="px-4 py-3 font-medium">URL</th>
-                <th className="hidden px-4 py-3 font-medium sm:table-cell">Events</th>
-                <th className="hidden px-4 py-3 font-medium md:table-cell">Status</th>
+                <th className="px-4 py-3 font-medium ">Events</th>
+                <th className="px-4 py-3 font-medium ">Status</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -51,7 +53,7 @@ function WebhookListPage() {
                   <td className="px-4 py-3 font-medium">
                     <span className="break-all">{wh.url}</span>
                   </td>
-                  <td className="hidden px-4 py-3 sm:table-cell">
+                  <td className="px-4 py-3 ">
                     <div className="flex flex-wrap gap-1">
                       {wh.events.map((evt) => (
                         <code key={evt} className="text-xs bg-[var(--bg-secondary)] border border-[var(--border-color)] px-1.5 py-0.5">
@@ -60,7 +62,7 @@ function WebhookListPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-3 md:table-cell">
+                  <td className="px-4 py-3 ">
                     <span className={cn(
                       'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
                       wh.active
@@ -73,13 +75,13 @@ function WebhookListPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Link to="/admin/webhooks/$id/logs" params={{ id: String(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--accent)]" title="Delivery logs">
+                      <Link to="/admin/webhooks/$id/logs" params={{ id: String(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--admin-link)]" title="Delivery logs">
                         <Eye className="h-4 w-4" />
                       </Link>
-                      <Link to="/admin/webhooks/$id/edit" params={{ id: String(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--accent)]">
+                      <Link aria-label={`Edit webhook ${wh.url}`} to="/admin/webhooks/$id/edit" params={{ id: String(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--admin-link)]">
                         <Edit className="h-4 w-4" />
                       </Link>
-                      <button onClick={() => { if (confirm('Delete this webhook?')) deleteMut.mutate(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-red-500">
+                      <button aria-label={`Delete webhook ${wh.url}`} disabled={deleteMut.isPending} onClick={() => { if (confirm('Delete this webhook?')) deleteMut.mutate(wh.id) }} className="rounded p-1 text-[var(--text-secondary)] hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>

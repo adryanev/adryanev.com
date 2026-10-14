@@ -33,6 +33,8 @@ const STATUS_OPTIONS = [
   { value: 'published' as const, label: 'Published', activeColor: 'var(--accent)' },
 ]
 
+import { editorContentSignature } from '@/lib/editor-content'
+
 export function PostForm({ initial }: { initial?: PostData }) {
   const navigate = useNavigate()
   const isEditing = !!initial?.id
@@ -50,13 +52,13 @@ export function PostForm({ initial }: { initial?: PostData }) {
 
   const dirty = title !== (initialRef.current?.title ?? '') ||
     slug !== (initialRef.current?.slug ?? '') ||
-    content !== (initialRef.current?.content ?? '') ||
+    editorContentSignature(content) !== editorContentSignature(initialRef.current?.content ?? '') ||
     excerpt !== (initialRef.current?.excerpt ?? '') ||
     coverImage !== (initialRef.current?.coverImage ?? '') ||
     status !== (initialRef.current?.status ?? 'draft') ||
     JSON.stringify(tags) !== JSON.stringify(initialRef.current?.tags ?? [])
 
-  useUnsavedChanges(dirty)
+  const allowNavigation = useUnsavedChanges(dirty)
 
   const createFn = useServerFn(createPost)
   const updateFn = useServerFn(updatePost)
@@ -78,6 +80,7 @@ export function PostForm({ initial }: { initial?: PostData }) {
       return createFn({ data })
     },
     onSuccess: () => {
+      allowNavigation()
       try {
         localStorage.removeItem(AUTOSAVE_KEY)
       } catch { /* private browsing or storage unavailable */ }

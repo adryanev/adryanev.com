@@ -24,7 +24,7 @@ function WebhookLogsPage() {
   return (
     <div>
       <div className="flex items-center gap-3">
-        <Link to="/admin/webhooks" className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--accent)]">
+        <Link to="/admin/webhooks" className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--admin-link)]">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
@@ -36,16 +36,16 @@ function WebhookLogsPage() {
       {logs.length === 0 ? (
         <div className="mt-12 text-center text-[var(--text-secondary)]">No delivery attempts yet.</div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]">
+        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]" role="region" aria-label="Webhook delivery logs table, scroll for all columns" tabIndex={0}>
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Event</th>
-                <th className="hidden px-4 py-3 font-medium sm:table-cell">HTTP</th>
-                <th className="hidden px-4 py-3 font-medium md:table-cell">Attempt</th>
+                <th className="px-4 py-3 font-medium ">HTTP</th>
+                <th className="px-4 py-3 font-medium ">Attempt</th>
                 <th className="px-4 py-3 font-medium">Time</th>
-                <th className="hidden px-4 py-3 font-medium lg:table-cell">Response</th>
+                <th className="px-4 py-3 font-medium lg:table-cell">Response</th>
               </tr>
             </thead>
             <tbody>
@@ -63,7 +63,7 @@ function WebhookLogsPage() {
                       {log.event}
                     </code>
                   </td>
-                  <td className="hidden px-4 py-3 sm:table-cell">
+                  <td className="px-4 py-3 ">
                     <span className={cn(
                       'text-xs font-medium',
                       log.statusCode && log.statusCode < 400 ? 'text-green-500' : 'text-red-500',
@@ -71,13 +71,13 @@ function WebhookLogsPage() {
                       {log.statusCode ?? '—'}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 md:table-cell text-[var(--text-secondary)]">
+                  <td className="px-4 py-3  text-[var(--text-secondary)]">
                     {log.attempt}/{MAX_RETRIES}
                   </td>
                   <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">
                     {new Date(log.createdAt).toLocaleString()}
                   </td>
-                  <td className="hidden px-4 py-3 lg:table-cell">
+                  <td className="px-4 py-3 lg:table-cell">
                     <span className="text-xs text-[var(--text-secondary)] truncate block max-w-xs">
                       {log.response?.slice(0, 100) ?? '—'}
                     </span>

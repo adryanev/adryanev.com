@@ -1,46 +1,86 @@
-import { motion, useReducedMotion } from 'motion/react'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode, type RefObject } from 'react'
+
+type Direction = 'up' | 'down' | 'left' | 'right' | 'none'
+
+interface EntranceOptions {
+  selector?: string
+  direction?: Direction
+  delay?: number
+  stagger?: number
+  once?: boolean
+}
+
+const offsets: Record<Direction, string> = {
+  up: '0 10px', down: '0 -10px', left: '10px 0', right: '-10px 0', none: '0 0',
+}
+
+// SSR and unobserved content stay readable. Never hide a section until scroll.
+export function useEntrance(
+  ref: RefObject<HTMLElement>,
+  { selector, direction = 'up', delay = 0, stagger = 0, once = true }: EntranceOptions = {},
+) {
+  useEffect(() => {
+    const root = ref.current
+    if (!root || !('IntersectionObserver' in window) || !root.animate) return
+
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const animations = new Map<Element, Animation>()
+    const targets = selector ? [...root.querySelectorAll<HTMLElement>(selector)] : [root]
+    const observer = new IntersectionObserver((entries) => {
+      let order = 0
+      for (const entry of entries) {
+        if (!entry.isIntersecting) {
+          animations.get(entry.target)?.cancel()
+          animations.delete(entry.target)
+          continue
+        }
+        if (once) observer.unobserve(entry.target)
+        if (preference.matches) continue
+        const target = entry.target as HTMLElement
+        const animation = target.animate([
+          { opacity: 0.8, translate: offsets[direction] },
+          { opacity: 1, translate: '0 0' },
+        ], {
+          duration: target.dataset.enter === 'bubble' ? 480 : 360,
+          delay: Math.min((delay + order++ * stagger) * 1000, 160),
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'backwards',
+        })
+        animations.set(target, animation)
+        animation.onfinish = () => animations.delete(target)
+      }
+    }, { threshold: 0, rootMargin: '0px 0px -16px 0px' })
+
+    targets.forEach((target) => observer.observe(target))
+    const cancel = () => {
+      animations.forEach((animation) => animation.cancel())
+      animations.clear()
+    }
+    const onPreference = () => { if (preference.matches) cancel() }
+    const onVisibility = () => { if (document.hidden) cancel() }
+    preference.addEventListener('change', onPreference)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      observer.disconnect()
+      cancel()
+      preference.removeEventListener('change', onPreference)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [ref, selector, direction, delay, stagger, once])
+}
 
 interface RevealProps {
   children: ReactNode
   delay?: number
   className?: string
-  direction?: 'up' | 'down' | 'left' | 'right' | 'none'
+  direction?: Direction
   once?: boolean
 }
 
-const directionMap = {
-  up: { y: 24 },
-  down: { y: -24 },
-  left: { x: 24 },
-  right: { x: -24 },
-  none: {},
-}
-
-export function Reveal({
-  children,
-  delay = 0,
-  className,
-  direction = 'up',
-  once = true,
-}: RevealProps) {
-  const shouldReduce = useReducedMotion()
-
-  if (shouldReduce) {
-    return <div className={className}>{children}</div>
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, ...directionMap[direction] }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once, margin: '-60px' }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+export function Reveal({ children, className, ...options }: RevealProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEntrance(ref, options)
+  return <div ref={ref} className={className}>{children}</div>
 }
 
 interface StaggerChildrenProps {
@@ -53,29 +93,12 @@ interface StaggerChildrenProps {
 export function StaggerChildren({
   children,
   className,
-  stagger = 0.08,
+  stagger = 0.045,
   once = true,
 }: StaggerChildrenProps) {
-  const shouldReduce = useReducedMotion()
-
-  if (shouldReduce) {
-    return <div className={className}>{children}</div>
-  }
-
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin: '-40px' }}
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: stagger } },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+  const ref = useRef<HTMLDivElement>(null)
+  useEntrance(ref, { selector: ':scope > [data-stagger-item]', stagger, once })
+  return <div ref={ref} className={className}>{children}</div>
 }
 
 export function StaggerItem({
@@ -85,15 +108,5 @@ export function StaggerItem({
   children: ReactNode
   className?: string
 }) {
-  return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div data-stagger-item className={className}>{children}</div>
 }

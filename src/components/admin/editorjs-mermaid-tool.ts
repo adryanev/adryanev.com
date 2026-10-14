@@ -67,7 +67,7 @@ export default class MermaidTool implements BlockTool {
       mermaid.initialize({
         startOnLoad: false,
         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-        fontFamily: 'JetBrains Mono, monospace',
+        fontFamily: 'DM Mono, monospace',
       })
       const id = `mermaid-editor-${Date.now()}`
       const { svg } = await mermaid.render(id, this.data.code)

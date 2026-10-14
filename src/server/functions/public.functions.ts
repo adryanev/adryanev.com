@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestIP } from '@tanstack/react-start/server'
-import { eq, and, isNull, desc, asc, count, lt, gt, inArray } from 'drizzle-orm'
+import { eq, and, isNull, desc, asc, count, sql, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, postsToTags, tags } from '@/db/schema/posts'
 import {
@@ -11,7 +11,7 @@ import {
 import { resumeEntries } from '@/db/schema/resume'
 import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
-import { renderEditorJs, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
+import { renderEditorJs, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
 
@@ -102,13 +102,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     })
     if (!post) return null
 
-    let html = ''
-    let readingTime = 1
-    try {
-      const parsed = JSON.parse(post.content) as OutputData
-      html = await renderEditorJs(parsed)
-      readingTime = estimateReadingTime(parsed)
-    } catch { /* corrupted content, render empty */ }
+    const parsed = JSON.parse(post.content) as OutputData
+    const html = await renderEditorJs(parsed)
+    const readingTime = estimateReadingTime(parsed)
 
     // Get prev/next posts relative to the current post's publishedAt
     const [prev, next] = await Promise.all([
@@ -117,9 +113,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
             where: and(
               eq(posts.status, 'published'),
               isNull(posts.deletedAt),
-              lt(posts.publishedAt, post.publishedAt),
+              sql`(${posts.publishedAt}, ${posts.id}) < (SELECT published_at, id FROM posts WHERE id = ${post.id})`,
             ),
-            orderBy: desc(posts.publishedAt),
+            orderBy: [desc(posts.publishedAt), desc(posts.id)],
             columns: { slug: true, title: true },
           })
         : Promise.resolve(undefined),
@@ -128,9 +124,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
             where: and(
               eq(posts.status, 'published'),
               isNull(posts.deletedAt),
-              gt(posts.publishedAt, post.publishedAt),
+              sql`(${posts.publishedAt}, ${posts.id}) > (SELECT published_at, id FROM posts WHERE id = ${post.id})`,
             ),
-            orderBy: asc(posts.publishedAt),
+            orderBy: [asc(posts.publishedAt), asc(posts.id)],
             columns: { slug: true, title: true },
           })
         : Promise.resolve(undefined),
@@ -245,15 +241,12 @@ export const getPublicProject = createServerFn({ method: 'GET' })
       ),
       with: {
         category: true,
-        images: { orderBy: asc(projectImages.sortOrder) },
+        images: { orderBy: [asc(projectImages.sortOrder), asc(projectImages.id)] },
       },
     })
     if (!project) return null
 
-    let descriptionHtml = ''
-    try {
-      descriptionHtml = await renderEditorJs(JSON.parse(project.description) as OutputData)
-    } catch { /* corrupted content, render empty */ }
+    const descriptionHtml = await renderProjectDescription(project.description)
     return { ...project, descriptionHtml }
   })
 

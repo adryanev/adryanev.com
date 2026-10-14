@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPosts, deletePost } from '@/server/functions/posts.functions'
 
+import { FormError } from '@/components/admin/form/FormError'
 export const Route = createFileRoute('/admin/_layout/posts/')({
   loader: () => getPosts(),
   component: PostListPage,
@@ -26,6 +27,7 @@ function PostListPage() {
 
   return (
     <div className="space-y-6">
+      <FormError message={deleteMutation.isError ? 'The item could not be removed. Please try again.' : ''} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-4">
         <div>
           <h1 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
@@ -37,7 +39,7 @@ function PostListPage() {
         </div>
         <Link
           to="/admin/posts/new"
-          className="inline-flex items-center gap-2 border border-[var(--accent)] bg-[var(--accent)] px-4 py-2 text-sm font-bold uppercase text-[var(--accent-fg)] transition-colors hover:bg-transparent hover:text-[var(--accent)]"
+          className="inline-flex items-center gap-2 border border-[var(--accent)] bg-[var(--accent)] px-4 py-2 text-sm font-bold uppercase text-[var(--accent-fg)] transition-colors hover:bg-transparent hover:text-[var(--admin-link)]"
         >
           <Plus className="h-4 w-4" />
           New Post
@@ -50,19 +52,19 @@ function PostListPage() {
           <p className="font-semibold text-[var(--text-primary)] uppercase tracking-wider">No posts found</p>
           <Link
             to="/admin/posts/new"
-            className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
+            className="mt-4 inline-block text-sm text-[var(--admin-link)] hover:underline"
           >
             Create your first post
           </Link>
         </div>
       ) : (
-        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] overflow-x-auto">
+        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] overflow-x-auto" role="region" aria-label="Posts table, scroll for all columns" tabIndex={0}>
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
                 <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs">Title</th>
-                <th className="hidden px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs sm:table-cell">Status</th>
-                <th className="hidden px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs md:table-cell">Date</th>
+                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs ">Status</th>
+                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs ">Date</th>
                 <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs text-right">Actions</th>
               </tr>
             </thead>
@@ -76,7 +78,7 @@ function PostListPage() {
                     <Link
                       to="/admin/posts/$id/edit"
                       params={{ id: String(post.id) }}
-                      className="font-medium text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                      className="font-medium text-[var(--text-primary)] hover:text-[var(--admin-link)] transition-colors"
                     >
                       {post.title}
                     </Link>
@@ -84,7 +86,7 @@ function PostListPage() {
                       /{post.slug}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-3 sm:table-cell">
+                  <td className="px-4 py-3 ">
                     <span
                       className={cn(
                         'inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider border',
@@ -96,7 +98,7 @@ function PostListPage() {
                       {post.status}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 text-xs text-[var(--text-secondary)] md:table-cell">
+                  <td className="px-4 py-3 text-xs text-[var(--text-secondary)] ">
                     {new Date(post.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -104,13 +106,14 @@ function PostListPage() {
                       <Link
                         to="/admin/posts/$id/edit"
                         params={{ id: String(post.id) }}
-                        className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)] transition-colors"
+                        className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--admin-link)] hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)] transition-colors"
                         title="Edit"
                         aria-label={`Edit ${post.title}`}
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
+                        disabled={deleteMutation.isPending}
                         onClick={() => {
                           if (confirm('Are you sure you want to delete this post?')) {
                             deleteMutation.mutate(post.id)

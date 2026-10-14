@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Terminal } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { ArrowRight } from 'lucide-react'
+import { useRef } from 'react'
+import { useEntrance } from '@/components/motion/Reveal'
+import { PortfolioScene3D } from '@/components/home/PortfolioScene3D'
 import { getHomePageData } from '@/server/functions/public.functions'
-import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
-import { TextReveal } from '@/components/motion/TextReveal'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
@@ -38,286 +38,148 @@ type Project = {
   category: { slug: string; name: string }
 }
 
-type Saas = {
-  id: number
-  name: string
-  description: string
-  status: string
-  url: string | null
-  logoUrl: string | null
-}
-
 function HomePage() {
-  const { latestPosts, featuredProjects, activeSaas } = Route.useLoaderData()
+  const homeRef = useRef<HTMLDivElement>(null)
+  useEntrance(homeRef, { selector: '[data-enter]', stagger: 0.06 })
+  const { latestPosts, featuredProjects } = Route.useLoaderData()
+  const [leadProject, ...remainingProjects] = featuredProjects
+  const supportingProjects = remainingProjects.slice(0, 2)
 
   return (
-    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center overflow-hidden px-6 py-12 md:py-24 space-y-32">
-      {/* Hero Section */}
-      <div className="relative z-10 grid gap-12 lg:grid-cols-[1fr_400px]">
-        <div className="flex flex-col justify-center">
-          <Reveal delay={0}>
-            <div className="mb-8 inline-flex w-fit items-center gap-3 border-[2px] border-text-primary bg-accent px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-accent-fg brutal-shadow">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping motion-reduce:animate-none rounded-full bg-bg-primary opacity-75"></span>
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-bg-primary"></span>
-              </span>
-              Available for Work
-            </div>
-          </Reveal>
-
-          <h1 className="font-serif text-6xl font-medium leading-[1.05] tracking-tight md:text-8xl lg:text-[10rem]">
-            <TextReveal text="Software" delay={0.1} />
-            <br />
-            <span className="italic text-accent">
-              <TextReveal text="Engineer." delay={0.3} />
-            </span>
+    <div ref={homeRef} className="adventure-home">
+      <section className="adventure-hero" aria-labelledby="intro-title">
+        <div className="adventure-hero__copy" data-enter="bubble">
+          <p className="adventure-eyebrow">Software engineer · Jakarta</p>
+          <h1 id="intro-title">
+            Hi, I'm <em>Adryan.</em>
           </h1>
-
-          <Reveal delay={0.5}>
-            <p className="mt-10 max-w-xl font-mono text-base leading-relaxed text-text-secondary md:text-lg">
-              I'm Adryan Eka Vandra. I build web and mobile applications with a focus on performance, shipping fast, and creating real business impact.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.65}>
-            <div className="mt-12 flex flex-wrap items-center gap-6">
-              <Link
-                to="/portfolio"
-                className="group flex items-center gap-3 bg-text-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-bg-primary transition-all hover:bg-accent hover:text-accent-fg brutal-border border-text-primary"
-              >
-                View Work
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-
-              <Link
-                to="/about"
-                className="group flex items-center gap-3 bg-bg-secondary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-text-primary transition-all hover:border-accent hover:text-accent brutal-border"
-              >
-                About Me
-              </Link>
-            </div>
-          </Reveal>
+          <p className="adventure-hero__summary">
+            I work on mobile apps, backend systems, and delivery infrastructure.
+          </p>
+          <div className="adventure-actions">
+            <a className="adventure-button adventure-button--primary" href="#selected-work">
+              See my work
+              <ArrowRight aria-hidden="true" />
+            </a>
+            <Link className="adventure-button adventure-button--secondary" to="/contact">
+              Get in touch
+            </Link>
+          </div>
         </div>
 
-        <Reveal direction="right" delay={0.4} className="hidden lg:flex flex-col justify-center">
-          <div className="brutal-border brutal-shadow-lg bg-bg-secondary p-8 relative">
-            <div className="absolute -top-3 -right-3 h-6 w-6 border-2 border-text-primary bg-accent" />
-            <div className="mb-6 flex items-center gap-3 border-b-2 border-border pb-4">
-              <Terminal className="h-5 w-5 text-text-primary" />
-              <span className="font-mono text-xs font-bold uppercase tracking-widest text-text-primary">
-                adryanev@web ~
+        <PortfolioScene3D />
+      </section>
+
+      {leadProject ? (
+        <section
+          className="adventure-work"
+          data-enter="panel"
+          id="selected-work"
+          aria-labelledby="selected-work-title"
+        >
+          <Link
+            to="/portfolio/$category/$slug"
+            params={{
+              category: leadProject.category.slug,
+              slug: leadProject.slug,
+            }}
+            className="adventure-work__lead"
+            data-project-card
+          >
+            <div>
+              <span className="adventure-label">
+                Featured work · {leadProject.year.toString()}
+              </span>
+              <h2 id="selected-work-title">{leadProject.title}</h2>
+              <p>
+                {leadProject.role} · {leadProject.workplace}
+              </p>
+            </div>
+            <div className="adventure-work__evidence">
+              <div className="adventure-tags" aria-label="Technologies">
+                {leadProject.technology.slice(0, 5).map((technology: string) => (
+                  <span key={technology}>{technology}</span>
+                ))}
+              </div>
+              <span className="adventure-work__link">
+                Open case study
+                <ArrowRight aria-hidden="true" />
               </span>
             </div>
-            <div className="font-mono text-sm leading-loose text-text-secondary space-y-1">
-              <p><span className="text-accent font-bold">$</span> init --sequence start</p>
-              <p className="text-text-primary">{'>'} Booting core modules...</p>
-              <p><span className="text-accent font-bold">$</span> load --module skills</p>
-              <p className="text-text-primary">{'>'} React, Node.js, Go, Postgres</p>
-              <p><span className="text-accent font-bold">$</span> status</p>
-              <p className="text-accent font-bold animate-pulse motion-reduce:animate-none">{'>'} Awaiting input_</p>
+          </Link>
+
+          {supportingProjects.length > 0 ? (
+            <div className="adventure-work__index" aria-label="More selected work">
+              {supportingProjects.map((project: Project) => (
+                <Link
+                  key={project.id}
+                  to="/portfolio/$category/$slug"
+                  params={{
+                    category: project.category.slug,
+                    slug: project.slug,
+                  }}
+                  data-project-card
+                >
+                  <span className="adventure-label">
+                    {project.year.toString()} · {project.category.name}
+                  </span>
+                  <h3>{project.title}</h3>
+                  <p>{project.role} · {project.workplace}</p>
+                  <span className="adventure-work__link">
+                    View project
+                    <ArrowRight aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
             </div>
-          </div>
-        </Reveal>
-      </div>
+          ) : null}
+        </section>
+      ) : null}
 
-      {/* Latest Blog Posts — #2: stronger card borders, #7: softer dividers, #9: better tag contrast */}
-      {latestPosts.length > 0 && (
-        <section className="border-t-2 border-text-primary dark:border-border pt-16">
-          <Reveal>
-            <SectionHeader
-              title="Latest Posts"
-              linkTo="/blog"
-              linkLabel="All Posts"
-            />
-          </Reveal>
-          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post: Post) => (
-              <StaggerItem key={post.id}>
-                <Link
-                  to="/blog/$slug"
-                  params={{ slug: post.slug }}
-                  className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
-                >
-                  <div>
-                    <time className="font-mono text-sm font-bold text-accent uppercase tracking-widest">
+      <section className="adventure-closing" data-enter="panel" aria-label="Writing and contact">
+        <article className="adventure-writing">
+          <p className="adventure-eyebrow">Writing</p>
+          <h2>I write about the work.</h2>
+          <p>Technical notes, project decisions, and operational documentation.</p>
+          {latestPosts.length > 0 ? (
+            <ul className="adventure-writing__list">
+              {latestPosts.slice(0, 2).map((post: Post) => (
+                <li key={post.id}>
+                  <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                    <span>{post.title}</span>
+                    <time dateTime={post.publishedAt?.toISOString()}>
                       {post.publishedAt
-                        ? new Intl.DateTimeFormat('en-CA').format(new Date(post.publishedAt)).replace(/-/g, '.')
-                        : 'DRAFT'}
+                        ? new Intl.DateTimeFormat('en', {
+                            month: 'short',
+                            year: 'numeric',
+                          }).format(new Date(post.publishedAt))
+                        : 'Draft'}
                     </time>
-                    <h3 className="mt-4 font-serif text-3xl font-bold leading-tight group-hover:italic transition-all">
-                      {post.title}
-                    </h3>
-                    {post.excerpt && (
-                      <p className="mt-4 font-sans text-text-secondary line-clamp-2">
-                        {post.excerpt}
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-8 flex flex-wrap gap-2">
-                    {post.postsToTags.map((pt) => (
-                      <span
-                        key={pt.tag.id}
-                        className="bg-bg-primary px-2 py-1 font-mono text-xs uppercase tracking-widest text-text-primary border border-border"
-                      >
-                        {pt.tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        </section>
-      )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <Link
+            className="adventure-text-link"
+            to="/blog"
+            search={{ page: undefined, tag: undefined }}
+          >
+            Browse writing
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </article>
 
-      {/* Featured Projects */}
-      {featuredProjects.length > 0 && (
-        <section className="border-t-2 border-text-primary dark:border-border pt-16">
-          <Reveal>
-            <SectionHeader
-              title="Featured Projects"
-              linkTo="/portfolio"
-              linkLabel="All Projects"
-            />
-          </Reveal>
-          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2">
-            {featuredProjects.map((project: Project) => (
-              <StaggerItem key={project.id}>
-                <Link
-                  to="/portfolio/$category"
-                  params={{ category: project.category.slug }}
-                  className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
-                >
-                  <div>
-                    <div className="flex items-start justify-between border-b-2 border-border pb-4 group-hover:border-text-primary transition-colors">
-                      <div>
-                        <h3 className="font-serif text-4xl font-bold leading-tight group-hover:italic transition-all">
-                          {project.title}
-                        </h3>
-                        <p className="mt-2 font-mono text-sm text-text-secondary">
-                          {project.role} · {project.workplace} · {project.year.toString()}
-                        </p>
-                      </div>
-                      <span className="bg-accent px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-accent-fg brutal-border">
-                        {project.category.name}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-8 flex flex-wrap gap-2">
-                    {project.technology.slice(0, 5).map((tech) => (
-                      <span
-                        key={tech}
-                        className="bg-bg-primary px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-text-primary border border-border group-hover:text-accent transition-colors"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        </section>
-      )}
-
-      {/* Active SaaS — #5: show "Coming Soon" when no URL */}
-      {activeSaas.length > 0 && (
-        <section className="border-t-2 border-text-primary dark:border-border pt-16">
-          <Reveal>
-            <SectionHeader
-              title="Products"
-              linkTo="/saas"
-              linkLabel="All Products"
-            />
-          </Reveal>
-          <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {activeSaas.map((saas: Saas) => (
-              <StaggerItem key={saas.id}>
-                <div className="group flex h-full flex-col justify-between brutal-border bg-bg-secondary p-8">
-                  <div>
-                    <div className="flex items-center gap-4 border-b-2 border-border pb-4">
-                      {saas.logoUrl && (
-                        <img
-                          src={saas.logoUrl}
-                          alt={saas.name}
-                          loading="lazy"
-                          className="h-10 w-10 brutal-border bg-bg-primary"
-                        />
-                      )}
-                      <h3 className="font-serif text-2xl font-bold">{saas.name}</h3>
-                      <StatusBadge status={saas.status} />
-                    </div>
-                    <p className="mt-6 font-sans text-text-secondary line-clamp-3">
-                      {saas.description}
-                    </p>
-                  </div>
-                  {saas.url ? (
-                    <a
-                      href={saas.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-8 inline-flex items-center gap-2 font-mono text-sm font-bold uppercase tracking-widest text-text-primary hover:text-accent transition-colors"
-                    >
-                      Visit <ArrowRight className="h-4 w-4" />
-                    </a>
-                  ) : (
-                    <span className="mt-8 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-text-secondary">
-                      Coming Soon
-                    </span>
-                  )}
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        </section>
-      )}
-
-      {/* #4: Moved watermark behind hero only, not overlapping content sections */}
-      <div className="pointer-events-none absolute top-[60vh] right-0 overflow-hidden opacity-[0.02] z-0">
-        <span className="font-serif text-[25vw] font-bold leading-none tracking-tighter">
-          ADRYAN
-        </span>
-      </div>
+        <Link className="adventure-contact" to="/contact">
+          <span className="adventure-eyebrow">Contact</span>
+          <h2>Have something to discuss?</h2>
+          <p>Send a note about the role, project, or problem you're working on.</p>
+          <span className="adventure-contact__link">
+            Get in touch
+            <ArrowRight aria-hidden="true" />
+          </span>
+        </Link>
+      </section>
     </div>
-  )
-}
-
-function SectionHeader({
-  title,
-  linkTo,
-  linkLabel,
-}: {
-  title: string
-  linkTo: string
-  linkLabel: string
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <h2 className="font-serif text-3xl font-bold italic text-text-primary md:text-4xl">{title}</h2>
-      <Link
-        to={linkTo}
-        className="group flex items-center gap-2 bg-bg-secondary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-text-primary transition-colors hover:text-accent active:scale-95 brutal-border"
-      >
-        {linkLabel} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-      </Link>
-    </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: 'bg-accent text-accent-fg',
-    beta: 'bg-accent/20 text-accent border-accent',
-    retired: 'bg-text-secondary/20 text-text-secondary',
-  }
-  return (
-    <span
-      className={cn(
-        'ml-auto px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest brutal-border',
-        colors[status] ?? colors.active,
-      )}
-    >
-      {status}
-    </span>
   )
 }

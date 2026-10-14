@@ -18,6 +18,8 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [markdownInput, setMarkdownInput] = useState('')
+  const [editorError, setEditorError] = useState('')
+  const [editorReady, setEditorReady] = useState(false)
   onChangeRef.current = onChange
 
   const uploadFn = useServerFn(upload)
@@ -159,10 +161,12 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
       editor = new EditorJS(config)
       await editor.isReady
       editorRef.current = editor
+      setEditorReady(true)
     }
 
     init().catch(() => {
       initializedRef.current = false
+      setEditorError('The editor could not load. Reload this page before editing or saving content.')
     })
 
     return () => {
@@ -177,21 +181,26 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
 
   const handleImportMarkdown = useCallback(() => {
     if (!markdownInput.trim() || !editorRef.current) return
+    if (value?.blocks.length && !window.confirm('Replace the current editor content with this Markdown?')) return
     const data = markdownToEditorJs(markdownInput)
     editorRef.current.render(data).then(() => {
       onChangeRef.current(data)
       setMarkdownInput('')
       setShowImport(false)
-    })
-  }, [markdownInput])
+    }).catch(() => setEditorError('Markdown could not be imported. Please try again.'))
+  }, [markdownInput, value])
 
   return (
     <div>
+      {!editorReady && !editorError && <p role="status" className="mb-3 text-sm text-text-secondary">Loading editor…</p>}
+      {editorError && <p role="alert" className="admin-feedback">{editorError}</p>}
       <div className="flex items-center justify-end mb-2">
         <button
           type="button"
+          disabled={!editorReady}
+          aria-expanded={showImport}
           onClick={() => setShowImport(!showImport)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)] border border-[var(--border-color)] rounded hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)] border border-[var(--border-color)] rounded hover:text-[var(--admin-link)] hover:border-[var(--accent)] transition-colors"
         >
           <FileText className="h-3.5 w-3.5" />
           Import Markdown
@@ -223,6 +232,7 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
             </div>
           </div>
           <textarea
+            aria-label="Markdown to import"
             value={markdownInput}
             onChange={(e) => setMarkdownInput(e.target.value)}
             placeholder={'# Heading\n\nParagraph text with **bold** and *italic*.\n\n```typescript\nconst x = 1\n```'}

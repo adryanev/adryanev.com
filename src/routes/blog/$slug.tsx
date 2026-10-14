@@ -16,8 +16,8 @@ export const Route = createFileRoute('/blog/$slug')({
   },
   component: BlogPostPage,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-      <p className="font-mono text-6xl font-bold text-accent">404</p>
+    <div className="chapter-page chapter-notice mx-auto max-w-4xl px-6 py-20 text-center">
+      <h1 className="text-4xl font-bold">Article not found</h1>
       <p className="mt-4 font-sans text-lg text-text-secondary">Post not found</p>
       <Link
         to="/blog"
@@ -115,7 +115,7 @@ function BlogPostPage() {
             btn.textContent = 'Copy'
             delete btn.dataset.copied
           }, 2000)
-        })
+        }).catch(() => { btn.textContent = 'Select code to copy'; btn.setAttribute('aria-label', 'Clipboard unavailable. Select the code and copy it manually.') })
       })
       pre.appendChild(btn)
       buttons.push(btn)
@@ -128,7 +128,7 @@ function BlogPostPage() {
   useMermaidRenderer(contentRef, post.html, true)
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12 md:py-24">
+    <article className="chapter-page chapter-article mx-auto max-w-3xl px-6 py-12 md:py-24">
       <Link
         to="/blog"
         search={{ page: undefined, tag: undefined }}
@@ -147,11 +147,11 @@ function BlogPostPage() {
         />
       )}
 
-      <h1 className="mt-8 font-serif text-4xl font-bold leading-tight text-text-primary md:text-6xl">
+      <h1 className="chapter-article__title mt-8 font-serif text-4xl font-bold leading-tight text-text-primary md:text-6xl">
         {post.title}
       </h1>
 
-      <div className="mt-6 flex items-center gap-6 font-mono text-sm text-text-secondary">
+      <div className="chapter-article__metadata mt-6 flex items-center gap-6 font-mono text-sm text-text-secondary">
         {post.publishedAt && (
           <span className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-accent" />
@@ -195,7 +195,7 @@ function BlogPostPage() {
       <div
         ref={contentRef}
         className={cn(
-          'prose dark:prose-invert max-w-none',
+          'chapter-prose prose dark:prose-invert max-w-none',
           'prose-headings:font-serif prose-headings:font-bold prose-headings:text-text-primary',
           'prose-p:font-sans prose-p:text-text-secondary prose-p:leading-relaxed',
           'prose-a:text-accent prose-a:underline prose-a:decoration-accent/40 prose-a:underline-offset-2 hover:prose-a:decoration-accent',

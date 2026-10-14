@@ -43,7 +43,7 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
     setDirty(changed)
   }, [url, events, active])
 
-  useUnsavedChanges(dirty)
+  const allowNavigation = useUnsavedChanges(dirty)
 
   const createFn = useServerFn(createWebhook)
   const updateFn = useServerFn(updateWebhook)
@@ -55,6 +55,7 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
       return createFn({ data })
     },
     onSuccess: (result) => {
+      allowNavigation()
       if (!isEditing && result && 'secret' in result && typeof result.secret === 'string') {
         setNewSecret(result.secret)
       } else {

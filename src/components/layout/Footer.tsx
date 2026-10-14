@@ -1,4 +1,7 @@
+import { Link } from '@tanstack/react-router'
 import { Github, Linkedin, Mail } from 'lucide-react'
+import { useRef } from 'react'
+import { useEntrance } from '@/components/motion/Reveal'
 
 const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/adryanev', icon: Github },
@@ -7,42 +10,32 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEntrance(ref, { direction: 'none' })
   return (
-    <footer className="mt-auto border-t-2 border-text-primary bg-bg-secondary relative overflow-hidden">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-12 md:flex-row md:py-16">
-        <div className="text-center md:text-left z-10">
-          <p className="font-serif text-3xl font-bold italic text-text-primary">
-            Adryan Eka Vandra
-          </p>
-          <p className="mt-2 font-mono text-xs text-text-secondary tracking-wider">
-            Software Engineer · {new Date().getFullYear()}
-          </p>
+    <footer className="site-footer">
+      <div ref={ref} className="site-footer__inner">
+        <div>
+          <strong>Adryan Eka Vandra</strong>
+          <span>Software Engineer · Jakarta · {new Date().getFullYear()}</span>
         </div>
 
-        <div className="flex items-center gap-4 z-10">
-          {socialLinks.map(({ label, href, icon: Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex h-12 w-12 items-center justify-center bg-bg-primary brutal-border text-text-primary transition-colors hover:bg-accent hover:text-accent-fg hover:border-text-primary"
-              aria-label={label}
-              title={label}
-            >
-              <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+        <nav aria-label="Footer navigation">
+          <Link to="/portfolio">Work</Link>
+          <Link to="/blog" search={{ page: undefined, tag: undefined }}>
+            Writing
+          </Link>
+          <Link to="/resume">Resume</Link>
+          <Link to="/contact">Contact</Link>
+          {socialLinks.slice(0, 2).map(({ label, href }) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer">
+              {label}
             </a>
           ))}
-        </div>
-        <div className="text-center sm:text-right z-10">
-          <p className="font-mono text-xs text-text-secondary tracking-wider">
-            &copy; {new Date().getFullYear()} All rights reserved
-          </p>
-          <p className="mt-1 hidden font-mono text-xs text-text-secondary tracking-wider sm:block pointer-coarse:hidden">
-            Press{' '}
-            <kbd className="rounded bg-bg-primary px-1.5 py-0.5 border border-border text-text-primary">Ctrl+`</kbd>{' '}
-            for terminal
-          </p>
+        </nav>
+        <div className="site-tools" aria-label="Website tools">
+          <button onClick={() => window.dispatchEvent(new Event('site:search'))}>Search <span aria-hidden="true">⌘K</span></button>
+          <button onClick={() => window.dispatchEvent(new Event('site:terminal'))}>Open terminal</button>
         </div>
       </div>
     </footer>

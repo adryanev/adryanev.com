@@ -3,10 +3,12 @@ import { QueryClient } from '@tanstack/react-query'
 import { routerWithQueryClient } from '@tanstack/react-router-with-query'
 import { routeTree } from './routeTree.gen'
 
+import { RouteError, RoutePending } from '@/components/layout/RouteState'
+
 export function createAppRouter() {
   const queryClient = new QueryClient()
   // @ts-expect-error — routerWithQueryClient wrapper type is incompatible with Register
-  return routerWithQueryClient(createRouter({ routeTree }), queryClient)
+  return routerWithQueryClient(createRouter({ routeTree, defaultPendingComponent: RoutePending, defaultErrorComponent: RouteError }), queryClient)
 }
 
 export const router = createAppRouter()

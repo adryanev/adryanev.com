@@ -71,7 +71,7 @@ function Input({ placeholder = 'Add tag...' }: { placeholder?: string }) {
       <button
         type="button"
         onClick={addTag}
-        className="border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-xs font-semibold uppercase text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+        className="border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-xs font-semibold uppercase text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--accent)] hover:text-[var(--admin-link)] transition-colors"
       >
         Add
       </button>
@@ -89,7 +89,7 @@ function List() {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="flex items-center gap-1 border border-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 text-xs text-[var(--accent)]"
+          className="flex items-center gap-1 border border-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 text-xs text-[var(--admin-link)]"
         >
           {tag}
           <button

@@ -1,9 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Eye } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { ArrowRight } from 'lucide-react'
 import { getPublishedPosts, getAllTags } from '@/server/functions/public.functions'
 import { getPostViewCounts } from '@/server/functions/views.functions'
-import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
@@ -37,150 +35,46 @@ export const Route = createFileRoute('/blog/')({
 })
 
 function BlogListPage() {
-  const { posts, total, page, totalPages, tags, currentTag, views } = Route.useLoaderData()
+  const { posts, page, totalPages, tags, currentTag, views } = Route.useLoaderData()
   const navigate = Route.useNavigate()
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
-      <Reveal>
-        <div className="mb-16 border-b-4 border-text-primary pb-8">
-          <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
-            Blog
-          </h1>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="h-4 w-4 bg-accent brutal-border" />
-            <span className="font-mono text-sm text-text-secondary tracking-wider">
-              Engineering & Design
-            </span>
+    <div className="chapter-page chapter-blog mx-auto">
+      <header className="chapter-header">
+        <h1>Writing</h1>
+        <p>Notes on engineering, design, and the work behind software.</p>
+      </header>
+      {tags.length > 0 && <nav className="topic-filters" aria-label="Filter articles by topic">
+        <button aria-pressed={!currentTag} onClick={() => navigate({ search: { page: undefined, tag: undefined } })}>All articles</button>
+        {tags.map((tag) => <button key={tag.id} aria-pressed={currentTag === tag.slug}
+          onClick={() => navigate({ search: { page: undefined, tag: tag.slug } })}>{tag.name} <span>({tag.postCount})</span></button>)}
+      </nav>}
+      {posts.length === 0 ? <section className="page-empty">
+        <h2>{currentTag ? 'No articles for this topic' : 'No articles published yet'}</h2>
+        <p>{currentTag ? 'Choose another topic or browse all articles.' : 'New articles will appear here when they are published.'}</p>
+        {currentTag && <button className="page-button page-button--quiet" onClick={() => navigate({ search: { page: undefined, tag: undefined } })}>Show all articles</button>}
+      </section> : <div className="writing-index">
+        {posts.map((post) => <article className="writing-entry" key={post.id}>
+          <div className="writing-entry__meta">
+            {post.publishedAt && <time dateTime={new Date(post.publishedAt).toISOString()}>
+              {new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(post.publishedAt))}
+            </time>}
+            {(views as Record<number, number>)[post.id] > 0 && <span>{(views as Record<number, number>)[post.id].toLocaleString()} views</span>}
           </div>
-        </div>
-      </Reveal>
-
-      {/* Tag filter */}
-      {tags.length > 0 && (
-        <Reveal delay={0.1}>
-          <div className="mb-12 flex flex-wrap gap-3">
-            <button
-              onClick={() => navigate({ search: { page: undefined, tag: undefined } })}
-              className={cn(
-                'px-4 py-2 font-mono text-sm brutal-border transition-colors',
-                !currentTag
-                  ? 'bg-text-primary text-bg-primary'
-                  : 'bg-bg-secondary text-text-primary hover:text-accent hover:border-accent'
-              )}
-            >
-              All [{total}]
-            </button>
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => navigate({ search: { page: undefined, tag: tag.slug } })}
-                className={cn(
-                  'px-4 py-2 font-mono text-sm brutal-border transition-colors',
-                  currentTag === tag.slug
-                    ? 'bg-text-primary text-bg-primary'
-                    : 'bg-bg-secondary text-text-primary hover:text-accent hover:border-accent'
-                )}
-              >
-                {tag.name} [{tag.postCount}]
-              </button>
-            ))}
-          </div>
-        </Reveal>
-      )}
-
-      {posts.length === 0 ? (
-        <div className="mt-12 text-center text-text-secondary font-serif text-2xl italic">
-          No posts found.
-        </div>
-      ) : (
-        <StaggerChildren className="grid gap-10">
-          {posts.map((post) => (
-            <StaggerItem key={post.id}>
-              <article
-                className="group relative grid gap-6 brutal-border bg-bg-secondary p-8 transition-all hover:-translate-y-1 hover:brutal-shadow"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 group-hover:border-text-primary transition-colors">
-                  <div className="flex items-center gap-4">
-                    <time className="font-mono text-sm font-bold text-accent">
-                      {post.publishedAt ? new Intl.DateTimeFormat('en-CA').format(new Date(post.publishedAt)).replace(/-/g, '.') : 'DRAFT'}
-                    </time>
-                    {(views as Record<number, number>)[post.id] > 0 && (
-                      <span className="flex items-center gap-1.5 font-mono text-xs text-text-secondary">
-                        <Eye className="h-3.5 w-3.5" />
-                        {(views as Record<number, number>)[post.id].toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {post.postsToTags.map((pt) => (
-                      <span key={pt.tag.id} className="font-mono text-xs text-text-secondary">
-                        {pt.tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Link to="/blog/$slug" params={{ slug: post.slug }} className="block">
-                    <h2 className="font-serif text-3xl md:text-5xl font-bold leading-tight text-text-primary mb-4 group-hover:italic transition-all">
-                      {post.title}
-                    </h2>
-                  </Link>
-                  {post.excerpt && (
-                    <p className="font-sans text-lg text-text-secondary max-w-3xl">
-                      {post.excerpt}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-2 flex">
-                  <Link
-                    to="/blog/$slug"
-                    params={{ slug: post.slug }}
-                    className="inline-flex items-center gap-2 font-mono text-sm font-bold text-text-primary hover:text-accent transition-colors"
-                  >
-                    Read More
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
-                  </Link>
-                </div>
-              </article>
-            </StaggerItem>
-          ))}
-        </StaggerChildren>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Reveal>
-          <div className="mt-16 pt-8 border-t-2 border-text-primary flex justify-between items-center">
-            {page > 1 ? (
-              <button
-                onClick={() => navigate({ search: { page: page - 1, tag: currentTag ?? undefined } })}
-                className="px-6 py-3 font-mono text-sm font-bold bg-bg-primary brutal-border transition-colors hover:text-accent hover:border-accent"
-              >
-                &lt; Previous
-              </button>
-            ) : <div />}
-            <span className="font-mono text-sm text-text-secondary tabular-nums">
-              Page {page} / {totalPages}
-            </span>
-            {page < totalPages ? (
-              <button
-                onClick={() => navigate({ search: { page: page + 1, tag: currentTag ?? undefined } })}
-                className="px-6 py-3 font-mono text-sm font-bold bg-bg-primary brutal-border transition-colors hover:text-accent hover:border-accent"
-              >
-                Next &gt;
-              </button>
-            ) : <div />}
-          </div>
-        </Reveal>
-      )}
-
-      {/* Newsletter */}
-      <Reveal>
-        <SubscribeForm className="mt-16" />
-      </Reveal>
+          <h2><Link to="/blog/$slug" params={{ slug: post.slug }}>{post.title}</Link></h2>
+          {post.excerpt && <p>{post.excerpt}</p>}
+          <div className="writing-entry__topics">{post.postsToTags.map((pt) => <span key={pt.tag.id}>{pt.tag.name}</span>)}</div>
+          <Link className="writing-entry__link" to="/blog/$slug" params={{ slug: post.slug }}>Read article <ArrowRight size={18} aria-hidden="true" /></Link>
+        </article>)}
+      </div>}
+      {totalPages > 1 && <nav className="page-pagination" aria-label="Article pages">
+        <button className="page-button page-button--quiet" disabled={page <= 1}
+          onClick={() => navigate({ search: { page: page - 1, tag: currentTag ?? undefined } })}>Previous</button>
+        <span aria-current="page">Page {page} of {totalPages}</span>
+        <button className="page-button page-button--quiet" disabled={page >= totalPages}
+          onClick={() => navigate({ search: { page: page + 1, tag: currentTag ?? undefined } })}>Next</button>
+      </nav>}
+      <SubscribeForm />
     </div>
   )
 }

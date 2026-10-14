@@ -42,9 +42,9 @@ function ResumePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
+    <div className="chapter-page chapter-resume mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
       <Reveal>
-        <div className="mb-16 border-b-4 border-text-primary pb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="chapter-header mb-16 border-b-4 border-text-primary pb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
             <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
               CV
@@ -147,7 +147,7 @@ function ResumePage() {
             </h2>
           </Reveal>
 
-          <StaggerChildren className="space-y-10 relative before:absolute before:top-0 before:bottom-0 before:left-[19px] before:w-[2px] before:bg-border">
+          <StaggerChildren className="chapter-resume__timeline space-y-10 relative before:absolute before:top-0 before:bottom-0 before:left-[19px] before:w-[2px] before:bg-border">
             {resume.experience.map((job: Experience) => (
               <StaggerItem key={job.id}>
                 <div className="relative pl-14 group">

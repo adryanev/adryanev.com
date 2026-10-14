@@ -3,9 +3,9 @@ import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Mail, MailOpen, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { getContacts, markContactRead, deleteContact } from '@/server/functions/contacts.functions'
 
+import { FormError } from '@/components/admin/form/FormError'
 export const Route = createFileRoute('/admin/_layout/contacts')({
   loader: () => getContacts(),
   component: ContactsPage,
@@ -15,110 +15,28 @@ function ContactsPage() {
   const contacts = Route.useLoaderData()
   const router = useRouter()
   const [expandedId, setExpandedId] = useState<number | null>(null)
-
   const markReadFn = useServerFn(markContactRead)
   const deleteFn = useServerFn(deleteContact)
-
-  const markReadMut = useMutation({
-    mutationFn: (data: { id: number; isRead: boolean }) =>
-      markReadFn({ data }),
-    onSuccess: () => router.invalidate(),
-  })
-
-  const deleteMut = useMutation({
-    mutationFn: (id: number) => deleteFn({ data: { id } }),
-    onSuccess: () => router.invalidate(),
-  })
-
-  return (
-    <div>
-      <h1 className="text-2xl font-bold">Contact Messages</h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        {contacts.filter((c) => !c.isRead).length} unread
-      </p>
-
-      {contacts.length === 0 ? (
-        <div className="mt-12 text-center text-slate-500">No messages yet.</div>
-      ) : (
-        <div className="mt-6 space-y-2">
-          {contacts.map((contact) => (
-            <div
-              key={contact.id}
-              className={cn(
-                'rounded-lg border transition-colors',
-                contact.isRead
-                  ? 'border-slate-200 dark:border-slate-800'
-                  : 'border-accent/30 bg-accent/5',
-              )}
-            >
-              <div
-                className="flex cursor-pointer items-center justify-between px-4 py-3"
-                onClick={() => {
-                  setExpandedId(expandedId === contact.id ? null : contact.id)
-                  if (!contact.isRead) {
-                    markReadMut.mutate({ id: contact.id, isRead: true })
-                  }
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  {contact.isRead ? (
-                    <MailOpen className="h-4 w-4 text-slate-400" />
-                  ) : (
-                    <Mail className="h-4 w-4 text-accent" />
-                  )}
-                  <div>
-                    <p className={cn('text-sm', !contact.isRead && 'font-semibold')}>
-                      {contact.name}{' '}
-                      <span className="text-slate-400">({contact.email})</span>
-                    </p>
-                    {contact.subject && (
-                      <p className="text-xs text-slate-500">{contact.subject}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">
-                    {new Date(contact.createdAt).toLocaleDateString()}
-                  </span>
-                  {expandedId === contact.id ? (
-                    <ChevronUp className="h-4 w-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
-                  )}
-                </div>
-              </div>
-
-              {expandedId === contact.id && (
-                <div className="border-t border-slate-200 px-4 py-3 dark:border-slate-800">
-                  <p className="whitespace-pre-wrap text-sm">{contact.message}</p>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() =>
-                        markReadMut.mutate({
-                          id: contact.id,
-                          isRead: !contact.isRead,
-                        })
-                      }
-                      className="text-xs text-slate-500 hover:text-accent"
-                    >
-                      Mark as {contact.isRead ? 'unread' : 'read'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm('Delete this message?'))
-                          deleteMut.mutate(contact.id)
-                      }}
-                      className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-500"
-                    >
-                      <Trash2 className="h-3 w-3" /> Delete
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  const markReadMut = useMutation({ mutationFn: (data: { id: number; isRead: boolean }) => markReadFn({ data }), onSuccess: () => router.invalidate() })
+  const deleteMut = useMutation({ mutationFn: (id: number) => deleteFn({ data: { id } }), onSuccess: () => router.invalidate() })
+  return <div>
+    <header><div><h1>Messages</h1><p>{contacts.filter((contact) => !contact.isRead).length} unread messages</p></div></header>
+    <FormError message={markReadMut.isError || deleteMut.isError ? 'The message could not be updated. Please try again.' : ''} />
+    {contacts.length === 0 ? <section className="page-empty"><h2>Your inbox is clear</h2><p>Messages from the public contact form appear here.</p></section> :
+      <div className="admin-inbox">{contacts.map((contact) => <article key={contact.id} className="admin-message" data-unread={!contact.isRead}>
+        <button className="admin-message__summary" aria-expanded={expandedId === contact.id} aria-controls={'message-' + contact.id}
+          onClick={() => { setExpandedId(expandedId === contact.id ? null : contact.id); if (!contact.isRead) markReadMut.mutate({ id: contact.id, isRead: true }) }}>
+          {contact.isRead ? <MailOpen size={20} aria-hidden="true" /> : <Mail size={20} aria-hidden="true" />}
+          <span><strong>{contact.name}</strong><span>{contact.email}</span>{contact.subject && <span>{contact.subject}</span>}</span>
+          <span className="admin-message__date">{new Date(contact.createdAt).toLocaleDateString()}{expandedId === contact.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
+        </button>
+        {expandedId === contact.id && <div id={'message-' + contact.id} className="admin-message__body">
+          <p>{contact.message}</p><div className="page-actions">
+            <a className="admin-action admin-action--secondary" href={'mailto:' + contact.email}>Reply by email</a>
+            <button className="admin-action admin-action--secondary" disabled={markReadMut.isPending} onClick={() => markReadMut.mutate({ id: contact.id, isRead: !contact.isRead })}>Mark {contact.isRead ? 'unread' : 'read'}</button>
+            <button className="admin-action admin-action--secondary" disabled={deleteMut.isPending} onClick={() => { if (confirm('Delete this message from ' + contact.name + '?')) deleteMut.mutate(contact.id) }}><Trash2 size={16} /> Delete</button>
+          </div>
+        </div>}
+      </article>)}</div>}
+  </div>
 }

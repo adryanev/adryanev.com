@@ -20,6 +20,8 @@ import { useTheme } from '@/context/ThemeContext'
 import { useScrollLock } from '@/hooks/useScrollLock'
 import { searchContent } from '@/server/functions/search.functions'
 
+import { useDialogFocus } from '@/hooks/useDialogFocus'
+import { X } from 'lucide-react'
 const NAV_ITEMS = [
   { label: 'Home', to: '/', icon: Home, keywords: 'home start landing' },
   { label: 'About', to: '/about', icon: User, keywords: 'about bio info' },
@@ -33,196 +35,74 @@ const NAV_ITEMS = [
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<{
-    posts: { id: number; title: string; slug: string }[]
-    projects: { id: number; title: string; slug: string; category: { slug: string } }[]
-  }>({ posts: [], projects: [] })
+  const [results, setResults] = useState<{ posts: { id: number; title: string; slug: string }[]; projects: { id: number; title: string; slug: string; category: { slug: string } }[] }>({ posts: [], projects: [] })
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const searchFn = useServerFn(searchContent)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
-  const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const close = useCallback(() => setOpen(false), [])
+  useScrollLock(open)
+  useDialogFocus(open, dialogRef, close)
 
-  // Keyboard shortcut
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setOpen((prev) => !prev)
-      }
+    const toggle = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); window.dispatchEvent(new Event('site:close-terminal')); setOpen((value) => !value) }
     }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
+    const show = () => { window.dispatchEvent(new Event('site:close-terminal')); setOpen(true) }
+    document.addEventListener('keydown', toggle)
+    window.addEventListener('site:search', show)
+    window.addEventListener('site:close-search', close)
+    return () => { document.removeEventListener('keydown', toggle); window.removeEventListener('site:search', show); window.removeEventListener('site:close-search', close) }
   }, [])
 
-  // Lock body scroll when open
-  useScrollLock(open)
-
-  // Focus input when open
   useEffect(() => {
-    if (open) {
-      requestAnimationFrame(() => inputRef.current?.focus())
-    }
-  }, [open])
+    let cancelled = false
+    setResults({ posts: [], projects: [] })
+    if (!open || query.trim().length < 2) { setStatus('idle'); return }
+    setStatus('loading')
+    const timer = setTimeout(() => {
+      searchFn({ data: { query: query.trim() } }).then((data) => {
+        if (!cancelled) { setResults(data); setStatus('idle') }
+      }).catch(() => { if (!cancelled) setStatus('error') })
+    }, 300)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [query, open, searchFn])
 
-  // Debounced search
-  const handleSearch = useCallback(
-    (value: string) => {
-      setQuery(value)
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      if (value.trim().length < 2) {
-        setResults({ posts: [], projects: [] })
-        return
-      }
-      debounceRef.current = setTimeout(async () => {
-        const data = await searchFn({ data: { query: value } })
-        setResults(data)
-      }, 300)
-    },
-    [searchFn],
-  )
-
-  const go = (to: string) => {
-    setOpen(false)
-    setQuery('')
-    navigate({ to })
-  }
-
-  const handleSetTheme = (theme: 'light' | 'dark' | 'system') => {
-    setTheme(theme)
-    setOpen(false)
-  }
-
+  const go = (to: string) => { close(); setQuery(''); void navigate({ to }) }
+  const term = query.trim().toLowerCase()
+  const pages = NAV_ITEMS.filter((item) => (item.label + ' ' + item.keywords).toLowerCase().includes(term))
+  const themes = [{ label: 'Light', theme: 'light', icon: Sun }, { label: 'Dark', theme: 'dark', icon: Moon }, { label: 'System', theme: 'system', icon: Monitor }] as const
+  const visibleThemes = themes.filter((item) => (item.label + ' theme').toLowerCase().includes(term))
   if (!open) return null
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-text-primary/60 backdrop-blur-[2px]"
-        onClick={() => setOpen(false)}
-      />
-      <div className="relative w-full max-w-xl px-4 animate-in fade-in zoom-in-95 duration-200">
-        <Command
-          className="brutal-border brutal-shadow-lg bg-bg-primary overflow-hidden flex flex-col overscroll-contain"
-          shouldFilter={true}
-        >
-          <div className="flex items-center border-b-2 border-text-primary px-4 bg-bg-secondary">
-            <Search className="h-5 w-5 text-text-secondary mr-3" />
-            <Command.Input
-              ref={inputRef}
-              value={query}
-              onValueChange={handleSearch}
-              placeholder="Search pages, posts, projects…"
-              aria-label="Search"
-              className="w-full py-5 font-sans text-base text-text-primary outline-none placeholder:text-text-secondary bg-transparent"
-            />
-          </div>
-
-          <Command.List className="max-h-[60vh] overflow-y-auto p-2 scrollbar-thin">
-            <Command.Empty className="px-6 py-12 text-center">
-              <p className="font-serif text-2xl italic text-text-primary mb-2">No results</p>
-              <p className="font-mono text-xs text-text-secondary">Try a different search term</p>
-            </Command.Empty>
-
-            {/* Navigation */}
-            <Command.Group
-              heading="Pages"
-              className="px-4 pt-4 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
-            >
-              {NAV_ITEMS.map((item) => (
-                <Command.Item
-                  key={item.to}
-                  value={`${item.label} ${item.keywords}`}
-                  onSelect={() => go(item.to)}
-                  className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
-                >
-                  <item.icon className="h-5 w-5 shrink-0 text-text-secondary" />
-                  {item.label}
-                </Command.Item>
-              ))}
-            </Command.Group>
-
-            {/* Blog search results */}
-            {results.posts.length > 0 && (
-              <Command.Group
-                heading="Blog Posts"
-                className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
-              >
-                {results.posts.map((post) => (
-                  <Command.Item
-                    key={`post-${post.id}`}
-                    value={post.title}
-                    onSelect={() => go(`/blog/${post.slug}`)}
-                    className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
-                  >
-                    <FileText className="h-5 w-5 shrink-0 text-text-secondary" />
-                    {post.title}
-                  </Command.Item>
-                ))}
-              </Command.Group>
-            )}
-
-            {/* Project search results */}
-            {results.projects.length > 0 && (
-              <Command.Group
-                heading="Projects"
-                className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
-              >
-                {results.projects.map((project) => (
-                  <Command.Item
-                    key={`project-${project.id}`}
-                    value={project.title}
-                    onSelect={() =>
-                      go(`/portfolio/${project.category.slug}/${project.slug}`)
-                    }
-                    className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
-                  >
-                    <FolderOpen className="h-5 w-5 shrink-0 text-text-secondary" />
-                    {project.title}
-                  </Command.Item>
-                ))}
-              </Command.Group>
-            )}
-
-            {/* Theme */}
-            <Command.Group
-              heading="Theme"
-              className="px-4 pt-6 pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-accent"
-            >
-              {[
-                { label: 'Light', theme: 'light', icon: Sun },
-                { label: 'Dark', theme: 'dark', icon: Moon },
-                { label: 'System', theme: 'system', icon: Monitor },
-              ].map((t) => (
-                <Command.Item
-                  key={t.theme}
-                  value={`${t.label} theme`}
-                  onSelect={() => handleSetTheme(t.theme as any)}
-                  className="flex cursor-pointer items-center gap-4 border-2 border-transparent px-4 py-3 font-serif text-xl font-bold text-text-primary transition-colors aria-selected:border-text-primary aria-selected:bg-bg-secondary aria-selected:italic aria-selected:text-accent"
-                >
-                  <t.icon className="h-5 w-5 shrink-0 text-text-secondary" />
-                  {t.label}
-                </Command.Item>
-              ))}
-            </Command.Group>
-          </Command.List>
-
-          <div className="border-t-2 border-text-primary bg-bg-secondary px-6 py-3 flex items-center justify-between font-mono text-[10px] font-bold text-text-secondary tracking-wider">
-            <div className="flex gap-4">
-              <span>
-                <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">↑↓</kbd> Navigate
-              </span>
-              <span>
-                <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">↵</kbd> Select
-              </span>
-            </div>
-            <span>
-              <kbd className="brutal-border bg-bg-primary px-1.5 py-0.5 mr-1 text-text-primary">Esc</kbd> Close
-            </span>
-          </div>
-        </Command>
-      </div>
+  return <div className="chapter-search fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] px-4">
+    <div className="fixed inset-0 bg-text-primary/60" onClick={close} />
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Search website" className="relative w-full max-w-xl">
+      <Command shouldFilter={false} className="border-2 border-text-primary bg-bg-secondary flex flex-col overflow-hidden">
+        <div className="flex items-center gap-3 border-b-2 border-text-primary px-4">
+          <Search size={20} aria-hidden="true" />
+          <Command.Input data-dialog-autofocus value={query} onValueChange={setQuery} aria-label="Search pages, articles and projects" placeholder="Search pages, articles, projects…" className="w-full min-w-0 py-5 bg-transparent text-base outline-none" />
+          <button onClick={close} aria-label="Close search" className="min-w-11 min-h-11 flex items-center justify-center"><X size={20} /></button>
+        </div>
+        {status === 'loading' && <p className="chapter-search__status" role="status">Searching content…</p>}
+        {status === 'error' && <p className="chapter-search__status" role="alert">Search could not load. Change the search term to try again. Page links still work.</p>}
+        <Command.List className="max-h-[55dvh] overflow-y-auto p-2">
+          {status === 'idle' && !pages.length && !visibleThemes.length && !results.posts.length && !results.projects.length && <Command.Empty className="p-6 text-center">No results. Try another title or topic.</Command.Empty>}
+          {!!pages.length && <Command.Group heading="Pages" className="p-3">
+            {pages.map((item) => <Command.Item key={item.to} value={item.to} onSelect={() => go(item.to)} className="flex cursor-pointer items-center gap-3 px-3 py-2"><item.icon size={18} />{item.label}</Command.Item>)}
+          </Command.Group>}
+          {!!results.posts.length && <Command.Group heading="Articles" className="p-3">
+            {results.posts.map((post) => <Command.Item key={post.id} value={'post-' + post.id} onSelect={() => go('/blog/' + post.slug)} className="flex cursor-pointer items-center gap-3 px-3 py-2"><FileText size={18} />{post.title}</Command.Item>)}
+          </Command.Group>}
+          {!!results.projects.length && <Command.Group heading="Projects" className="p-3">
+            {results.projects.map((project) => <Command.Item key={project.id} value={'project-' + project.id} onSelect={() => go('/portfolio/' + project.category.slug + '/' + project.slug)} className="flex cursor-pointer items-center gap-3 px-3 py-2"><FolderOpen size={18} />{project.title}</Command.Item>)}
+          </Command.Group>}
+          {!!visibleThemes.length && <Command.Group heading="Appearance" className="p-3">
+            {visibleThemes.map((item) => <Command.Item key={item.theme} value={'theme-' + item.theme} onSelect={() => { setTheme(item.theme); close() }} className="flex cursor-pointer items-center gap-3 px-3 py-2"><item.icon size={18} />{item.label}</Command.Item>)}
+          </Command.Group>}
+        </Command.List>
+        <p className="border-t border-border px-5 py-3 text-xs text-text-secondary">Arrow keys to navigate · Enter to open · Esc to close</p>
+      </Command>
     </div>
-  )
+  </div>
 }

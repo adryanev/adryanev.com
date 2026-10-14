@@ -5,6 +5,7 @@ import { Users, Trash2, CheckCircle, Clock, UserMinus, ChevronLeft, ChevronRight
 import { cn } from '@/lib/utils'
 import { getSubscribers, getSubscriberStats, deleteSubscriber } from '@/server/functions/subscribers.functions'
 
+import { FormError } from '@/components/admin/form/FormError'
 export const Route = createFileRoute('/admin/_layout/subscribers')({
   validateSearch: (search: Record<string, unknown>) => ({
     page: Number(search.page) || 1,
@@ -40,6 +41,7 @@ function SubscribersPage() {
 
   return (
     <div>
+      <FormError message={deleteMut.isError ? 'The item could not be removed. Please try again.' : ''} />
       <header className="border-b border-[var(--border-color)] pb-4 mb-6">
         <h1 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
           <Users className="h-6 w-6" />
@@ -88,7 +90,7 @@ function SubscribersPage() {
                   <div className="flex items-center gap-4 min-w-0">
                     <StatusIcon className={cn('h-4 w-4 shrink-0', cfg.color)} />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                      <p className="text-sm font-medium text-[var(--text-primary)] break-all">
                         {sub.email}
                         {sub.name && (
                           <span className="ml-2 text-[var(--text-secondary)]">({sub.name})</span>
@@ -105,6 +107,7 @@ function SubscribersPage() {
                     </div>
                   </div>
                   <button
+                    disabled={deleteMut.isPending}
                     onClick={() => {
                       if (confirm(`Remove ${sub.email}?`)) deleteMut.mutate(sub.id)
                     }}

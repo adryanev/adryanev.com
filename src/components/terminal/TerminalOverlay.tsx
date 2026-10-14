@@ -4,6 +4,7 @@ import { X, Terminal as TerminalIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useScrollLock } from '@/hooks/useScrollLock'
 
+import { useDialogFocus } from '@/hooks/useDialogFocus'
 const HELP_TEXT = `Available commands:
   help      - Show this help message
   whoami    - Display info about me
@@ -20,7 +21,7 @@ ROLE: SOFTWARE ENGINEER
 LOCATION: INDONESIA
 GITHUB: github.com/adryanev
 EMAIL: me@adryanev.com
-STATUS: OPERATIONAL`
+`
 
 const FILE_SYSTEM: Record<string, { type: 'dir' | 'file'; children?: string[]; content?: string }> = {
   '/': { type: 'dir', children: ['about.md', 'resume/', 'blog/', 'portfolio/', 'saas/', 'contact.md'] },
@@ -48,9 +49,8 @@ type Line = { type: 'input' | 'output'; text: string }
 
 export function TerminalOverlay() {
   const [open, setOpen] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [lines, setLines] = useState<Line[]>([
-    { type: 'output', text: 'VANDRA_OS v2.0.4 — KERNEL: BRUTALIST_UI' },
+    { type: 'output', text: 'Portfolio terminal' },
     { type: 'output', text: 'Type "help" for available commands.' },
   ])
   const [input, setInput] = useState('')
@@ -59,23 +59,29 @@ export function TerminalOverlay() {
   const [cwd, setCwd] = useState('/')
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const close = useCallback(() => setOpen(false), [])
+  useDialogFocus(open, dialogRef, close)
   const navigate = useNavigate()
-
-  // Detect touch device after hydration
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window)
-  }, [])
 
   // Toggle with Ctrl+`
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault()
+        window.dispatchEvent(new Event('site:close-search'))
         setOpen((prev) => !prev)
       }
     }
     document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
+    const show = () => { window.dispatchEvent(new Event('site:close-search')); setOpen(true) }
+    window.addEventListener('site:terminal', show)
+    window.addEventListener('site:close-terminal', close)
+    return () => {
+      document.removeEventListener('keydown', handler)
+      window.removeEventListener('site:terminal', show)
+      window.removeEventListener('site:close-terminal', close)
+    }
   }, [])
 
   // Lock body scroll when opened
@@ -198,7 +204,7 @@ export function TerminalOverlay() {
             addLine('output', `err: invalid url '${arg}'`)
             break
           }
-          window.open(url, '_blank')
+          window.open(url, '_blank', 'noopener,noreferrer')
           addLine('output', `opening ${url}...`)
           break
         }
@@ -238,13 +244,10 @@ export function TerminalOverlay() {
     }
   }
 
-  // Hide on touch devices
-  if (isTouchDevice) return null
-
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="chapter-terminal fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-text-primary/80 backdrop-blur-[4px]"
@@ -253,6 +256,7 @@ export function TerminalOverlay() {
 
       {/* Terminal window */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Terminal"
@@ -280,10 +284,10 @@ export function TerminalOverlay() {
         {/* Terminal body */}
         <div
           ref={scrollRef}
-          className="h-[500px] overflow-y-auto p-8 font-mono text-sm leading-relaxed scrollbar-thin"
+          className="chapter-terminal__body overflow-y-auto font-mono text-sm leading-relaxed"
           onClick={() => inputRef.current?.focus()}
         >
-          <div className="space-y-2">
+          <div className="space-y-2" role="log" aria-live="polite" aria-relevant="additions">
             {lines.map((line, i) => (
               <div key={i} className={cn(
                 'whitespace-pre-wrap break-words',
@@ -291,7 +295,6 @@ export function TerminalOverlay() {
               )}>
                 {line.type === 'input' ? (
                   <span className="flex gap-2">
-                    <span className="opacity-50 tracking-tighter">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
                     <span>{line.text}</span>
                   </span>
                 ) : (
@@ -303,10 +306,10 @@ export function TerminalOverlay() {
 
           {/* Input line */}
           <div className="flex items-center gap-2 text-accent font-bold mt-4">
-            <span className="opacity-50 tracking-tighter">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
             <span>{cwd} $ </span>
             <input
               ref={inputRef}
+              data-dialog-autofocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -319,8 +322,8 @@ export function TerminalOverlay() {
         </div>
 
         {/* Footer info */}
-        <div className="border-t-2 border-text-primary bg-bg-secondary px-6 py-2 flex justify-between font-mono text-[10px] font-bold text-text-secondary tracking-wider">
-          <span>Secure</span>
+        <div className="border-t-2 border-text-primary bg-bg-secondary px-6 py-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[10px] font-bold text-text-secondary tracking-wider">
+          <span>Portfolio commands</span>
           <span>Ctrl+` to toggle</span>
           <span>Esc to close</span>
         </div>

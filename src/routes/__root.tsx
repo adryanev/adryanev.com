@@ -12,6 +12,8 @@ import { ThemeProvider } from '@/context/ThemeContext'
 import { websiteJsonLd, personJsonLd, jsonLdScript } from '@/lib/seo'
 import '../app.css'
 
+import '@/components/layout/public-pages.css'
+import { RouteError, RoutePending } from '@/components/layout/RouteState'
 const CommandPalette = lazy(() =>
   import('@/components/command-palette/CommandPalette').then((mod) => ({
     default: mod.CommandPalette,
@@ -35,12 +37,14 @@ const TanStackRouterDevtools = import.meta.env.DEV
 export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
+  pendingComponent: RoutePending,
+  errorComponent: RouteError,
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'theme-color', content: '#f4f0eb', media: '(prefers-color-scheme: light)' },
-      { name: 'theme-color', content: '#0a0a0a', media: '(prefers-color-scheme: dark)' },
+      { name: 'theme-color', content: '#f8e9bd', media: '(prefers-color-scheme: light)' },
+      { name: 'theme-color', content: '#111a1b', media: '(prefers-color-scheme: dark)' },
       { title: 'Adryan Eka Vandra — Software Engineer' },
       {
         name: 'description',
@@ -57,7 +61,7 @@ export const Route = createRootRoute({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Mono:wght@400;500&display=swap',
       },
       {
         rel: 'alternate',
@@ -87,73 +91,25 @@ export const Route = createRootRoute({
 })
 
 function NotFoundComponent() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center border-b border-border">
-      <div className="text-center p-12 brutal-border brutal-shadow bg-bg-primary dark:bg-bg-secondary">
-        <p className="font-serif text-8xl font-bold text-accent italic">404</p>
-        <p className="mt-4 font-serif text-2xl font-bold italic text-text-primary">
-          Page Not Found
-        </p>
-        <p className="mt-4 font-sans text-sm text-text-secondary">
-          The page you're looking for doesn't exist.
-        </p>
-        <a
-          href="/"
-          className="mt-8 inline-block brutal-border bg-accent px-8 py-3 text-sm font-bold uppercase tracking-wider text-accent-fg transition-colors hover:bg-text-primary hover:text-bg-primary"
-        >
-          Back to Home
-        </a>
-      </div>
-    </div>
-  )
+  return <div className="route-state"><h1>Page not found</h1><p>This address does not lead to a page. Browse the project archive or return home.</p><div className="page-actions"><a className="page-button" href="/portfolio">Explore work</a><a className="page-button page-button--quiet" href="/">Back home</a></div></div>
 }
 
 function RootComponent() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
   const isAdmin = pathname.startsWith('/admin')
-
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body
-        className="min-h-screen font-sans"
-        suppressHydrationWarning
-      >
-        {/* Skip link for keyboard navigation */}
-        {!isAdmin && (
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-accent focus:text-accent-fg focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:font-bold"
-          >
-            Skip to main content
-          </a>
-        )}
-        {isAdmin ? (
-          <Outlet />
-        ) : (
-          <ThemeProvider>
-            <div className="flex min-h-screen flex-col bg-bg-primary/95">
-              <Header />
-              <main id="main-content" className="flex-1 flex flex-col">
-                <Outlet />
-              </main>
-              <Footer />
-            </div>
-            <Suspense>
-              <CommandPalette />
-            </Suspense>
-            <Suspense>
-              <TerminalOverlay />
-            </Suspense>
-          </ThemeProvider>
-        )}
-        <Suspense>
-          <TanStackRouterDevtools />
-        </Suspense>
-        <Scripts />
-      </body>
-    </html>
-  )
+  return <html lang="en" suppressHydrationWarning>
+    <head><HeadContent /></head>
+    <body className="min-h-screen font-sans" suppressHydrationWarning>
+      <ThemeProvider>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-accent focus:text-accent-fg focus:px-4 focus:py-2">Skip to main content</a>
+        {isAdmin ? <Outlet /> : <>
+          <div className="public-site flex min-h-screen flex-col bg-bg-primary/95">
+            <Header /><main id="main-content" className="flex-1 flex flex-col"><Outlet /></main><Footer />
+          </div>
+          <Suspense><CommandPalette /></Suspense><Suspense><TerminalOverlay /></Suspense>
+        </>}
+      </ThemeProvider>
+      <Suspense><TanStackRouterDevtools /></Suspense><Scripts />
+    </body>
+  </html>
 }

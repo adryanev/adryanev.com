@@ -1,0 +1,12 @@
+.git
+node_modules
+.output
+.tanstack
+.impeccable
+.agents
+.claude
+.codex
+.serena
+.env*
+!.env.example
+assets/blender

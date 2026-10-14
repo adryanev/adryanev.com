@@ -18,18 +18,22 @@ The retained detector report contains 21 advisory font-size findings against the
 
 ## Local evidence
 
-Evidence is retained in the original checkout at `.impeccable/review/dashboard/`. This document reports the build thread's results from `verification.json` and `detector.json`; the documenter did not rerun tests, build or browser checks.
+Evidence is retained in the original checkout at `.impeccable/review/dashboard/`. This document reports retained evidence and the build thread's final results. The documenter did not rerun tests, build or browser checks.
 
 | Check | Recorded result |
 | --- | --- |
-| Tests and typecheck | 12 tests passed; typecheck passed |
+| Tests and typecheck | 12 tests passed; typecheck passed before the final CSS-only CTA adjustment |
 | Navigation | New post, New project, latest draft edit, Products, Contacts and Subscribers routes recorded |
 | UTC date boundary | Baseline recent views 6; inserting 7 views at today minus six changed the authenticated browser total to 13. Buckets at today minus seven and tomorrow did not enter the recent total. Temporary rows were removed |
 | Pending and mobile | Pending state captured during an owned local table lock, then rolled back. Mobile navigation opens with `aria-expanded=true`; a 3px themed keyboard outline and no horizontal overflow are recorded |
-| Final captures | Parent inspected desktop, mobile, dark and empty captures without overflow. Final comp comparison reports 86% overall match |
-| Final acceptance | Independent finish verdict pending. Reviewer identified incorrect automated region labels; spec metadata and phase bookkeeping corrections are in progress. No UI polish was requested |
-| Production build | Pending. Node 26 attempt stopped under resource pressure; a serial Node 22 build is running after stopping dev servers |
+| Final captures | Compiled local production runtimes on ports 3002 and 3005 supplied normal and empty captures. Desktop, 1440px, mobile, dark and empty views have no recorded overflow; the 800px header DOM check also passed |
+| Finish review | `ship` for SCORED FIXES ONLY. Contract, persistence and CTA findings resolved; no visible regression in recaptured normal, dark or empty views |
+| Production build | Passed with Node 22.23.1 and a 4096MB heap. `/private/tmp/adryanev-dashboard-final-build.log` records exit 0 |
 
-Final captures are `final-1280.png` at 1280×900, `final-390.png` at 390×1802, `final-1280-dark.png` at 1280×900, `final-empty-1280.png` at 1280×919, `final-empty-390.png` at 390×1805 and `pending-1280.png`. The automated comparison initially measured the attention heading as a control and the footer rule as the complete navigation. The reviewer confirmed those region labels were incorrect. The final finish verdict remains outstanding.
+The hero gate closed with `gate.ok=true`, score `0.864`, without force. The primary desktop CTA now measures 165×57px with its gold fill and border; mobile remains 48px high and dark mode remains readable. The initial comparison mislabeled the attention heading as a control and the footer rule as complete navigation. The reviewer accepted the corrected contract and persistence records.
 
-The VPS is off. This dashboard is not deployed, and no authenticated production verification is claimed.
+The separate automated responsive gate remains open and failed. Its 1440×900 comparison marks all regions missing after uniformly shrinking the capture to 1280×800 and padding it. That transform misaligns the fixed 232px navigation rail and fluid content. The reviewer acknowledged this calibration limitation. The screenshots and overflow checks provide local responsive evidence, but the entire automated phase workflow is not recorded as passed.
+
+Committed captures are [desktop](images/dashboard-redesign/desktop.png), [wide desktop](images/dashboard-redesign/desktop-wide.png), [mobile](images/dashboard-redesign/mobile.png), [dark desktop](images/dashboard-redesign/desktop-dark.png), [empty desktop](images/dashboard-redesign/empty-desktop.png), [empty mobile](images/dashboard-redesign/empty-mobile.png) and [pending](images/dashboard-redesign/pending.png). Final populated and empty captures use the compiled runtime; the pending capture comes from the earlier local development check. All eight dashboard documentation PNGs, including the approved comp, embed their origin or exact generated prompt. The provenance scan found zero missing records.
+
+Delivery is tracked in [PR #17](https://github.com/adryanev/adryanev.com/pull/17). Both CI checks passed for implementation commit `2582a5f`; later evidence-only commits have their own check status in the PR. The VPS is off. This dashboard is not deployed, and no authenticated production verification is claimed.

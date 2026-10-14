@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/server/functions/auth.functions'
 
 // ── Public: Record a view ──────────────────────────────
 
+import { getArticleViewWindow } from '@/lib/view-window'
 export const recordPostView = createServerFn({ method: 'POST' })
   .inputValidator((data: { postId: number }) => data)
   .handler(async ({ data }) => {
@@ -94,14 +95,12 @@ export const getViewAnalytics = createServerFn({ method: 'GET' }).handler(
       .limit(5)
 
     // Views in the last 7 days
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const recentDate = sevenDaysAgo.toISOString().split('T')[0]
+    const { startDate, endDate } = getArticleViewWindow()
 
     const [recentResult] = await db
       .select({ total: sum(postViews.viewCount) })
       .from(postViews)
-      .where(sql`${postViews.viewDate} >= ${recentDate}`)
+      .where(sql`${postViews.viewDate} >= ${startDate} and ${postViews.viewDate} <= ${endDate}`)
 
     return {
       totalViews: Number(totalResult?.total ?? 0),

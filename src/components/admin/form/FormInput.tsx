@@ -1,18 +1,13 @@
 import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
-export const FormInput = forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className, ...props }, ref) => (
-  <input
-    ref={ref}
-    className={cn(
-      'w-full bg-[var(--bg-primary)] border border-[var(--border-color)] px-3 py-2 text-sm transition-colors outline-none focus-visible:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded-none',
-      className,
-    )}
-    {...props}
-  />
-))
+import { useContext } from 'react'
+import { FieldContext } from './FieldContext'
+export const FormInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, id, ...props }, ref) => {
+    const field = useContext(FieldContext)
+    return <input ref={ref} id={id ?? field?.id} className={cn('admin-form-control', className)} {...props} />
+  },
+)
 
 FormInput.displayName = 'FormInput'

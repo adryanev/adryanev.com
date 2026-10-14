@@ -167,6 +167,24 @@ export async function renderEditorJs(data: OutputData): Promise<string> {
   return htmlParts.join('\n')
 }
 
+export async function renderProjectDescription(description: string): Promise<string> {
+  const text = description.trim()
+  if (!text) return ''
+
+  let data: unknown
+  try {
+    data = JSON.parse(text)
+  } catch { /* descriptions predating EditorJS are plain text */ }
+
+  if (data && typeof data === 'object' && 'blocks' in data) {
+    return renderEditorJs(data as OutputData)
+  }
+
+  return text.split(/\r?\n\s*\r?\n/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\r?\n/g, '<br />')}</p>`)
+    .join('\n')
+}
+
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '')
 }

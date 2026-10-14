@@ -48,14 +48,15 @@ function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-6 py-24 md:py-32">
+      <div className="chapter-page chapter-contact mx-auto w-full max-w-3xl px-6 py-24 md:py-32">
         <Reveal>
-          <div className="brutal-border brutal-shadow-lg bg-bg-secondary p-12 text-center">
+          <div className="brutal-border brutal-shadow-lg bg-bg-secondary p-8 md:p-12 text-center" role="status">
             <CheckCircle className="mx-auto h-20 w-20 text-accent mb-8" />
             <h1 className="font-serif text-5xl font-bold italic text-text-primary mb-4">Message Sent</h1>
             <p className="font-sans text-lg text-text-secondary">
               Thanks for reaching out. I'll review your message and respond shortly.
             </p>
+            <a className="page-button mt-8" href="/portfolio">Explore work</a>
           </div>
         </Reveal>
       </div>
@@ -63,9 +64,9 @@ function ContactPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
+    <div className="chapter-page chapter-contact mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
       <Reveal>
-        <div className="mb-16 border-b-4 border-text-primary pb-8">
+        <div className="chapter-header mb-16 border-b-4 border-text-primary pb-8">
           <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
             Contact
           </h1>
@@ -81,9 +82,8 @@ function ContactPage() {
       <div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
         <Reveal delay={0.1}>
           <div>
-            <p className="font-serif text-3xl leading-relaxed text-text-primary md:text-5xl italic mb-8">
-              Have a project in mind or just want to say hello? <br />
-              <span className="text-accent underline decoration-4 underline-offset-8">Let's talk.</span>
+            <p className="font-serif text-3xl leading-relaxed text-text-primary md:text-5xl mb-8">
+              Tell me about the role, project, or technical problem you're working on.
             </p>
 
             <div className="space-y-6 mt-12 font-mono text-lg">
@@ -112,7 +112,7 @@ function ContactPage() {
               setFieldErrors({})
               mutation.mutate()
             }}
-            className="brutal-border md:brutal-shadow-lg bg-bg-secondary p-8 md:p-12 space-y-8"
+            className="chapter-contact__form brutal-border md:brutal-shadow-lg bg-bg-secondary p-8 md:p-12 space-y-8"
           >
             {/* Honeypot — hidden from real users */}
             <div className="absolute -left-[9999px] top-0" aria-hidden="true">
@@ -135,6 +135,8 @@ function ContactPage() {
               <input
                 type="text"
                 id="name"
+                aria-invalid={!!fieldErrors.name}
+                aria-describedby={fieldErrors.name ? 'name-error' : undefined}
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -146,7 +148,7 @@ function ContactPage() {
                 placeholder="Your Name…"
               />
               {fieldErrors.name && (
-                <p className="mt-1 font-mono text-xs text-red-500">{fieldErrors.name}</p>
+                <p id="name-error" role="alert" className="field-error">{fieldErrors.name}</p>
               )}
             </div>
 
@@ -157,6 +159,8 @@ function ContactPage() {
               <input
                 type="email"
                 id="email"
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? 'email-error' : undefined}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -169,7 +173,7 @@ function ContactPage() {
                 placeholder="you@domain.com…"
               />
               {fieldErrors.email && (
-                <p className="mt-1 font-mono text-xs text-red-500">{fieldErrors.email}</p>
+                <p id="email-error" role="alert" className="field-error">{fieldErrors.email}</p>
               )}
             </div>
 
@@ -193,6 +197,8 @@ function ContactPage() {
               </label>
               <textarea
                 id="message"
+                aria-invalid={!!fieldErrors.message}
+                aria-describedby={fieldErrors.message ? 'message-error' : undefined}
                 required
                 minLength={10}
                 maxLength={5000}
@@ -207,7 +213,7 @@ function ContactPage() {
               />
               <div className="mt-1 flex justify-between">
                 {fieldErrors.message ? (
-                  <p className="font-mono text-xs text-red-500">{fieldErrors.message}</p>
+                  <p id="message-error" role="alert" className="field-error">{fieldErrors.message}</p>
                 ) : (
                   <span />
                 )}
@@ -216,7 +222,7 @@ function ContactPage() {
             </div>
 
             {fieldErrors.form && (
-              <div className="p-4 bg-red-500 text-white font-mono text-sm brutal-border">
+              <div role="alert" className="p-4 bg-bg-secondary text-accent text-sm brutal-border">
                 Error: {fieldErrors.form}
               </div>
             )}

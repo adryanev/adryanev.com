@@ -17,13 +17,13 @@ function EditProjectPage() {
   const { project, categories } = Route.useLoaderData()
 
   if (!project) {
-    return <div className="py-12 text-center text-slate-500">Project not found</div>
+    return <div className="py-12 text-center text-[var(--text-secondary)]">Project not found</div>
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Edit Project</h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">
         Editing: {project.title}
       </p>
       <div className="mt-6">

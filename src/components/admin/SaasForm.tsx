@@ -53,7 +53,7 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
     status !== (initialRef.current?.status ?? 'active') ||
     JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? [])
 
-  useUnsavedChanges(dirty)
+  const allowNavigation = useUnsavedChanges(dirty)
 
   const createFn = useServerFn(createSaasListing)
   const updateFn = useServerFn(updateSaasListing)
@@ -74,7 +74,7 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: () => navigate({ to: '/admin/saas' }),
+    onSuccess: () => { allowNavigation(); return navigate({ to: '/admin/saas' }) },
     onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save'),
   })
 

@@ -1,28 +1,18 @@
 import type { ReactNode } from 'react'
 
-export function FormField({
-  label,
-  htmlFor,
-  optional,
-  children,
-}: {
-  label: string
-  htmlFor?: string
-  optional?: boolean
-  children: ReactNode
+import { useId } from 'react'
+import { FieldContext } from './FieldContext'
+
+export function FormField({ label, htmlFor, optional, children }: {
+  label: string; htmlFor?: string; optional?: boolean; children: ReactNode
 }) {
-  return (
-    <div>
-      <label
-        htmlFor={htmlFor}
-        className="mb-1.5 block text-xs font-semibold uppercase text-[var(--text-secondary)]"
-      >
-        {label}
-        {optional && (
-          <span className="opacity-50 font-normal normal-case ml-1">(optional)</span>
-        )}
-      </label>
+  const generated = useId()
+  const id = htmlFor ?? generated
+  const labelId = id + '-label'
+  return <FieldContext.Provider value={{ id, labelId }}>
+    <div className="admin-field" role="group" aria-labelledby={labelId}>
+      <label id={labelId} htmlFor={id} className="admin-field__label">{label}{optional && <span className="admin-field__optional">(optional)</span>}</label>
       {children}
     </div>
-  )
+  </FieldContext.Provider>
 }

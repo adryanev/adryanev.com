@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Github, Zap, Server } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Github } from 'lucide-react'
 import { getPublicSaas } from '@/server/functions/public.functions'
-import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
+import { Link } from '@tanstack/react-router'
+import { ArrowUpRight } from 'lucide-react'
 export const Route = createFileRoute('/saas')({
   loader: () => getPublicSaas(),
   component: SaasPage,
@@ -18,126 +18,33 @@ export const Route = createFileRoute('/saas')({
   }),
 })
 
-type SaasListing = {
-  id: number
-  name: string
-  description: string
-  status: string
-  url: string | null
-  githubUrl: string | null
-  logoUrl: string | null
-  technology: string[] | null
-}
+
 
 function SaasPage() {
   const listings = Route.useLoaderData()
-
-  const grouped = {
-    active: listings.filter((l: SaasListing) => l.status === 'active'),
-    beta: listings.filter((l: SaasListing) => l.status === 'beta'),
-    retired: listings.filter((l: SaasListing) => l.status === 'retired'),
-  }
-
-  const ordered = [...grouped.active, ...grouped.beta, ...grouped.retired]
-
-  return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
-      <Reveal>
-        <div className="mb-16 border-b-4 border-text-primary pb-8">
-          <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
-            SaaS
-          </h1>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="h-4 w-4 bg-accent brutal-border" />
-            <span className="font-mono text-sm text-text-secondary tracking-wider">
-              Products & Infrastructure
-            </span>
-          </div>
+  const ordered = ['active', 'beta', 'retired'].flatMap((status) => listings.filter((product) => product.status === status))
+  return <div className="chapter-page chapter-products mx-auto">
+    <header className="chapter-header"><h1>Products</h1><p>Software and services I build and maintain.</p></header>
+    {ordered.length === 0 ? <section className="page-empty">
+      <h2>No products listed yet</h2><p>For examples of my engineering work, explore the project archive.</p>
+      <Link to="/portfolio" className="page-button">Explore projects <ArrowUpRight size={18} /></Link>
+    </section> : ordered.map((product) => <article key={product.id} className="product-record">
+      <div>
+        <div className="product-record__identity">
+          {product.logoUrl && <img src={product.logoUrl} alt="" width={48} height={48} loading="lazy" className="product-record__logo"
+            onError={(event) => { event.currentTarget.hidden = true }} />}
+          <h2>{product.name}</h2>
         </div>
-      </Reveal>
-
-      {ordered.length === 0 ? (
-        <div className="mt-12 text-center text-text-secondary font-serif text-2xl italic">
-          No products listed yet.
+        <p>{product.description}</p>
+        <div className="page-actions">
+          {product.url && <a className="page-button" href={product.url} target="_blank" rel="noopener noreferrer">Open product <ArrowUpRight size={18} /></a>}
+          {product.githubUrl && <a className="page-button page-button--quiet" href={product.githubUrl} target="_blank" rel="noopener noreferrer"><Github size={18} /> GitHub</a>}
         </div>
-      ) : (
-        <StaggerChildren className="grid gap-8 md:grid-cols-2">
-          {ordered.map((product: SaasListing) => (
-            <StaggerItem key={product.id}>
-              <div
-                className={cn(
-                  'flex flex-col border-2 border-text-primary bg-bg-primary brutal-shadow transition-all hover:-translate-y-1 hover:brutal-shadow-lg',
-                  product.status === 'retired' && 'opacity-60'
-                )}
-              >
-                {/* Header */}
-                <div className="border-b-2 border-text-primary bg-bg-secondary p-6 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-text-primary text-bg-primary brutal-border overflow-hidden">
-                      {product.logoUrl ? (
-                        <img src={product.logoUrl} alt={product.name} loading="lazy" className="h-6 w-6 object-cover" />
-                      ) : (
-                        <Server className="h-6 w-6" />
-                      )}
-                    </div>
-                    <h2 className="font-serif text-3xl font-bold italic">{product.name}</h2>
-                  </div>
-                  <StatusBadge status={product.status} />
-                </div>
-
-                {/* Body */}
-                <div className="p-8 flex-1 flex flex-col">
-                  <p className="font-sans text-lg text-text-secondary mb-8 flex-1">
-                    {product.description}
-                  </p>
-
-                  {product.technology && product.technology.length > 0 && (
-                    <div className="space-y-3 mb-8">
-                      {product.technology.map((tech: string) => (
-                        <div key={tech} className="flex items-center gap-3 font-mono text-sm text-text-primary">
-                          <Zap className="h-4 w-4 text-accent" />
-                          {tech}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-4 mt-auto pt-4">
-                    {product.url && (
-                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="w-full text-center bg-text-primary text-bg-primary py-4 font-mono font-bold uppercase tracking-widest brutal-border transition-colors hover:bg-accent hover:text-accent-fg">
-                        Visit
-                      </a>
-                    )}
-                    {product.githubUrl && (
-                      <a href={product.githubUrl} target="_blank" rel="noopener noreferrer" className="w-full text-center flex items-center justify-center gap-2 bg-bg-secondary text-text-primary py-4 font-mono font-bold uppercase tracking-widest brutal-border transition-colors hover:text-accent hover:border-accent">
-                        <Github className="h-4 w-4" /> Source Code
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </StaggerChildren>
-      )}
-    </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: 'bg-accent text-accent-fg',
-    beta: 'bg-accent/20 text-accent border-accent',
-    retired: 'bg-text-secondary/20 text-text-secondary',
-  }
-  return (
-    <span
-      className={cn(
-        'px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest brutal-border',
-        colors[status] ?? colors.active,
-      )}
-    >
-      {status}
-    </span>
-  )
+      </div>
+      <dl className="product-record__facts">
+        <dt>Status</dt><dd><span className="product-state" data-status={product.status}>{product.status === 'active' ? 'Active' : product.status === 'beta' ? 'Beta' : 'Retired'}</span></dd>
+        <dt>Technologies</dt><dd>{product.technology?.length ? <div className="adventure-tags">{product.technology.map((tech) => <span key={tech}>{tech}</span>)}</div> : 'Not listed'}</dd>
+      </dl>
+    </article>)}
+  </div>
 }

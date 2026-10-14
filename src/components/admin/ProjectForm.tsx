@@ -42,6 +42,8 @@ const STATUS_OPTIONS = [
   { value: 'published' as const, label: 'Published', activeColor: 'var(--accent)' },
 ]
 
+import { editorContent, editorContentSignature } from '@/lib/editor-content'
+
 export function ProjectForm({
   initial,
   categories,
@@ -55,7 +57,7 @@ export function ProjectForm({
   const [title, setTitle] = useState(initial?.title ?? '')
   const [slug, setSlug] = useState(initial?.slug ?? '')
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? 0)
-  const [description, setDescription] = useState(initial?.description ?? '')
+  const [description, setDescription] = useState(() => initial?.description ? JSON.stringify(editorContent(initial.description)) : '')
   const [year, setYear] = useState(initial?.year ?? new Date().getFullYear())
   const [role, setRole] = useState(initial?.role ?? '')
   const [workplace, setWorkplace] = useState(initial?.workplace ?? '')
@@ -70,15 +72,20 @@ export function ProjectForm({
 
   const dirty = title !== (initialRef.current?.title ?? '') ||
     slug !== (initialRef.current?.slug ?? '') ||
-    description !== (initialRef.current?.description ?? '') ||
+    editorContentSignature(description) !== editorContentSignature(initialRef.current?.description ?? '') ||
     categoryId !== (initialRef.current?.categoryId ?? categories[0]?.id ?? 0) ||
     role !== (initialRef.current?.role ?? '') ||
     workplace !== (initialRef.current?.workplace ?? '') ||
     status !== (initialRef.current?.status ?? 'draft') ||
-    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? [])
+    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? []) ||
+    year !== (initialRef.current?.year ?? new Date().getFullYear()) ||
+    sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
+    githubUrl !== (initialRef.current?.githubUrl ?? '') ||
+    externalUrl !== (initialRef.current?.externalUrl ?? '') ||
+    JSON.stringify(images) !== JSON.stringify(initialRef.current?.images ?? [])
 
-  useUnsavedChanges(dirty)
 
+  const allowNavigation = useUnsavedChanges(dirty)
   const createFn = useServerFn(createProject)
   const updateFn = useServerFn(updateProject)
 
@@ -102,12 +109,13 @@ export function ProjectForm({
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: () => navigate({ to: '/admin/portfolio' }),
+    onSuccess: () => { allowNavigation(); return navigate({ to: '/admin/portfolio' }) },
     onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save project'),
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (saveMutation.isPending) return
     setError('')
     if (!title.trim()) {
       setError('Title is required')
@@ -197,7 +205,7 @@ export function ProjectForm({
 
       <FormField label="Description">
         <EditorJsEditor
-          value={(() => { try { return description ? JSON.parse(description) as OutputData : null } catch { return null } })()}
+          value={editorContent(description)}
           onChange={(data) => setDescription(JSON.stringify(data))}
         />
       </FormField>
@@ -235,6 +243,8 @@ export function ProjectForm({
               <div className="flex-1">
                 <FormInput
                   type="text"
+                  aria-label={`Caption for image ${i + 1}`}
+                  id={`project-image-caption-${i}`}
                   value={img.alt ?? ''}
                   onChange={(e) => {
                     const newImages = [...images]
@@ -246,6 +256,7 @@ export function ProjectForm({
               </div>
               <button
                 type="button"
+                aria-label={`Remove image ${i + 1}`}
                 onClick={() => setImages(images.filter((_, j) => j !== i))}
                 className="text-red-500 hover:text-red-600"
               >

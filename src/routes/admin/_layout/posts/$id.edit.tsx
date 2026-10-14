@@ -12,14 +12,14 @@ function EditPostPage() {
 
   if (!post) {
     return (
-      <div className="py-12 text-center text-slate-500">Post not found</div>
+      <div className="py-12 text-center text-[var(--text-secondary)]">Post not found</div>
     )
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Edit Post</h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">
         Editing: {post.title}
       </p>
       <div className="mt-6">

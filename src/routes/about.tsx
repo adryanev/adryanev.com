@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Github, Linkedin, Mail } from 'lucide-react'
-import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { ArrowUpRight, Github, Linkedin, Mail } from 'lucide-react'
+import { AboutSystemModel } from '@/components/about/AboutSystemModel'
 import { seoMeta, canonicalLink } from '@/lib/seo'
+import './about.css'
 
 export const Route = createFileRoute('/about')({
   component: AboutPage,
@@ -15,13 +17,47 @@ export const Route = createFileRoute('/about')({
   }),
 })
 
-const skills = [
-  { category: 'Languages', items: ['TypeScript', 'Dart', 'Go', 'Kotlin', 'Swift', 'Python'] },
-  { category: 'Frontend', items: ['React', 'Next.js', 'TanStack', 'Tailwind CSS', 'Flutter'] },
-  { category: 'Backend', items: ['Node.js', 'Express', 'Hono', 'PostgreSQL', 'Redis'] },
-  { category: 'DevOps', items: ['Docker', 'CI/CD', 'Linux', 'Nginx', 'AWS'] },
-  { category: 'Tools', items: ['Git', 'Figma', 'VS Code', 'Neovim'] },
-]
+const selectedWork = [
+  {
+    workplace: 'PT Telkom Indonesia',
+    role: 'Full Stack Developer',
+    title: 'Enterprise Document Management System',
+    category: 'work',
+    slug: 'enterprise-dms',
+  },
+  {
+    workplace: 'Lexicon',
+    role: 'Backend Engineer',
+    title: 'Lexicon Platform API',
+    category: 'lexicon',
+    slug: 'lexicon-platform-api',
+  },
+  {
+    workplace: 'ITS',
+    role: 'Full Stack Developer',
+    title: 'Smart Campus IoT Dashboard',
+    category: 'college',
+    slug: 'smart-campus-iot',
+  },
+] as const
+
+const practices = [
+  {
+    name: 'Applications',
+    description: 'Interfaces for web and mobile.',
+    tools: 'React · Flutter · Swift · Kotlin',
+  },
+  {
+    name: 'Backend',
+    description: 'APIs and data services.',
+    tools: 'TypeScript · Go · PostgreSQL · Redis',
+  },
+  {
+    name: 'Delivery',
+    description: 'Deployment and operations after release.',
+    tools: 'Docker · CI/CD · Linux · Nginx',
+  },
+] as const
 
 const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/adryanev', icon: Github },
@@ -30,115 +66,79 @@ const socialLinks = [
 ]
 
 function AboutPage() {
+  const [active, setActive] = useState(0)
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
-      {/* Header */}
-      <Reveal>
-        <div className="mb-16 border-b-4 border-text-primary pb-8">
-          <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
-            About
-          </h1>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="h-4 w-4 bg-accent brutal-border" />
-            <span className="font-mono text-sm text-text-secondary tracking-wider">
-              Adryan Eka Vandra · Software Engineer
-            </span>
+    <div className="about-page">
+      <div className="about-page__duo">
+        <section className="about-page__proof" aria-labelledby="about-work-title">
+          <h1 id="about-work-title">Selected<br /><span>work.</span></h1>
+          <div className="about-page__projects">
+            {selectedWork.map((project) => (
+              <Link
+                key={project.slug}
+                to="/portfolio/$category/$slug"
+                params={{ category: project.category, slug: project.slug }}
+                className="about-page__project"
+              >
+                <span className="about-page__project-meta">{project.workplace} · {project.role}</span>
+                <strong>{project.title}</strong>
+                <ArrowUpRight size={20} strokeWidth={2.2} aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <div className="about-page__areas" aria-label="Areas of work">
+          <AboutSystemModel active={active} onSelect={setActive} />
+          {practices.map((practice, index) => (
+            <section
+              key={practice.name}
+              className="about-page__practice"
+              data-focus={active === index ? '' : undefined}
+              aria-label={practice.name}
+            >
+              <h2>{practice.name}</h2>
+              <p>{practice.description}</p>
+              <span>{practice.tools}</span>
+            </section>
+          ))}
+        </div>
+      </div>
+
+      <section className="about-page__bio" aria-labelledby="about-bio-title">
+        <div className="about-page__bio-body">
+          <h2 id="about-bio-title">I'm Adryan.</h2>
+          <p>
+            I'm a software engineer based in Indonesia. I work on mobile apps,
+            backend systems, and delivery infrastructure. The projects and writing
+            here document what I built, the role I played, and the decisions behind
+            the work.
+          </p>
+          <div className="about-page__social" aria-label="Find Adryan elsewhere">
+            {socialLinks.map(({ label, href, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith('mailto:') ? undefined : '_blank'}
+                rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                aria-label={label}
+              >
+                <Icon size={17} aria-hidden="true" />
+                {label}
+              </a>
+            ))}
           </div>
         </div>
-      </Reveal>
-
-      <div className="grid gap-16 md:grid-cols-[1fr_2fr] lg:gap-24">
-        {/* Left Column - Image/Stats */}
-        <div className="space-y-8">
-          <Reveal>
-            <div className="aspect-[3/4] w-full brutal-border brutal-shadow-lg bg-bg-secondary relative overflow-hidden group flex items-center justify-center">
-              <div className="text-center space-y-4 p-8">
-                <span className="font-serif text-[8rem] font-bold italic text-accent leading-none">A</span>
-                <p className="font-mono text-sm text-text-secondary tracking-widest uppercase">Adryan Eka Vandra</p>
-              </div>
-              <div className="absolute bottom-4 left-4 right-4 bg-bg-primary p-4 brutal-border">
-                <p className="font-mono text-xs text-text-primary tracking-wider">
-                  Software Engineer · Indonesia
-                </p>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.1}>
-            <div className="brutal-border bg-bg-primary p-6 space-y-4">
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="font-mono text-sm text-text-secondary">Status</span>
-                <span className="font-mono text-sm font-bold text-accent">Available</span>
-              </div>
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="font-mono text-sm text-text-secondary">Location</span>
-                <span className="font-mono text-sm text-text-primary">Indonesia</span>
-              </div>
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="font-mono text-sm text-text-secondary">Role</span>
-                <span className="font-mono text-sm text-text-primary">Software Engineer</span>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.15}>
-            <div className="flex gap-4">
-              {socialLinks.map(({ label, href, icon: Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-12 w-12 items-center justify-center bg-bg-primary brutal-border text-text-primary transition-colors hover:bg-accent hover:text-accent-fg hover:border-text-primary"
-                  aria-label={label}
-                >
-                  <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </a>
-              ))}
-            </div>
-          </Reveal>
+        <div className="about-page__bio-action">
+          <strong>Have something to discuss?</strong>
+          <Link to="/contact">Contact me <ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
+      </section>
 
-        {/* Right Column - Text content */}
-        <div>
-          <Reveal>
-            <div className="font-serif text-2xl leading-relaxed text-text-primary md:text-4xl">
-              <p className="mb-8">
-                <span className="text-accent font-bold font-sans">01.</span> I'm a software engineer who enjoys working across the full stack, from building <span className="italic">fast</span> backend services to creating frontend interfaces that feel snappy and responsive.
-              </p>
-              <p className="mb-8 text-text-secondary">
-                <span className="text-accent font-bold font-sans">02.</span> I care about performance, shipping quickly, and making sure what I build actually moves the needle for the business. I'd rather get something working and into users' hands than spend weeks perfecting abstractions nobody asked for.
-              </p>
-              <p>
-                <span className="text-accent font-bold font-sans">03.</span> Whether it's an API, a web app, or a mobile experience, I focus on making things fast: both the software itself and the pace at which it gets built.
-              </p>
-            </div>
-          </Reveal>
-
-          <Reveal>
-            <div className="mt-16 pt-16 border-t-2 border-text-primary space-y-8">
-              <h2 className="font-serif text-2xl font-bold italic text-text-primary">
-                Skills & Tools
-              </h2>
-              {skills.map((group) => (
-                <div key={group.category} className="space-y-4">
-                  <h3 className="font-mono text-xs text-text-secondary uppercase tracking-widest">
-                    {group.category}
-                  </h3>
-                  <StaggerChildren className="flex flex-wrap gap-3">
-                    {group.items.map((item) => (
-                      <StaggerItem key={item}>
-                        <span className="bg-bg-secondary px-4 py-2 font-mono text-sm brutal-border transition-colors hover:text-accent hover:border-accent">
-                          {item}
-                        </span>
-                      </StaggerItem>
-                    ))}
-                  </StaggerChildren>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </div>
+      <div className="about-page__foot">
+        <span>Adryan Eka Vandra · Software Engineer</span>
+        <Link to="/resume">Full CV <ArrowUpRight size={14} aria-hidden="true" /></Link>
       </div>
     </div>
   )

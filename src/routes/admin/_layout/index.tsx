@@ -94,7 +94,7 @@ function DashboardPage() {
                 params={{ slug: post.slug }}
                 className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[var(--bg-primary)]"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--border-color)] bg-[var(--bg-primary)] font-mono text-sm font-bold text-[var(--text-secondary)] group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--border-color)] bg-[var(--bg-primary)] font-mono text-sm font-bold text-[var(--text-secondary)] group-hover:border-[var(--accent)] group-hover:text-[var(--admin-link)]">
                   {i + 1}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--text-primary)]">
@@ -186,13 +186,13 @@ function StatCard({
         <Icon
           className={cn(
             'h-5 w-5',
-            accent ? 'text-[var(--accent)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--accent)]'
+            accent ? 'text-[var(--admin-link)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--admin-link)]'
           )}
         />
       </div>
       <p className={cn(
         "mt-4 text-3xl font-bold",
-        accent ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
+        accent ? "text-[var(--admin-link)]" : "text-[var(--text-primary)]"
       )}>
         {value}
       </p>
@@ -217,7 +217,7 @@ function QuickLink({
       className="group flex items-center gap-4 border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4 transition-colors hover:border-[var(--accent)] hover:bg-[var(--bg-primary)]"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--border-color)] bg-[var(--bg-primary)] group-hover:border-[var(--accent)] transition-colors">
-        <Icon className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+        <Icon className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-[var(--admin-link)]" />
       </div>
       <div className="min-w-0">
         <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-primary)] truncate">

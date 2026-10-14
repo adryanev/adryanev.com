@@ -1,123 +1,42 @@
 import { useState, useRef } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Upload, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { upload } from '@/server/functions/upload.functions'
 
-export function ImageUploader({
-  value,
-  onChange,
-  label = 'Image',
-}: {
-  value: string
-  onChange: (url: string) => void
-  label?: string
-}) {
+export function ImageUploader({ value, onChange, label = 'Image' }: { value: string; onChange: (url: string) => void; label?: string }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
   const uploadFn = useServerFn(upload)
-
   const uploadFile = async (file: File) => {
+    if (uploading) return
     setError('')
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      setError('Choose a JPEG, PNG, WebP, or GIF image smaller than 10 MB.')
+      return
+    }
     setUploading(true)
-
     try {
       const buffer = await file.arrayBuffer()
-      const result = await uploadFn({
-        data: {
-          contentType: file.type,
-          fileSize: file.size,
-          bytes: Array.from(new Uint8Array(buffer)),
-        },
-      })
-
+      const result = await uploadFn({ data: { contentType: file.type, fileSize: file.size, bytes: Array.from(new Uint8Array(buffer)) } })
       onChange(result.publicUrl)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-    } finally {
-      setUploading(false)
-    }
+    } catch { setError('Image upload failed. Your existing images are unchanged. Please try again.') }
+    finally { setUploading(false); if (inputRef.current) inputRef.current.value = '' }
   }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragOver(false)
-    const file = e.dataTransfer.files[0]
-    if (file) uploadFile(file)
-  }
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) uploadFile(file)
-  }
-
-  return (
-    <div>
-      <label className="mb-1.5 block text-sm font-medium">{label}</label>
-
-      {value ? (
-        <div className="relative inline-block">
-          <img
-            src={value}
-            alt="Uploaded"
-            className="h-32 w-auto border border-[var(--border-color)] object-cover"
-          />
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            aria-label="Remove image"
-            className="absolute -right-2 -top-2 bg-red-500 p-1 text-white hover:bg-red-600"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </div>
-      ) : (
-        <div
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOver(true)
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          className={cn(
-            'flex cursor-pointer flex-col items-center gap-2 border-2 border-dashed p-8 text-center transition-colors',
-            dragOver
-              ? 'border-[var(--accent)] bg-[var(--accent)]/5'
-              : 'border-[var(--border-color)] hover:border-[var(--text-secondary)]',
-            uploading && 'pointer-events-none opacity-60',
-          )}
-        >
-          {uploading ? (
-            <span className="inline-block h-6 w-6 animate-spin border-2 border-[var(--accent)] border-t-transparent" />
-          ) : (
-            <Upload className="h-6 w-6 text-[var(--text-secondary)]" />
-          )}
-          <span className="text-sm text-[var(--text-secondary)]">
-            {uploading
-              ? 'Uploading...'
-              : 'Drop an image here or click to select'}
-          </span>
-          <span className="text-xs text-[var(--text-secondary)]">
-            JPEG, PNG, WebP, GIF — max 10MB
-          </span>
-        </div>
-      )}
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-
-      {error && (
-        <p className="mt-2 text-sm text-red-500 dark:text-red-400">{error}</p>
-      )}
-    </div>
-  )
+  return <div className="admin-upload">
+    <p className="admin-field__label">{label}</p>
+    {value ? <div className="admin-upload__preview">
+      <img src={value} alt={label + ' preview'} loading="lazy" />
+      <div className="page-actions"><a href={value} target="_blank" rel="noopener noreferrer">Open image</a><button className="admin-action admin-action--secondary" type="button" onClick={() => onChange('')}><X size={16} />Remove image</button></div>
+    </div> : <button type="button" className="admin-upload__drop" data-dragging={dragOver} disabled={uploading} aria-label={'Choose ' + label.toLowerCase()}
+      onDragOver={(event) => { event.preventDefault(); setDragOver(true) }} onDragLeave={() => setDragOver(false)}
+      onDrop={(event) => { event.preventDefault(); setDragOver(false); const file = event.dataTransfer.files[0]; if (file) void uploadFile(file) }}
+      onClick={() => inputRef.current?.click()}>
+      <Upload size={24} aria-hidden="true" /><strong>{uploading ? 'Uploading image…' : 'Choose an image or drop it here'}</strong><span>JPEG, PNG, WebP, GIF · Up to 10 MB</span>
+    </button>}
+    <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label={label} className="hidden" disabled={uploading} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadFile(file) }} />
+    {uploading && <p role="status" className="mt-3 text-sm">Uploading image. Keep this page open.</p>}
+    {error && <p role="alert" className="admin-feedback">{error}</p>}
+  </div>
 }

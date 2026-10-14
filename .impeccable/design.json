@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T08:01:59Z",
+  "title": "Design system: adryanev.com",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#142027" },
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#fff8e7" },
+      "ground": { "role": "neutral", "displayName": "Warm ground", "canonical": "#f8e9bd" },
+      "red": { "role": "primary", "displayName": "Contact red", "canonical": "#cf3924" },
+      "yellow": { "role": "secondary", "displayName": "Action yellow", "canonical": "#f6ce4a" },
+      "blue": { "role": "tertiary", "displayName": "Writing blue", "canonical": "#8fd9e3" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Homepage and chapter titles" },
+      "body": { "displayName": "Body", "purpose": "Descriptions and long form content" },
+      "label": { "displayName": "Metadata", "purpose": "Dates, code, and short technical labels" }
+    },
+    "shadows": [
+      { "name": "chapter", "value": "12px 12px 0 var(--adventure-red)", "purpose": "Separates a major chapter header from the page" },
+      { "name": "directory", "value": "8px 9px 0 var(--adventure-blue)", "purpose": "Separates work rows from the ground" }
+    ],
+    "motion": [
+      { "name": "feedback", "value": "160ms", "purpose": "Controls and hover response" },
+      { "name": "settle", "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Menu, arrow, and panel arrival" }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "820px" },
+      { "name": "phone", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Chapter header",
+      "kind": "custom",
+      "refersTo": "paper-panel",
+      "description": "A route title on a colored printed sheet",
+      "html": "<div class=\"chapter-header\"><h1>Work</h1></div>",
+      "css": ".chapter-header { border: 5px solid #142027; background: #f6ce4a; box-shadow: 12px 12px 0 #cf3924; }"
+    },
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "A direct action with an ink outline",
+      "html": "<a class=\"adventure-button adventure-button--primary\" href=\"#selected-work\">See my work</a>",
+      "css": ".adventure-button { min-height: 52px; border: 4px solid #142027; } .adventure-button--primary { background: #f6ce4a; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Clear-line coding adventure",
+    "overview": "An interactive Blender workstation opens real portfolio destinations. The Resume worktable reveals factual role records on a pull-out tray inside its scene. Ink outlines and colored paper panels carry the same world across reading and utility pages.",
+    "keyCharacteristics": ["Interactive 3D navigation", "In-scene Resume records", "Bricolage Grotesque display", "Ink and paper panels", "Short feedback motion"],
+    "rules": [
+      { "name": "Evidence first", "body": "Link from the landing page to concrete projects before biographical detail.", "section": "components" }
+    ],
+    "dos": ["Keep text and links available without WebGL", "Use factual role and project copy"],
+    "donts": ["Invent client claims", "Require game mechanics for navigation"]
+  }
+}

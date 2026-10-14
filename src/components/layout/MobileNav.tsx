@@ -15,7 +15,14 @@ export function MobileNav({ open, onClose, items }: MobileNavProps) {
   // Auto-focus the close button when the panel opens
   useEffect(() => {
     if (open) {
+      const previousFocus = document.activeElement as HTMLElement | null
+      const previousOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
       closeButtonRef.current?.focus()
+      return () => {
+        document.body.style.overflow = previousOverflow
+        previousFocus?.focus({ preventScroll: true })
+      }
     }
   }, [open])
 
@@ -68,10 +75,10 @@ export function MobileNav({ open, onClose, items }: MobileNavProps) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="site-mobile-nav fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-text-primary/90 backdrop-blur-sm"
+        className="site-mobile-nav__backdrop fixed inset-0 bg-text-primary/90"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -79,10 +86,11 @@ export function MobileNav({ open, onClose, items }: MobileNavProps) {
       {/* Panel */}
       <div
         ref={panelRef}
+        id="mobile-navigation"
         role="dialog"
         aria-modal="true"
         aria-label="Mobile navigation"
-        className="fixed inset-y-0 right-0 w-full max-w-sm border-l-4 border-text-primary bg-bg-primary p-6 brutal-shadow-lg flex flex-col overscroll-contain"
+        className="site-mobile-nav__panel fixed inset-y-0 right-0 w-full max-w-sm border-l border-text-primary bg-bg-primary p-6 brutal-shadow-lg flex flex-col overscroll-contain overflow-y-auto"
       >
         <div className="flex items-center justify-between border-b border-border pb-4">
           <span className="font-mono text-sm text-text-secondary tracking-wider">

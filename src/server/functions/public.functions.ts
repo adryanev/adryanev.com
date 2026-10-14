@@ -188,6 +188,25 @@ export const getPublicCategories = createServerFn({ method: 'GET' }).handler(
   },
 )
 
+export const getPublicWork = createServerFn({ method: 'GET' }).handler(async () => {
+  return db.query.portfolioCategories.findMany({
+    columns: { id: true, name: true, slug: true, description: true },
+    orderBy: [asc(portfolioCategories.sortOrder), asc(portfolioCategories.id)],
+    with: {
+      projects: {
+        where: and(
+          eq(portfolioProjects.status, 'published'),
+          isNull(portfolioProjects.deletedAt),
+        ),
+        columns: {
+          id: true, title: true, slug: true, year: true,
+          role: true, workplace: true, technology: true,
+        },
+        orderBy: [asc(portfolioProjects.sortOrder), asc(portfolioProjects.id)],
+      },
+    },
+  })
+})
 export const getCategoryWithProjects = createServerFn({ method: 'GET' })
   .inputValidator((data: { categorySlug: string }) => data)
   .handler(async ({ data }) => {

@@ -1,18 +1,20 @@
-# Stage 1: Install dependencies
-FROM node:22-alpine AS deps
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Shared toolchain; Corepack reads the pinned packageManager from package.json.
+FROM node:22-alpine AS base
+RUN corepack enable
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+
+# Stage 1: Install dependencies
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Stage 2: Build
-FROM node:22-alpine AS builder
-RUN corepack enable && corepack prepare pnpm@latest --activate
-WORKDIR /app
+FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
+RUN pnpm typecheck && pnpm exec tsx --test --test-concurrency=1 tests/*.test.ts
 
 # Stage 3: Production
 FROM node:22-alpine AS runner

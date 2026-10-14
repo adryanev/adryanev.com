@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@11.14.0",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -53,12 +54,6 @@
     "tailwind-merge": "^3.5.0",
     "three": "^0.186.0",
     "zod": "^3.24.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "argon2",
-      "esbuild"
-    ]
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",

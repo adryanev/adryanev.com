@@ -107,8 +107,9 @@ function WebhookListPage() {
                           to="/admin/webhooks/$id/logs"
                           params={{ id: String(wh.id) }}
                           title="Delivery logs"
+                          aria-label={`Delivery logs for ${wh.url}`}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4" aria-hidden="true" />
                         </Link>
                       </Button>
                       <Button asChild variant="ghost" size="icon">

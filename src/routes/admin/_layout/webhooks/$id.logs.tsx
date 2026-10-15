@@ -44,8 +44,8 @@ function WebhookLogsPage() {
     <div>
       <PageHeader className="justify-start">
         <Button asChild variant="ghost" size="icon">
-          <Link to="/admin/webhooks">
-            <ArrowLeft className="h-5 w-5" />
+          <Link to="/admin/webhooks" aria-label="Back to webhooks">
+            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Link>
         </Button>
         <div>

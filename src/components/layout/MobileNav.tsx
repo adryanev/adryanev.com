@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 
+import { Button } from '@/components/ui'
+
 interface MobileNavProps {
   open: boolean
   onClose: () => void
@@ -96,14 +98,15 @@ export function MobileNav({ open, onClose, items }: MobileNavProps) {
           <span className="font-mono text-sm text-text-secondary tracking-wider">
             Navigation
           </span>
-          <button
+          <Button
+            variant="plain"
             ref={closeButtonRef}
             onClick={onClose}
             className="flex h-11 w-11 items-center justify-center brutal-border bg-accent text-accent-fg transition-transform active:scale-95"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <nav className="mt-12 flex flex-col gap-6 flex-1">

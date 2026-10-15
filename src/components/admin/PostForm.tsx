@@ -6,10 +6,13 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { SlugInput } from './SlugInput'
 import { EditorJsEditor } from './EditorJsEditor'
 import type { OutputData } from '@editorjs/editorjs'
-import { FormField } from './form/FormField'
-import { FormInput } from './form/FormInput'
-import { FormTextarea } from './form/FormTextarea'
-import { FormError } from './form/FormError'
+import {
+  Field as FormField,
+  Input as FormInput,
+  Textarea as FormTextarea,
+  FormError,
+} from '@/components/ui'
+
 import { FormActions } from './form/FormActions'
 import { TagInput } from './form/TagInput'
 import { StatusRadio } from './form/StatusRadio'
@@ -30,7 +33,11 @@ const AUTOSAVE_KEY = 'admin_post_draft:v1'
 
 const STATUS_OPTIONS = [
   { value: 'draft' as const, label: 'Draft' },
-  { value: 'published' as const, label: 'Published', activeColor: 'var(--accent)' },
+  {
+    value: 'published' as const,
+    label: 'Published',
+    activeColor: 'var(--accent)',
+  },
 ]
 
 import { editorContentSignature } from '@/lib/editor-content'
@@ -44,15 +51,19 @@ export function PostForm({ initial }: { initial?: PostData }) {
   const [content, setContent] = useState(initial?.content ?? '')
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? '')
   const [coverImage, setCoverImage] = useState(initial?.coverImage ?? '')
-  const [status, setStatus] = useState<'draft' | 'published'>(initial?.status ?? 'draft')
+  const [status, setStatus] = useState<'draft' | 'published'>(
+    initial?.status ?? 'draft',
+  )
   const [tags, setTags] = useState<string[]>(initial?.tags ?? [])
   const [error, setError] = useState('')
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const initialRef = useRef(initial)
 
-  const dirty = title !== (initialRef.current?.title ?? '') ||
+  const dirty =
+    title !== (initialRef.current?.title ?? '') ||
     slug !== (initialRef.current?.slug ?? '') ||
-    editorContentSignature(content) !== editorContentSignature(initialRef.current?.content ?? '') ||
+    editorContentSignature(content) !==
+      editorContentSignature(initialRef.current?.content ?? '') ||
     excerpt !== (initialRef.current?.excerpt ?? '') ||
     coverImage !== (initialRef.current?.coverImage ?? '') ||
     status !== (initialRef.current?.status ?? 'draft') ||
@@ -83,15 +94,34 @@ export function PostForm({ initial }: { initial?: PostData }) {
       allowNavigation()
       try {
         localStorage.removeItem(AUTOSAVE_KEY)
-      } catch { /* private browsing or storage unavailable */ }
+      } catch {
+        /* private browsing or storage unavailable */
+      }
       navigate({ to: '/admin/posts' })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save post'),
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : 'Failed to save post'),
   })
 
   // Autosave
-  const formDataRef = useRef({ title, slug, content, excerpt, coverImage, status, tags })
-  formDataRef.current = { title, slug, content, excerpt, coverImage, status, tags }
+  const formDataRef = useRef({
+    title,
+    slug,
+    content,
+    excerpt,
+    coverImage,
+    status,
+    tags,
+  })
+  formDataRef.current = {
+    title,
+    slug,
+    content,
+    excerpt,
+    coverImage,
+    status,
+    tags,
+  }
 
   useEffect(() => {
     if (isEditing) return
@@ -101,7 +131,9 @@ export function PostForm({ initial }: { initial?: PostData }) {
         try {
           localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data))
           setLastSaved(new Date())
-        } catch { /* quota exceeded or private browsing */ }
+        } catch {
+          /* quota exceeded or private browsing */
+        }
       }
     }, 30000)
     return () => clearInterval(interval)
@@ -125,28 +157,33 @@ export function PostForm({ initial }: { initial?: PostData }) {
           setLastSaved(new Date())
         }
       }
-    } catch { /* private browsing or storage unavailable */ }
+    } catch {
+      /* private browsing or storage unavailable */
+    }
   }, [isEditing])
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (!title.trim()) {
-      setError('Title is required')
-      return
-    }
-    try {
-      const parsed = JSON.parse(content) as OutputData
-      if (!parsed.blocks || parsed.blocks.length === 0) {
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      setError('')
+      if (!title.trim()) {
+        setError('Title is required')
+        return
+      }
+      try {
+        const parsed = JSON.parse(content) as OutputData
+        if (!parsed.blocks || parsed.blocks.length === 0) {
+          setError('Content is required')
+          return
+        }
+      } catch {
         setError('Content is required')
         return
       }
-    } catch {
-      setError('Content is required')
-      return
-    }
-    saveMutation.mutate()
-  }, [title, content, saveMutation])
+      saveMutation.mutate()
+    },
+    [title, content, saveMutation],
+  )
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
@@ -168,7 +205,13 @@ export function PostForm({ initial }: { initial?: PostData }) {
 
         <FormField label="Content">
           <EditorJsEditor
-            value={(() => { try { return content ? JSON.parse(content) as OutputData : null } catch { return null } })()}
+            value={(() => {
+              try {
+                return content ? (JSON.parse(content) as OutputData) : null
+              } catch {
+                return null
+              }
+            })()}
             onChange={(data) => setContent(JSON.stringify(data))}
           />
         </FormField>
@@ -222,7 +265,9 @@ export function PostForm({ initial }: { initial?: PostData }) {
         onCancel={() => navigate({ to: '/admin/posts' })}
         saveLabel={isEditing ? 'Update' : 'Save'}
       >
-        {lastSaved && !isEditing && `Auto-saved at ${lastSaved.toLocaleTimeString()}`}
+        {lastSaved &&
+          !isEditing &&
+          `Auto-saved at ${lastSaved.toLocaleTimeString()}`}
       </FormActions>
     </form>
   )

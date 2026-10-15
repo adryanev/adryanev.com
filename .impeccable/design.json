@@ -1,60 +1,724 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-24T08:01:59Z",
+  "generatedAt": "2026-10-15T02:57:28.643840+00:00",
   "title": "Design system: adryanev.com",
   "extensions": {
     "colorMeta": {
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#142027" },
-      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#fff8e7" },
-      "ground": { "role": "neutral", "displayName": "Warm ground", "canonical": "#f8e9bd" },
-      "red": { "role": "primary", "displayName": "Contact red", "canonical": "#cf3924" },
-      "yellow": { "role": "secondary", "displayName": "Action yellow", "canonical": "#f6ce4a" },
-      "blue": { "role": "tertiary", "displayName": "Writing blue", "canonical": "#8fd9e3" }
+      "brand-ink": {
+        "role": "neutral",
+        "displayName": "Brand ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0216 234.50)",
+          "oklch(26.4% 0.0216 234.50)",
+          "oklch(37.9% 0.0216 234.50)",
+          "oklch(49.3% 0.0216 234.50)",
+          "oklch(60.7% 0.0216 234.50)",
+          "oklch(72.1% 0.0216 234.50)",
+          "oklch(83.6% 0.0216 234.50)",
+          "oklch(95.0% 0.0216 234.50)"
+        ]
+      },
+      "brand-paper": {
+        "role": "neutral",
+        "displayName": "Brand paper",
+        "tonalRamp": [
+          "oklch(15.0% 0.0235 88.23)",
+          "oklch(26.4% 0.0235 88.23)",
+          "oklch(37.9% 0.0235 88.23)",
+          "oklch(49.3% 0.0235 88.23)",
+          "oklch(60.7% 0.0235 88.23)",
+          "oklch(72.1% 0.0235 88.23)",
+          "oklch(83.6% 0.0235 88.23)",
+          "oklch(95.0% 0.0235 88.23)"
+        ]
+      },
+      "brand-ground": {
+        "role": "neutral",
+        "displayName": "Brand ground",
+        "tonalRamp": [
+          "oklch(15.0% 0.0593 91.45)",
+          "oklch(26.4% 0.0593 91.45)",
+          "oklch(37.9% 0.0593 91.45)",
+          "oklch(49.3% 0.0593 91.45)",
+          "oklch(60.7% 0.0593 91.45)",
+          "oklch(72.1% 0.0593 91.45)",
+          "oklch(83.6% 0.0593 91.45)",
+          "oklch(95.0% 0.0593 91.45)"
+        ]
+      },
+      "brand-yellow": {
+        "role": "primary",
+        "displayName": "Brand yellow",
+        "tonalRamp": [
+          "oklch(15.0% 0.1513 91.73)",
+          "oklch(26.4% 0.1513 91.73)",
+          "oklch(37.9% 0.1513 91.73)",
+          "oklch(49.3% 0.1513 91.73)",
+          "oklch(60.7% 0.1513 91.73)",
+          "oklch(72.1% 0.1513 91.73)",
+          "oklch(83.6% 0.1513 91.73)",
+          "oklch(95.0% 0.1513 91.73)"
+        ]
+      },
+      "brand-blue": {
+        "role": "secondary",
+        "displayName": "Brand blue",
+        "tonalRamp": [
+          "oklch(15.0% 0.0746 206.61)",
+          "oklch(26.4% 0.0746 206.61)",
+          "oklch(37.9% 0.0746 206.61)",
+          "oklch(49.3% 0.0746 206.61)",
+          "oklch(60.7% 0.0746 206.61)",
+          "oklch(72.1% 0.0746 206.61)",
+          "oklch(83.6% 0.0746 206.61)",
+          "oklch(95.0% 0.0746 206.61)"
+        ]
+      },
+      "brand-red": {
+        "role": "tertiary",
+        "displayName": "Brand red",
+        "tonalRamp": [
+          "oklch(15.0% 0.1901 31.20)",
+          "oklch(26.4% 0.1901 31.20)",
+          "oklch(37.9% 0.1901 31.20)",
+          "oklch(49.3% 0.1901 31.20)",
+          "oklch(60.7% 0.1901 31.20)",
+          "oklch(72.1% 0.1901 31.20)",
+          "oklch(83.6% 0.1901 31.20)",
+          "oklch(95.0% 0.1901 31.20)"
+        ]
+      },
+      "foreground-muted": {
+        "role": "neutral",
+        "displayName": "Foreground muted",
+        "tonalRamp": [
+          "oklch(15.0% 0.0192 233.49)",
+          "oklch(26.4% 0.0192 233.49)",
+          "oklch(37.9% 0.0192 233.49)",
+          "oklch(49.3% 0.0192 233.49)",
+          "oklch(60.7% 0.0192 233.49)",
+          "oklch(72.1% 0.0192 233.49)",
+          "oklch(83.6% 0.0192 233.49)",
+          "oklch(95.0% 0.0192 233.49)"
+        ]
+      },
+      "color-link": {
+        "role": "neutral",
+        "displayName": "Color link",
+        "tonalRamp": [
+          "oklch(15.0% 0.1515 30.89)",
+          "oklch(26.4% 0.1515 30.89)",
+          "oklch(37.9% 0.1515 30.89)",
+          "oklch(49.3% 0.1515 30.89)",
+          "oklch(60.7% 0.1515 30.89)",
+          "oklch(72.1% 0.1515 30.89)",
+          "oklch(83.6% 0.1515 30.89)",
+          "oklch(95.0% 0.1515 30.89)"
+        ]
+      },
+      "color-outline": {
+        "role": "neutral",
+        "displayName": "Color outline",
+        "tonalRamp": [
+          "oklch(15.0% 0.0216 234.50)",
+          "oklch(26.4% 0.0216 234.50)",
+          "oklch(37.9% 0.0216 234.50)",
+          "oklch(49.3% 0.0216 234.50)",
+          "oklch(60.7% 0.0216 234.50)",
+          "oklch(72.1% 0.0216 234.50)",
+          "oklch(83.6% 0.0216 234.50)",
+          "oklch(95.0% 0.0216 234.50)"
+        ]
+      },
+      "color-success": {
+        "role": "neutral",
+        "displayName": "Color success",
+        "tonalRamp": [
+          "oklch(15.0% 0.0910 151.02)",
+          "oklch(26.4% 0.0910 151.02)",
+          "oklch(37.9% 0.0910 151.02)",
+          "oklch(49.3% 0.0910 151.02)",
+          "oklch(60.7% 0.0910 151.02)",
+          "oklch(72.1% 0.0910 151.02)",
+          "oklch(83.6% 0.0910 151.02)",
+          "oklch(95.0% 0.0910 151.02)"
+        ]
+      },
+      "color-success-surface": {
+        "role": "neutral",
+        "displayName": "Color success surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0232 143.37)",
+          "oklch(26.4% 0.0232 143.37)",
+          "oklch(37.9% 0.0232 143.37)",
+          "oklch(49.3% 0.0232 143.37)",
+          "oklch(60.7% 0.0232 143.37)",
+          "oklch(72.1% 0.0232 143.37)",
+          "oklch(83.6% 0.0232 143.37)",
+          "oklch(95.0% 0.0232 143.37)"
+        ]
+      },
+      "color-warning": {
+        "role": "neutral",
+        "displayName": "Color warning",
+        "tonalRamp": [
+          "oklch(15.0% 0.0903 76.87)",
+          "oklch(26.4% 0.0903 76.87)",
+          "oklch(37.9% 0.0903 76.87)",
+          "oklch(49.3% 0.0903 76.87)",
+          "oklch(60.7% 0.0903 76.87)",
+          "oklch(72.1% 0.0903 76.87)",
+          "oklch(83.6% 0.0903 76.87)",
+          "oklch(95.0% 0.0903 76.87)"
+        ]
+      },
+      "color-warning-surface": {
+        "role": "neutral",
+        "displayName": "Color warning surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0593 91.45)",
+          "oklch(26.4% 0.0593 91.45)",
+          "oklch(37.9% 0.0593 91.45)",
+          "oklch(49.3% 0.0593 91.45)",
+          "oklch(60.7% 0.0593 91.45)",
+          "oklch(72.1% 0.0593 91.45)",
+          "oklch(83.6% 0.0593 91.45)",
+          "oklch(95.0% 0.0593 91.45)"
+        ]
+      },
+      "color-danger": {
+        "role": "neutral",
+        "displayName": "Color danger",
+        "tonalRamp": [
+          "oklch(15.0% 0.1515 30.89)",
+          "oklch(26.4% 0.1515 30.89)",
+          "oklch(37.9% 0.1515 30.89)",
+          "oklch(49.3% 0.1515 30.89)",
+          "oklch(60.7% 0.1515 30.89)",
+          "oklch(72.1% 0.1515 30.89)",
+          "oklch(83.6% 0.1515 30.89)",
+          "oklch(95.0% 0.1515 30.89)"
+        ]
+      },
+      "color-danger-surface": {
+        "role": "neutral",
+        "displayName": "Color danger surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0271 43.65)",
+          "oklch(26.4% 0.0271 43.65)",
+          "oklch(37.9% 0.0271 43.65)",
+          "oklch(49.3% 0.0271 43.65)",
+          "oklch(60.7% 0.0271 43.65)",
+          "oklch(72.1% 0.0271 43.65)",
+          "oklch(83.6% 0.0271 43.65)",
+          "oklch(95.0% 0.0271 43.65)"
+        ]
+      },
+      "color-info": {
+        "role": "neutral",
+        "displayName": "Color info",
+        "tonalRamp": [
+          "oklch(15.0% 0.0554 214.63)",
+          "oklch(26.4% 0.0554 214.63)",
+          "oklch(37.9% 0.0554 214.63)",
+          "oklch(49.3% 0.0554 214.63)",
+          "oklch(60.7% 0.0554 214.63)",
+          "oklch(72.1% 0.0554 214.63)",
+          "oklch(83.6% 0.0554 214.63)",
+          "oklch(95.0% 0.0554 214.63)"
+        ]
+      },
+      "color-info-surface": {
+        "role": "neutral",
+        "displayName": "Color info surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0169 196.87)",
+          "oklch(26.4% 0.0169 196.87)",
+          "oklch(37.9% 0.0169 196.87)",
+          "oklch(49.3% 0.0169 196.87)",
+          "oklch(60.7% 0.0169 196.87)",
+          "oklch(72.1% 0.0169 196.87)",
+          "oklch(83.6% 0.0169 196.87)",
+          "oklch(95.0% 0.0169 196.87)"
+        ]
+      },
+      "brand-ink-dark": {
+        "role": "neutral",
+        "displayName": "Brand ink dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0115 217.20)",
+          "oklch(26.4% 0.0115 217.20)",
+          "oklch(37.9% 0.0115 217.20)",
+          "oklch(49.3% 0.0115 217.20)",
+          "oklch(60.7% 0.0115 217.20)",
+          "oklch(72.1% 0.0115 217.20)",
+          "oklch(83.6% 0.0115 217.20)",
+          "oklch(95.0% 0.0115 217.20)"
+        ]
+      },
+      "brand-paper-dark": {
+        "role": "neutral",
+        "displayName": "Brand paper dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0280 115.69)",
+          "oklch(26.4% 0.0280 115.69)",
+          "oklch(37.9% 0.0280 115.69)",
+          "oklch(49.3% 0.0280 115.69)",
+          "oklch(60.7% 0.0280 115.69)",
+          "oklch(72.1% 0.0280 115.69)",
+          "oklch(83.6% 0.0280 115.69)",
+          "oklch(95.0% 0.0280 115.69)"
+        ]
+      },
+      "brand-yellow-dark": {
+        "role": "primary",
+        "displayName": "Brand yellow dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.1791 119.70)",
+          "oklch(26.4% 0.1791 119.70)",
+          "oklch(37.9% 0.1791 119.70)",
+          "oklch(49.3% 0.1791 119.70)",
+          "oklch(60.7% 0.1791 119.70)",
+          "oklch(72.1% 0.1791 119.70)",
+          "oklch(83.6% 0.1791 119.70)",
+          "oklch(95.0% 0.1791 119.70)"
+        ]
+      },
+      "brand-blue-dark": {
+        "role": "secondary",
+        "displayName": "Brand blue dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.1026 196.03)",
+          "oklch(26.4% 0.1026 196.03)",
+          "oklch(37.9% 0.1026 196.03)",
+          "oklch(49.3% 0.1026 196.03)",
+          "oklch(60.7% 0.1026 196.03)",
+          "oklch(72.1% 0.1026 196.03)",
+          "oklch(83.6% 0.1026 196.03)",
+          "oklch(95.0% 0.1026 196.03)"
+        ]
+      },
+      "brand-red-dark": {
+        "role": "tertiary",
+        "displayName": "Brand red dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.1926 35.73)",
+          "oklch(26.4% 0.1926 35.73)",
+          "oklch(37.9% 0.1926 35.73)",
+          "oklch(49.3% 0.1926 35.73)",
+          "oklch(60.7% 0.1926 35.73)",
+          "oklch(72.1% 0.1926 35.73)",
+          "oklch(83.6% 0.1926 35.73)",
+          "oklch(95.0% 0.1926 35.73)"
+        ]
+      },
+      "surface-canvas-dark": {
+        "role": "neutral",
+        "displayName": "Surface canvas dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0133 204.69)",
+          "oklch(26.4% 0.0133 204.69)",
+          "oklch(37.9% 0.0133 204.69)",
+          "oklch(49.3% 0.0133 204.69)",
+          "oklch(60.7% 0.0133 204.69)",
+          "oklch(72.1% 0.0133 204.69)",
+          "oklch(83.6% 0.0133 204.69)",
+          "oklch(95.0% 0.0133 204.69)"
+        ]
+      },
+      "surface-paper-dark": {
+        "role": "neutral",
+        "displayName": "Surface paper dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0178 196.13)",
+          "oklch(26.4% 0.0178 196.13)",
+          "oklch(37.9% 0.0178 196.13)",
+          "oklch(49.3% 0.0178 196.13)",
+          "oklch(60.7% 0.0178 196.13)",
+          "oklch(72.1% 0.0178 196.13)",
+          "oklch(83.6% 0.0178 196.13)",
+          "oklch(95.0% 0.0178 196.13)"
+        ]
+      },
+      "foreground-dark": {
+        "role": "neutral",
+        "displayName": "Foreground dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0280 115.69)",
+          "oklch(26.4% 0.0280 115.69)",
+          "oklch(37.9% 0.0280 115.69)",
+          "oklch(49.3% 0.0280 115.69)",
+          "oklch(60.7% 0.0280 115.69)",
+          "oklch(72.1% 0.0280 115.69)",
+          "oklch(83.6% 0.0280 115.69)",
+          "oklch(95.0% 0.0280 115.69)"
+        ]
+      },
+      "foreground-muted-dark": {
+        "role": "neutral",
+        "displayName": "Foreground muted dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0206 159.64)",
+          "oklch(26.4% 0.0206 159.64)",
+          "oklch(37.9% 0.0206 159.64)",
+          "oklch(49.3% 0.0206 159.64)",
+          "oklch(60.7% 0.0206 159.64)",
+          "oklch(72.1% 0.0206 159.64)",
+          "oklch(83.6% 0.0206 159.64)",
+          "oklch(95.0% 0.0206 159.64)"
+        ]
+      },
+      "color-link-dark": {
+        "role": "neutral",
+        "displayName": "Color link dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.1279 37.99)",
+          "oklch(26.4% 0.1279 37.99)",
+          "oklch(37.9% 0.1279 37.99)",
+          "oklch(49.3% 0.1279 37.99)",
+          "oklch(60.7% 0.1279 37.99)",
+          "oklch(72.1% 0.1279 37.99)",
+          "oklch(83.6% 0.1279 37.99)",
+          "oklch(95.0% 0.1279 37.99)"
+        ]
+      },
+      "color-outline-dark": {
+        "role": "neutral",
+        "displayName": "Color outline dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0280 115.69)",
+          "oklch(26.4% 0.0280 115.69)",
+          "oklch(37.9% 0.0280 115.69)",
+          "oklch(49.3% 0.0280 115.69)",
+          "oklch(60.7% 0.0280 115.69)",
+          "oklch(72.1% 0.0280 115.69)",
+          "oklch(83.6% 0.0280 115.69)",
+          "oklch(95.0% 0.0280 115.69)"
+        ]
+      },
+      "color-success-dark": {
+        "role": "neutral",
+        "displayName": "Color success dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0786 150.85)",
+          "oklch(26.4% 0.0786 150.85)",
+          "oklch(37.9% 0.0786 150.85)",
+          "oklch(49.3% 0.0786 150.85)",
+          "oklch(60.7% 0.0786 150.85)",
+          "oklch(72.1% 0.0786 150.85)",
+          "oklch(83.6% 0.0786 150.85)",
+          "oklch(95.0% 0.0786 150.85)"
+        ]
+      },
+      "color-success-surface-dark": {
+        "role": "neutral",
+        "displayName": "Color success surface dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0421 157.66)",
+          "oklch(26.4% 0.0421 157.66)",
+          "oklch(37.9% 0.0421 157.66)",
+          "oklch(49.3% 0.0421 157.66)",
+          "oklch(60.7% 0.0421 157.66)",
+          "oklch(72.1% 0.0421 157.66)",
+          "oklch(83.6% 0.0421 157.66)",
+          "oklch(95.0% 0.0421 157.66)"
+        ]
+      },
+      "color-warning-dark": {
+        "role": "neutral",
+        "displayName": "Color warning dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0985 91.66)",
+          "oklch(26.4% 0.0985 91.66)",
+          "oklch(37.9% 0.0985 91.66)",
+          "oklch(49.3% 0.0985 91.66)",
+          "oklch(60.7% 0.0985 91.66)",
+          "oklch(72.1% 0.0985 91.66)",
+          "oklch(83.6% 0.0985 91.66)",
+          "oklch(95.0% 0.0985 91.66)"
+        ]
+      },
+      "color-warning-surface-dark": {
+        "role": "neutral",
+        "displayName": "Color warning surface dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0312 89.19)",
+          "oklch(26.4% 0.0312 89.19)",
+          "oklch(37.9% 0.0312 89.19)",
+          "oklch(49.3% 0.0312 89.19)",
+          "oklch(60.7% 0.0312 89.19)",
+          "oklch(72.1% 0.0312 89.19)",
+          "oklch(83.6% 0.0312 89.19)",
+          "oklch(95.0% 0.0312 89.19)"
+        ]
+      },
+      "color-danger-dark": {
+        "role": "neutral",
+        "displayName": "Color danger dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.1279 37.99)",
+          "oklch(26.4% 0.1279 37.99)",
+          "oklch(37.9% 0.1279 37.99)",
+          "oklch(49.3% 0.1279 37.99)",
+          "oklch(60.7% 0.1279 37.99)",
+          "oklch(72.1% 0.1279 37.99)",
+          "oklch(83.6% 0.1279 37.99)",
+          "oklch(95.0% 0.1279 37.99)"
+        ]
+      },
+      "color-danger-surface-dark": {
+        "role": "neutral",
+        "displayName": "Color danger surface dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0340 30.57)",
+          "oklch(26.4% 0.0340 30.57)",
+          "oklch(37.9% 0.0340 30.57)",
+          "oklch(49.3% 0.0340 30.57)",
+          "oklch(60.7% 0.0340 30.57)",
+          "oklch(72.1% 0.0340 30.57)",
+          "oklch(83.6% 0.0340 30.57)",
+          "oklch(95.0% 0.0340 30.57)"
+        ]
+      },
+      "color-info-dark": {
+        "role": "neutral",
+        "displayName": "Color info dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0615 203.83)",
+          "oklch(26.4% 0.0615 203.83)",
+          "oklch(37.9% 0.0615 203.83)",
+          "oklch(49.3% 0.0615 203.83)",
+          "oklch(60.7% 0.0615 203.83)",
+          "oklch(72.1% 0.0615 203.83)",
+          "oklch(83.6% 0.0615 203.83)",
+          "oklch(95.0% 0.0615 203.83)"
+        ]
+      },
+      "color-info-surface-dark": {
+        "role": "neutral",
+        "displayName": "Color info surface dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0333 204.79)",
+          "oklch(26.4% 0.0333 204.79)",
+          "oklch(37.9% 0.0333 204.79)",
+          "oklch(49.3% 0.0333 204.79)",
+          "oklch(60.7% 0.0333 204.79)",
+          "oklch(72.1% 0.0333 204.79)",
+          "oklch(83.6% 0.0333 204.79)",
+          "oklch(95.0% 0.0333 204.79)"
+        ]
+      },
+      "accent-fg-dark": {
+        "role": "neutral",
+        "displayName": "Accent fg dark",
+        "tonalRamp": [
+          "oklch(15.0% 0.0051 219.72)",
+          "oklch(26.4% 0.0051 219.72)",
+          "oklch(37.9% 0.0051 219.72)",
+          "oklch(49.3% 0.0051 219.72)",
+          "oklch(60.7% 0.0051 219.72)",
+          "oklch(72.1% 0.0051 219.72)",
+          "oklch(83.6% 0.0051 219.72)",
+          "oklch(95.0% 0.0051 219.72)"
+        ]
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Homepage and chapter titles" },
-      "body": { "displayName": "Body", "purpose": "Descriptions and long form content" },
-      "label": { "displayName": "Metadata", "purpose": "Dates, code, and short technical labels" }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Public chapter titles."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Studio and shared state headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading and descriptions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Badges and compact technical metadata."
+      }
     },
     "shadows": [
-      { "name": "chapter", "value": "12px 12px 0 var(--adventure-red)", "purpose": "Separates a major chapter header from the page" },
-      { "name": "directory", "value": "8px 9px 0 var(--adventure-blue)", "purpose": "Separates work rows from the ground" }
+      {
+        "name": "chapter",
+        "value": "12px 12px 0 var(--brand-red)",
+        "purpose": "Established public printed sheets."
+      },
+      {
+        "name": "directory",
+        "value": "8px 9px 0 var(--brand-blue)",
+        "purpose": "Compact public directory depth."
+      }
     ],
     "motion": [
-      { "name": "feedback", "value": "160ms", "purpose": "Controls and hover response" },
-      { "name": "settle", "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Menu, arrow, and panel arrival" }
+      {
+        "name": "feedback",
+        "value": "160ms",
+        "purpose": "Shared control color and border response; disabled under reduced motion."
+      },
+      {
+        "name": "settle",
+        "value": "260ms cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Existing authored menu and panel arrival."
+      }
     ],
     "breakpoints": [
-      { "name": "stack", "value": "820px" },
-      { "name": "phone", "value": "560px" }
+      {
+        "name": "chapter-stack",
+        "value": "820px"
+      },
+      {
+        "name": "table-guidance",
+        "value": "767px"
+      },
+      {
+        "name": "chapter-phone",
+        "value": "560px"
+      }
     ]
   },
   "components": [
     {
-      "name": "Chapter header",
-      "kind": "custom",
-      "refersTo": "paper-panel",
-      "description": "A route title on a colored printed sheet",
-      "html": "<div class=\"chapter-header\"><h1>Work</h1></div>",
-      "css": ".chapter-header { border: 5px solid #142027; background: #f6ce4a; box-shadow: 12px 12px 0 #cf3924; }"
-    },
-    {
-      "name": "Primary action",
+      "name": "Primary button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "A direct action with an ink outline",
-      "html": "<a class=\"adventure-button adventure-button--primary\" href=\"#selected-work\">See my work</a>",
-      "css": ".adventure-button { min-height: 52px; border: 4px solid #142027; } .adventure-button--primary { background: #f6ce4a; }"
+      "description": "Shared primary action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">Primary</button>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:var(--action-primary,#f6ce4a);color:var(--action-foreground,#142027);}.ds-button-primary:hover:not(:disabled){background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);border-color:var(--foreground,#142027);}.ds-button-primary:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-primary:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none;}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Shared secondary action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-secondary\" type=\"button\">Secondary</button>",
+      "css": ".ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:var(--surface-paper,#fff8e7);color:var(--foreground,#142027);}.ds-button-secondary:hover:not(:disabled){background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);border-color:var(--foreground,#142027);}.ds-button-secondary:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-secondary:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none;}}"
+    },
+    {
+      "name": "Accent button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "Shared accent action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-accent\" type=\"button\">Accent</button>",
+      "css": ".ds-button-accent{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);}.ds-button-accent:hover:not(:disabled){background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);border-color:var(--foreground,#142027);}.ds-button-accent:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-accent:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-accent{transition:none;}}"
+    },
+    {
+      "name": "Inverse button",
+      "kind": "button",
+      "refersTo": "button-inverse",
+      "description": "Shared inverse action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-inverse\" type=\"button\">Inverse</button>",
+      "css": ".ds-button-inverse{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:var(--foreground,#142027);color:var(--surface-canvas,#f8e9bd);}.ds-button-inverse:hover:not(:disabled){background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);border-color:var(--foreground,#142027);}.ds-button-inverse:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-inverse:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-inverse{transition:none;}}"
+    },
+    {
+      "name": "Danger button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Shared danger action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-danger\" type=\"button\">Delete entry</button>",
+      "css": ".ds-button-danger{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:var(--color-danger-surface,#f9e3da);color:var(--color-danger,#9c2b1c);border-color:var(--color-danger,#9c2b1c);}.ds-button-danger:hover:not(:disabled){background:var(--color-danger,#9c2b1c);color:var(--surface-paper,#fff8e7);border-color:var(--color-danger,#9c2b1c);}.ds-button-danger:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-danger:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-danger{transition:none;}}"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Shared ghost action; default height follows public or studio context.",
+      "html": "<button class=\"ds-button-ghost\" type=\"button\">Ghost</button>",
+      "css": ".ds-button-ghost{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2,8px);min-height:var(--control-height,48px);padding:var(--space-2,8px) var(--space-5,20px);border:var(--control-border,2px) solid var(--foreground,#142027);border-radius:var(--radius-control,0);font:600 1rem/1.25 var(--font-body,'Bricolage Grotesque',sans-serif);text-align:center;text-decoration:none;cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);background:transparent;color:var(--foreground,#142027);border-color:transparent;}.ds-button-ghost:hover:not(:disabled){background:var(--brand-blue,#8fd9e3);color:var(--brand-ink,#142027);border-color:var(--foreground,#142027);}.ds-button-ghost:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-button-ghost:disabled{opacity:.5;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition:none;}}"
+    },
+    {
+      "name": "Plain action",
+      "kind": "button",
+      "refersTo": "button-plain",
+      "description": "Domain-styled action; shared API supplies pending and disabled behavior without shared dimensions.",
+      "html": "<button class=\"ds-button-plain\" type=\"button\">Select role</button>",
+      "css": ".ds-button-plain{cursor:pointer;transition:background-color var(--duration-feedback,160ms),color var(--duration-feedback,160ms),border-color var(--duration-feedback,160ms);}.ds-button-plain:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-button-plain{transition:none;}}.ds-button-plain:disabled{opacity:.5;cursor:not-allowed;}"
+    },
+    {
+      "name": "Labeled text field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "A labeled field with a hint association and shared focus/invalid treatment.",
+      "html": "<div><label class=\"ds-field-label\" for=\"ds-email\">Email address</label><input class=\"ds-input\" id=\"ds-email\" type=\"email\" aria-describedby=\"ds-email-hint\" placeholder=\"you@example.com\"><p class=\"ds-field-hint\" id=\"ds-email-hint\">Used to reply to your message.</p></div>",
+      "css": ".ds-field-label{display:block;margin-bottom:8px;font:600 .875rem var(--font-body,'Bricolage Grotesque',sans-serif);color:var(--foreground,#142027);}.ds-input{width:100%;max-width:100%;min-height:var(--control-height,48px);padding:8px 16px;border:var(--control-border,2px) solid var(--field-outline,#142027);border-radius:0;background:var(--field-surface,#f8e9bd);color:var(--foreground,#142027);font:400 1rem/1.55 var(--font-body,'Bricolage Grotesque',sans-serif);transition:border-color 160ms;}.ds-input::placeholder{color:var(--foreground-muted,#445057);opacity:.8;}.ds-input:focus-visible{outline:3px solid var(--color-link,#9c2b1c);outline-offset:3px;}.ds-input[aria-invalid='true']{border-color:var(--color-danger,#9c2b1c);}.ds-input:disabled{opacity:.5;cursor:not-allowed;}.ds-field-hint{margin-top:8px;font-size:.875rem;color:var(--foreground-muted,#445057);}@media(prefers-reduced-motion:reduce){.ds-input{transition:none;}}"
+    },
+    {
+      "name": "Paper panel",
+      "kind": "card",
+      "refersTo": "paper-panel",
+      "description": "Shared paper container without an offset shadow.",
+      "html": "<section class=\"ds-panel\"><h2>Content studio</h2><p>Edit the entries on your website.</p></section>",
+      "css": ".ds-panel{min-width:0;padding:24px;border:var(--control-border,2px) solid var(--foreground,#142027);background:var(--surface-paper,#fff8e7);color:var(--foreground,#142027);}"
+    },
+    {
+      "name": "Status badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Compact semantic status with an explicit text label.",
+      "html": "<span class=\"ds-badge\">Published</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid currentColor;font:500 .75rem/1.3 var(--font-code,'DM Mono',monospace);white-space:nowrap;color:var(--color-success,#276239);background:var(--color-success-surface,#e0eddf);}"
+    },
+    {
+      "name": "Public navigation link",
+      "kind": "nav",
+      "refersTo": "public-navigation",
+      "description": "A masthead link whose blue state marks hover, focus, or the current route.",
+      "html": "<nav class=\"ds-navigation\" aria-label=\"Portfolio\"><a class=\"ds-nav-link\" href=\"/portfolio\">Work</a><a class=\"ds-nav-link\" href=\"/blog\" aria-current=\"page\">Writing</a></nav>",
+      "css": ".ds-navigation{display:flex;background:var(--brand-ink,#142027);color:var(--brand-paper,#fff8e7);}.ds-nav-link{display:flex;min-height:66px;align-items:center;justify-content:center;padding:0 10px;border-right:1px solid rgb(255 248 231 / 28%);color:inherit;font:700 .72rem var(--font-body,'Bricolage Grotesque',sans-serif);text-decoration:none;transition:color 180ms ease,background 180ms ease;}.ds-nav-link:hover,.ds-nav-link:focus-visible,.ds-nav-link[aria-current='page']{color:var(--brand-ink,#142027);background:var(--brand-blue,#8fd9e3);}"
+    },
+    {
+      "name": "Printed chapter sheet",
+      "kind": "custom",
+      "refersTo": "chapter-header",
+      "description": "The public chapter introduction; blue, red, and paper variants remain route-specific.",
+      "html": "<header class=\"ds-chapter\"><h1>Work</h1></header>",
+      "css": ".ds-chapter{min-height:270px;display:flex;align-items:flex-end;gap:36px;padding:clamp(28px,5vw,60px);color:var(--brand-ink,#142027);background:var(--brand-yellow,#f6ce4a);border:5px solid var(--brand-ink,#142027);box-shadow:12px 12px 0 var(--brand-red,#cf3924);}.ds-chapter h1{max-width:18ch;font:800 var(--type-display,clamp(3.6rem,8vw,6rem))/.9 var(--font-body,'Bricolage Grotesque',sans-serif);letter-spacing:-.04em;overflow-wrap:anywhere;}@media(max-width:820px){.ds-chapter{min-height:230px;align-items:flex-start;flex-direction:column;justify-content:flex-end;gap:20px;padding:30px;}}@media(max-width:560px){.ds-chapter{min-height:210px;border-width:4px;box-shadow:8px 9px 0 var(--brand-red,#cf3924);}.ds-chapter h1{font-size:var(--type-display-compact,clamp(3rem,13vw,4.25rem));}}"
     }
   ],
   "narrative": {
     "northStar": "Clear-line coding adventure",
-    "overview": "An interactive Blender workstation opens real portfolio destinations. The Resume worktable reveals factual role records on a pull-out tray inside its scene. Ink outlines and colored paper panels carry the same world across reading and utility pages.",
-    "keyCharacteristics": ["Interactive 3D navigation", "In-scene Resume records", "Bricolage Grotesque display", "Ink and paper panels", "Short feedback motion"],
-    "rules": [
-      { "name": "Evidence first", "body": "Link from the landing page to concrete projects before biographical detail.", "section": "components" }
+    "overview": "The site uses ink outlines, warm paper, yellow and blue sheets, and Bricolage Grotesque type. Authored Blender scenes give the homepage workstation and Resume worktable a spatial role. Ordinary links, readable content, and keyboard controls remain available alongside them.\n\nThe content studio uses the same materials at a denser scale. Shared controls change height, border weight, and field background by context. Public chapter layouts and 3D controls keep their own composition while consuming the canonical tokens.",
+    "keyCharacteristics": [
+      "Paper and ink in light and dark themes",
+      "Bricolage Grotesque with DM Mono metadata",
+      "Shared controls with public and admin density",
+      "Authored 3D with readable fallbacks"
     ],
-    "dos": ["Keep text and links available without WebGL", "Use factual role and project copy"],
-    "donts": ["Invent client claims", "Require game mechanics for navigation"]
+    "rules": [
+      {
+        "name": "The role color rule",
+        "body": "Use semantic foreground, surface, and feedback tokens for shared controls. Brand ink on a colored sheet is a different role from readable text on a dark page.",
+        "section": "colors"
+      },
+      {
+        "name": "The context rule",
+        "body": "Use the shared component API for repeated controls. Keep route composition and authored 3D behavior in their domain components.",
+        "section": "components"
+      },
+      {
+        "name": "The printed depth rule",
+        "body": "Keep hard offset color shadows on the established public sheets. Shared forms and studio panels use borders without adding a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do import shared controls from @/components/ui and reuse the canonical CSS tokens.",
+      "Do keep ordinary links, keyboard access, visible focus, and reduced-motion behavior alongside 3D.",
+      "Do give icon controls an accessible name and horizontal table regions a useful label.",
+      "Do preserve factual project and role content."
+    ],
+    "donts": [
+      "Don't restate brand colors, field styling, or control sizes in each route.",
+      "Don't apply shared button dimensions to a domain control that intentionally uses the plain variant.",
+      "Don't use color alone to convey validation or publication state.",
+      "Don't invent testimonials, project results, or client endorsements."
+    ]
   }
 }

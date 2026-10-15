@@ -18,7 +18,7 @@ export function useMermaidRenderer(
       mermaid.initialize({
         startOnLoad: false,
         theme: isDark ? 'dark' : 'neutral',
-        fontFamily: 'JetBrains Mono, monospace',
+        fontFamily: 'var(--font-code)',
       })
       blocks.forEach(async (block, i) => {
         if (cancelled) return

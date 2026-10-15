@@ -1,8 +1,21 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+
 import { MAX_RETRIES } from '@/lib/webhook-events'
-import { getWebhookById, getWebhookDeliveryLogs } from '@/server/functions/webhooks.functions'
+import {
+  getWebhookById,
+  getWebhookDeliveryLogs,
+} from '@/server/functions/webhooks.functions'
+
+import {
+  Button,
+  Table,
+  TableScroll,
+  EmptyState,
+  Badge,
+  PageHeader,
+  PageState,
+} from '@/components/ui'
 
 export const Route = createFileRoute('/admin/_layout/webhooks/$id/logs')({
   loader: async ({ params }) => {
@@ -19,25 +32,39 @@ export const Route = createFileRoute('/admin/_layout/webhooks/$id/logs')({
 function WebhookLogsPage() {
   const { webhook, logs } = Route.useLoaderData()
 
-  if (!webhook) return <div className="py-12 text-center text-[var(--text-secondary)]">Webhook not found</div>
+  if (!webhook)
+    return (
+      <PageState>
+        <h1>Webhook not found</h1>
+        <p>Return to the collection to choose another entry.</p>
+      </PageState>
+    )
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <Link to="/admin/webhooks" className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--admin-link)]">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
+      <PageHeader className="justify-start">
+        <Button asChild variant="ghost" size="icon">
+          <Link to="/admin/webhooks">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </Button>
         <div>
           <h1 className="text-2xl font-bold">Delivery Logs</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)] break-all">{webhook.url}</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)] break-all">
+            {webhook.url}
+          </p>
         </div>
-      </div>
+      </PageHeader>
 
       {logs.length === 0 ? (
-        <div className="mt-12 text-center text-[var(--text-secondary)]">No delivery attempts yet.</div>
+        <EmptyState>No delivery attempts yet.</EmptyState>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border-color)]" role="region" aria-label="Webhook delivery logs table, scroll for all columns" tabIndex={0}>
-          <table className="w-full text-left text-sm">
+        <TableScroll
+          role="region"
+          aria-label="Webhook delivery logs table, scroll for all columns"
+          tabIndex={0}
+        >
+          <Table>
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -45,17 +72,22 @@ function WebhookLogsPage() {
                 <th className="px-4 py-3 font-medium ">HTTP</th>
                 <th className="px-4 py-3 font-medium ">Attempt</th>
                 <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium lg:table-cell">Response</th>
+                <th className="px-4 py-3 font-medium lg:table-cell">
+                  Response
+                </th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b border-[var(--border-color)]">
+                <tr
+                  key={log.id}
+                  className="border-b border-[var(--border-color)]"
+                >
                   <td className="px-4 py-3">
                     {log.success ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-[var(--color-success)]" />
                     ) : (
-                      <XCircle className="h-4 w-4 text-red-500" />
+                      <XCircle className="h-4 w-4 text-[var(--color-danger)]" />
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -64,12 +96,15 @@ function WebhookLogsPage() {
                     </code>
                   </td>
                   <td className="px-4 py-3 ">
-                    <span className={cn(
-                      'text-xs font-medium',
-                      log.statusCode && log.statusCode < 400 ? 'text-green-500' : 'text-red-500',
-                    )}>
+                    <Badge
+                      tone={
+                        log.statusCode && log.statusCode < 400
+                          ? 'success'
+                          : 'danger'
+                      }
+                    >
                       {log.statusCode ?? '—'}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-4 py-3  text-[var(--text-secondary)]">
                     {log.attempt}/{MAX_RETRIES}
@@ -85,8 +120,8 @@ function WebhookLogsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableScroll>
       )}
     </div>
   )

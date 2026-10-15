@@ -1,11 +1,31 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
-import { Users, Trash2, CheckCircle, Clock, UserMinus, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Users,
+  Trash2,
+  CheckCircle,
+  Clock,
+  UserMinus,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getSubscribers, getSubscriberStats, deleteSubscriber } from '@/server/functions/subscribers.functions'
+import {
+  getSubscribers,
+  getSubscriberStats,
+  deleteSubscriber,
+} from '@/server/functions/subscribers.functions'
 
-import { FormError } from '@/components/admin/form/FormError'
+import {
+  FormError,
+  PageHeader,
+  Button,
+  Panel,
+  EmptyState,
+  Badge,
+} from '@/components/ui'
+
 export const Route = createFileRoute('/admin/_layout/subscribers')({
   validateSearch: (search: Record<string, unknown>) => ({
     page: Number(search.page) || 1,
@@ -22,9 +42,24 @@ export const Route = createFileRoute('/admin/_layout/subscribers')({
 })
 
 const statusConfig = {
-  confirmed: { label: 'Confirmed', icon: CheckCircle, color: 'text-green-500' },
-  pending: { label: 'Pending', icon: Clock, color: 'text-yellow-500' },
-  unsubscribed: { label: 'Unsubscribed', icon: UserMinus, color: 'text-[var(--text-secondary)]' },
+  confirmed: {
+    label: 'Confirmed',
+    icon: CheckCircle,
+    color: 'text-[var(--color-success)]',
+    tone: 'success',
+  },
+  pending: {
+    label: 'Pending',
+    icon: Clock,
+    color: 'text-[var(--color-warning)]',
+    tone: 'warning',
+  },
+  unsubscribed: {
+    label: 'Unsubscribed',
+    icon: UserMinus,
+    color: 'text-[var(--text-secondary)]',
+    tone: 'neutral',
+  },
 } as const
 
 function SubscribersPage() {
@@ -41,41 +76,60 @@ function SubscribersPage() {
 
   return (
     <div>
-      <FormError message={deleteMut.isError ? 'The item could not be removed. Please try again.' : ''} />
-      <header className="border-b border-[var(--border-color)] pb-4 mb-6">
+      <FormError
+        message={
+          deleteMut.isError
+            ? 'The item could not be removed. Please try again.'
+            : ''
+        }
+      />
+      <PageHeader className="border-b border-[var(--border-color)] pb-4 mb-6">
         <h1 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
           <Users className="h-6 w-6" />
           Newsletter Subscribers
         </h1>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          {stats.confirmed} confirmed, {stats.pending} pending, {stats.total} total
+          {stats.confirmed} confirmed, {stats.pending} pending, {stats.total}{' '}
+          total
         </p>
-      </header>
+      </PageHeader>
 
       {/* Stats cards */}
       <div className="grid gap-4 sm:grid-cols-3 mb-8">
-        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-            Confirmed
-          </span>
-          <p className="mt-2 text-3xl font-bold text-green-500">{stats.confirmed}</p>
-        </div>
-        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-            Pending
-          </span>
-          <p className="mt-2 text-3xl font-bold text-yellow-500">{stats.pending}</p>
-        </div>
-        <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-            Total
-          </span>
-          <p className="mt-2 text-3xl font-bold text-[var(--text-primary)]">{stats.total}</p>
-        </div>
+        <Panel asChild>
+          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Confirmed
+            </span>
+            <p className="mt-2 text-3xl font-bold text-[var(--color-success)]">
+              {stats.confirmed}
+            </p>
+          </div>
+        </Panel>
+        <Panel asChild>
+          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Pending
+            </span>
+            <p className="mt-2 text-3xl font-bold text-[var(--color-warning)]">
+              {stats.pending}
+            </p>
+          </div>
+        </Panel>
+        <Panel asChild>
+          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Total
+            </span>
+            <p className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
+              {stats.total}
+            </p>
+          </div>
+        </Panel>
       </div>
 
       {subscribers.items.length === 0 ? (
-        <div className="mt-12 text-center text-[var(--text-secondary)]">No subscribers yet.</div>
+        <EmptyState>No subscribers yet.</EmptyState>
       ) : (
         <>
           <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
@@ -93,28 +147,37 @@ function SubscribersPage() {
                       <p className="text-sm font-medium text-[var(--text-primary)] break-all">
                         {sub.email}
                         {sub.name && (
-                          <span className="ml-2 text-[var(--text-secondary)]">({sub.name})</span>
+                          <span className="ml-2 text-[var(--text-secondary)]">
+                            ({sub.name})
+                          </span>
                         )}
                       </p>
                       <p className="text-xs text-[var(--text-secondary)]">
-                        <span className={cfg.color}>{cfg.label}</span>
+                        <Badge tone={cfg.tone}>{cfg.label}</Badge>
                         {' · '}
                         {new Date(sub.createdAt).toLocaleDateString()}
                         {sub.confirmedAt && (
-                          <> · confirmed {new Date(sub.confirmedAt).toLocaleDateString()}</>
+                          <>
+                            {' '}
+                            · confirmed{' '}
+                            {new Date(sub.confirmedAt).toLocaleDateString()}
+                          </>
                         )}
                       </p>
                     </div>
                   </div>
-                  <button
+                  <Button
+                    variant="danger"
+                    size="icon"
                     disabled={deleteMut.isPending}
                     onClick={() => {
-                      if (confirm(`Remove ${sub.email}?`)) deleteMut.mutate(sub.id)
+                      if (confirm(`Remove ${sub.email}?`))
+                        deleteMut.mutate(sub.id)
                     }}
-                    className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-red-500 shrink-0 ml-4"
+                    className="shrink-0 ml-4"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Remove
-                  </button>
+                  </Button>
                 </div>
               )
             })}
@@ -124,23 +187,24 @@ function SubscribersPage() {
           {subscribers.totalPages > 1 && (
             <div className="mt-6 flex items-center justify-between">
               <p className="text-xs text-[var(--text-secondary)]">
-                Page {subscribers.page} of {subscribers.totalPages} ({subscribers.total} total)
+                Page {subscribers.page} of {subscribers.totalPages} (
+                {subscribers.total} total)
               </p>
               <div className="flex items-center gap-2">
-                <button
+                <Button
+                  variant="secondary"
                   disabled={page <= 1}
                   onClick={() => navigate({ search: { page: page - 1 } })}
-                  className="flex items-center gap-1 border border-[var(--border-color)] px-3 py-1.5 text-xs font-mono uppercase tracking-wider hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" /> Prev
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
                   disabled={page >= subscribers.totalPages}
                   onClick={() => navigate({ search: { page: page + 1 } })}
-                  className="flex items-center gap-1 border border-[var(--border-color)] px-3 py-1.5 text-xs font-mono uppercase tracking-wider hover:bg-[var(--bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Next <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
           )}

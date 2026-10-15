@@ -1,9 +1,15 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
-import type { OutputData, EditorConfig, ToolConstructable } from '@editorjs/editorjs'
+import type {
+  OutputData,
+  EditorConfig,
+  ToolConstructable,
+} from '@editorjs/editorjs'
 import { useServerFn } from '@tanstack/react-start'
 import { upload } from '@/server/functions/upload.functions'
 import { FileText } from 'lucide-react'
 import { markdownToEditorJs } from '@/lib/markdown-to-editorjs'
+
+import { Feedback, Button, Textarea } from '@/components/ui'
 
 interface EditorJsEditorProps {
   value: OutputData | null
@@ -11,7 +17,9 @@ interface EditorJsEditorProps {
 }
 
 export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
-  const editorRef = useRef<InstanceType<typeof import('@editorjs/editorjs').default> | null>(null)
+  const editorRef = useRef<InstanceType<
+    typeof import('@editorjs/editorjs').default
+  > | null>(null)
   const holderRef = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
   const initializedRef = useRef(false)
@@ -24,32 +32,37 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
 
   const uploadFn = useServerFn(upload)
 
-  const createUploader = useCallback(() => ({
-    async uploadByFile(file: File) {
-      try {
-        const buffer = await file.arrayBuffer()
-        const result = await uploadFn({
-          data: {
-            contentType: file.type,
-            fileSize: file.size,
-            bytes: Array.from(new Uint8Array(buffer)),
-          },
-        })
-        return {
-          success: 1,
-          file: { url: result.publicUrl },
+  const createUploader = useCallback(
+    () => ({
+      async uploadByFile(file: File) {
+        try {
+          const buffer = await file.arrayBuffer()
+          const result = await uploadFn({
+            data: {
+              contentType: file.type,
+              fileSize: file.size,
+              bytes: Array.from(new Uint8Array(buffer)),
+            },
+          })
+          return {
+            success: 1,
+            file: { url: result.publicUrl },
+          }
+        } catch {
+          return { success: 0, file: { url: '' } }
         }
-      } catch {
-        return { success: 0, file: { url: '' } }
-      }
-    },
-  }), [uploadFn])
+      },
+    }),
+    [uploadFn],
+  )
 
   useEffect(() => {
     if (initializedRef.current || !holderRef.current) return
     initializedRef.current = true
 
-    let editor: InstanceType<typeof import('@editorjs/editorjs').default> | null = null
+    let editor: InstanceType<
+      typeof import('@editorjs/editorjs').default
+    > | null = null
 
     async function init() {
       const [
@@ -136,7 +149,10 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
           warning: {
             class: Warning as unknown as ToolConstructable,
             inlineToolbar: true,
-            config: { titlePlaceholder: 'Title', messagePlaceholder: 'Message' },
+            config: {
+              titlePlaceholder: 'Title',
+              messagePlaceholder: 'Message',
+            },
           },
           marker: {
             class: Marker as unknown as ToolConstructable,
@@ -166,7 +182,9 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
 
     init().catch(() => {
       initializedRef.current = false
-      setEditorError('The editor could not load. Reload this page before editing or saving content.')
+      setEditorError(
+        'The editor could not load. Reload this page before editing or saving content.',
+      )
     })
 
     return () => {
@@ -176,35 +194,52 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
         editorRef.current = null
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleImportMarkdown = useCallback(() => {
     if (!markdownInput.trim() || !editorRef.current) return
-    if (value?.blocks.length && !window.confirm('Replace the current editor content with this Markdown?')) return
+    if (
+      value?.blocks.length &&
+      !window.confirm('Replace the current editor content with this Markdown?')
+    )
+      return
     const data = markdownToEditorJs(markdownInput)
-    editorRef.current.render(data).then(() => {
-      onChangeRef.current(data)
-      setMarkdownInput('')
-      setShowImport(false)
-    }).catch(() => setEditorError('Markdown could not be imported. Please try again.'))
+    editorRef.current
+      .render(data)
+      .then(() => {
+        onChangeRef.current(data)
+        setMarkdownInput('')
+        setShowImport(false)
+      })
+      .catch(() =>
+        setEditorError('Markdown could not be imported. Please try again.'),
+      )
   }, [markdownInput, value])
 
   return (
     <div>
-      {!editorReady && !editorError && <p role="status" className="mb-3 text-sm text-text-secondary">Loading editor…</p>}
-      {editorError && <p role="alert" className="admin-feedback">{editorError}</p>}
+      {!editorReady && !editorError && (
+        <Feedback tone="info" role="status">
+          Loading editor…
+        </Feedback>
+      )}
+      {editorError && (
+        <Feedback tone="danger" role="alert">
+          {editorError}
+        </Feedback>
+      )}
       <div className="flex items-center justify-end mb-2">
-        <button
+        <Button
+          variant="secondary"
           type="button"
           disabled={!editorReady}
           aria-expanded={showImport}
           onClick={() => setShowImport(!showImport)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)] border border-[var(--border-color)] rounded hover:text-[var(--admin-link)] hover:border-[var(--accent)] transition-colors"
         >
           <FileText className="h-3.5 w-3.5" />
           Import Markdown
-        </button>
+        </Button>
       </div>
 
       {showImport && (
@@ -214,28 +249,34 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
               Paste Markdown
             </span>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="secondary"
                 type="button"
-                onClick={() => { setShowImport(false); setMarkdownInput('') }}
-                className="px-3 py-1 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                onClick={() => {
+                  setShowImport(false)
+                  setMarkdownInput('')
+                }}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 type="button"
                 onClick={handleImportMarkdown}
                 disabled={!markdownInput.trim()}
-                className="px-3 py-1 text-xs font-bold bg-[var(--accent)] text-[var(--accent-fg)] rounded hover:opacity-90 transition-opacity disabled:opacity-40"
               >
                 Import
-              </button>
+              </Button>
             </div>
           </div>
-          <textarea
+          <Textarea
+            appearance="plain"
             aria-label="Markdown to import"
             value={markdownInput}
             onChange={(e) => setMarkdownInput(e.target.value)}
-            placeholder={'# Heading\n\nParagraph text with **bold** and *italic*.\n\n```typescript\nconst x = 1\n```'}
+            placeholder={
+              '# Heading\n\nParagraph text with **bold** and *italic*.\n\n```typescript\nconst x = 1\n```'
+            }
             className="w-full min-h-[200px] p-3 font-mono text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] border-none outline-none resize-y"
           />
         </div>

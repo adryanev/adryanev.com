@@ -2,28 +2,54 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Download, Loader2 } from 'lucide-react'
 import { getPublicResume } from '@/server/functions/public.functions'
-import { Reveal, StaggerChildren, StaggerItem } from '@/components/motion/Reveal'
+import {
+  Reveal,
+  StaggerChildren,
+  StaggerItem,
+} from '@/components/motion/Reveal'
 import { ResumeWorktable } from '@/components/resume/ResumeWorktable'
 import { experiencePoints } from '@/components/resume/experience-points'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
+import { PageHeader, Button } from '@/components/ui'
 export const Route = createFileRoute('/resume')({
   loader: () => getPublicResume(),
   component: ResumePage,
   head: () => ({
     meta: seoMeta({
       title: 'Resume — Adryan Eka Vandra',
-      description: 'Resume of Adryan Eka Vandra — Software Engineer. Experience, education, certifications, and skills.',
+      description:
+        'Resume of Adryan Eka Vandra — Software Engineer. Experience, education, certifications, and skills.',
       path: '/resume',
     }),
     links: [canonicalLink('/resume')],
   }),
 })
 
-type Education = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null }
-type Certification = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null }
+type Education = {
+  id: number
+  title: string
+  organization: string | null
+  startDate: string | null
+  endDate: string | null
+}
+type Certification = {
+  id: number
+  title: string
+  organization: string | null
+  startDate: string | null
+  endDate: string | null
+}
 type Skill = { id: number; title: string; technology: string[] | null }
-type Experience = { id: number; title: string; organization: string | null; startDate: string | null; endDate: string | null; description: string | null; technology: string[] | null }
+type Experience = {
+  id: number
+  title: string
+  organization: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+  technology: string[] | null
+}
 
 function ResumePage() {
   const resume = Route.useLoaderData()
@@ -32,9 +58,8 @@ function ResumePage() {
   async function handleDownload() {
     setGenerating(true)
     try {
-      const { generateResumePDF } = await import(
-        '@/components/resume/ResumePDF'
-      )
+      const { generateResumePDF } =
+        await import('@/components/resume/ResumePDF')
       await generateResumePDF(resume)
     } finally {
       setGenerating(false)
@@ -44,7 +69,7 @@ function ResumePage() {
   return (
     <div className="chapter-page chapter-resume mx-auto w-full max-w-7xl px-6 py-12 md:py-24">
       <Reveal>
-        <div className="chapter-header mb-16 border-b-4 border-text-primary pb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <PageHeader variant="chapter" className="resume-page__header">
           <div>
             <h1 className="font-serif text-6xl font-medium tracking-tight md:text-8xl lg:text-[10rem] uppercase">
               CV
@@ -56,15 +81,21 @@ function ResumePage() {
               </span>
             </div>
           </div>
-          <button
+          <Button
+            variant="inverse"
+            size="lg"
             onClick={handleDownload}
             disabled={generating}
-            className="flex w-full md:w-auto items-center justify-center gap-2 bg-text-primary text-bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest brutal-border transition-colors hover:bg-accent hover:text-accent-fg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full md:w-auto"
           >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {generating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
             {generating ? 'Generating\u2026' : 'Download PDF'}
-          </button>
-        </div>
+          </Button>
+        </PageHeader>
       </Reveal>
 
       <ResumeWorktable experience={resume.experience} />
@@ -101,7 +132,9 @@ function ResumePage() {
                 <div className="space-y-6 font-sans">
                   {resume.certification.map((cert: Certification) => (
                     <div key={cert.id}>
-                      <p className="font-bold text-text-primary">{cert.title}</p>
+                      <p className="font-bold text-text-primary">
+                        {cert.title}
+                      </p>
                       <p className="text-text-secondary">{cert.organization}</p>
                       <p className="font-mono text-xs text-text-secondary mt-1">
                         {formatDateRange(cert.startDate, cert.endDate)}
@@ -122,11 +155,16 @@ function ResumePage() {
                 <div className="space-y-6 font-sans">
                   {resume.skill.map((skill: Skill) => (
                     <div key={skill.id}>
-                      <p className="font-bold text-text-primary mb-2">{skill.title}</p>
+                      <p className="font-bold text-text-primary mb-2">
+                        {skill.title}
+                      </p>
                       {skill.technology && skill.technology.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {skill.technology.map((tech: string) => (
-                            <span key={tech} className="bg-bg-primary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
+                            <span
+                              key={tech}
+                              className="bg-bg-primary border border-border px-2 py-1 font-mono text-xs text-text-secondary"
+                            >
                               {tech}
                             </span>
                           ))}
@@ -155,15 +193,26 @@ function ResumePage() {
 
                   <div className="p-6 brutal-border bg-bg-primary group-hover:brutal-shadow transition-all">
                     <div className="flex flex-col gap-1 mb-4">
-                      <span className="font-mono text-xs font-bold text-accent">{formatDateRange(job.startDate, job.endDate)}</span>
-                      <h3 className="font-serif text-3xl font-bold text-text-primary italic">{job.title}</h3>
-                      <span className="font-mono text-sm text-text-secondary">{job.organization}</span>
+                      <span className="font-mono text-xs font-bold text-accent">
+                        {formatDateRange(job.startDate, job.endDate)}
+                      </span>
+                      <h3 className="font-serif text-3xl font-bold text-text-primary italic">
+                        {job.title}
+                      </h3>
+                      <span className="font-mono text-sm text-text-secondary">
+                        {job.organization}
+                      </span>
                     </div>
-                    {job.description && <DescriptionList text={job.description} />}
+                    {job.description && (
+                      <DescriptionList text={job.description} />
+                    )}
                     {job.technology && job.technology.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         {job.technology.map((tech: string) => (
-                          <span key={tech} className="bg-bg-secondary border border-border px-2 py-1 font-mono text-xs text-text-secondary">
+                          <span
+                            key={tech}
+                            className="bg-bg-secondary border border-border px-2 py-1 font-mono text-xs text-text-secondary"
+                          >
                             {tech}
                           </span>
                         ))}
@@ -184,16 +233,12 @@ function DescriptionList({ text }: { text: string }) {
   const sentences = experiencePoints(text)
 
   if (sentences.length <= 1) {
-    return (
-      <p className="mt-2 text-text-secondary font-sans">{text}</p>
-    )
+    return <p className="mt-2 text-text-secondary font-sans">{text}</p>
   }
 
   return (
     <div className="mt-2 space-y-2">
-      <p className="text-text-primary font-bold font-sans">
-        {sentences[0]}
-      </p>
+      <p className="text-text-primary font-bold font-sans">{sentences[0]}</p>
       <ul className="list-inside list-disc space-y-1 text-text-secondary font-sans pl-2">
         {sentences.slice(1).map((s, i) => (
           <li key={i}>{s}</li>

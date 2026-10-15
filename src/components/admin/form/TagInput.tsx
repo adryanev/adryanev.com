@@ -1,7 +1,7 @@
 import { useState, useCallback, createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { FormInput } from './FormInput'
+import { Input as FormInput, Button } from '@/components/ui'
 
 interface TagInputContextValue {
   tags: string[]
@@ -15,7 +15,10 @@ const TagInputContext = createContext<TagInputContextValue | null>(null)
 
 function useTagInputContext() {
   const ctx = useContext(TagInputContext)
-  if (!ctx) throw new Error('TagInput compound components must be used within TagInput.Root')
+  if (!ctx)
+    throw new Error(
+      'TagInput compound components must be used within TagInput.Root',
+    )
   return ctx
 }
 
@@ -44,7 +47,9 @@ function Root({
   )
 
   return (
-    <TagInputContext.Provider value={{ tags: value, inputValue, setInputValue, addTag, removeTag }}>
+    <TagInputContext.Provider
+      value={{ tags: value, inputValue, setInputValue, addTag, removeTag }}
+    >
       {children}
     </TagInputContext.Provider>
   )
@@ -68,13 +73,9 @@ function Input({ placeholder = 'Add tag...' }: { placeholder?: string }) {
         className="flex-1"
         placeholder={placeholder}
       />
-      <button
-        type="button"
-        onClick={addTag}
-        className="border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-xs font-semibold uppercase text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--accent)] hover:text-[var(--admin-link)] transition-colors"
-      >
+      <Button variant="secondary" type="button" onClick={addTag}>
         Add
-      </button>
+      </Button>
     </div>
   )
 }
@@ -92,14 +93,15 @@ function List() {
           className="flex items-center gap-1 border border-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 text-xs text-[var(--admin-link)]"
         >
           {tag}
-          <button
+          <Button
+            variant="danger"
+            size="icon"
             type="button"
             onClick={() => removeTag(tag)}
             aria-label={`Remove ${tag}`}
-            className="hover:text-red-500 transition-colors"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </span>
       ))}
     </div>

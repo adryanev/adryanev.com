@@ -6,12 +6,17 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { X } from 'lucide-react'
 import { SlugInput } from './SlugInput'
 import { ImageUploader } from './ImageUploader'
-import { FormField } from './form/FormField'
-import { FormInput } from './form/FormInput'
+import {
+  Field as FormField,
+  Input as FormInput,
+  Select as FormSelect,
+  FormError,
+  Button,
+} from '@/components/ui'
+
 import { EditorJsEditor } from './EditorJsEditor'
 import type { OutputData } from '@editorjs/editorjs'
-import { FormSelect } from './form/FormSelect'
-import { FormError } from './form/FormError'
+
 import { FormActions } from './form/FormActions'
 import { TagInput } from './form/TagInput'
 import { StatusRadio } from './form/StatusRadio'
@@ -39,7 +44,11 @@ type ProjectData = {
 
 const STATUS_OPTIONS = [
   { value: 'draft' as const, label: 'Draft' },
-  { value: 'published' as const, label: 'Published', activeColor: 'var(--accent)' },
+  {
+    value: 'published' as const,
+    label: 'Published',
+    activeColor: 'var(--accent)',
+  },
 ]
 
 import { editorContent, editorContentSignature } from '@/lib/editor-content'
@@ -56,34 +65,48 @@ export function ProjectForm({
 
   const [title, setTitle] = useState(initial?.title ?? '')
   const [slug, setSlug] = useState(initial?.slug ?? '')
-  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? 0)
-  const [description, setDescription] = useState(() => initial?.description ? JSON.stringify(editorContent(initial.description)) : '')
+  const [categoryId, setCategoryId] = useState(
+    initial?.categoryId ?? categories[0]?.id ?? 0,
+  )
+  const [description, setDescription] = useState(() =>
+    initial?.description
+      ? JSON.stringify(editorContent(initial.description))
+      : '',
+  )
   const [year, setYear] = useState(initial?.year ?? new Date().getFullYear())
   const [role, setRole] = useState(initial?.role ?? '')
   const [workplace, setWorkplace] = useState(initial?.workplace ?? '')
-  const [technology, setTechnology] = useState<string[]>(initial?.technology ?? [])
+  const [technology, setTechnology] = useState<string[]>(
+    initial?.technology ?? [],
+  )
   const [githubUrl, setGithubUrl] = useState(initial?.githubUrl ?? '')
   const [externalUrl, setExternalUrl] = useState(initial?.externalUrl ?? '')
-  const [status, setStatus] = useState<'draft' | 'published'>(initial?.status ?? 'draft')
+  const [status, setStatus] = useState<'draft' | 'published'>(
+    initial?.status ?? 'draft',
+  )
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
-  const [images, setImages] = useState<{ url: string; alt?: string }[]>(initial?.images ?? [])
+  const [images, setImages] = useState<{ url: string; alt?: string }[]>(
+    initial?.images ?? [],
+  )
   const [error, setError] = useState('')
   const initialRef = useRef(initial)
 
-  const dirty = title !== (initialRef.current?.title ?? '') ||
+  const dirty =
+    title !== (initialRef.current?.title ?? '') ||
     slug !== (initialRef.current?.slug ?? '') ||
-    editorContentSignature(description) !== editorContentSignature(initialRef.current?.description ?? '') ||
+    editorContentSignature(description) !==
+      editorContentSignature(initialRef.current?.description ?? '') ||
     categoryId !== (initialRef.current?.categoryId ?? categories[0]?.id ?? 0) ||
     role !== (initialRef.current?.role ?? '') ||
     workplace !== (initialRef.current?.workplace ?? '') ||
     status !== (initialRef.current?.status ?? 'draft') ||
-    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? []) ||
+    JSON.stringify(technology) !==
+      JSON.stringify(initialRef.current?.technology ?? []) ||
     year !== (initialRef.current?.year ?? new Date().getFullYear()) ||
     sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
     githubUrl !== (initialRef.current?.githubUrl ?? '') ||
     externalUrl !== (initialRef.current?.externalUrl ?? '') ||
     JSON.stringify(images) !== JSON.stringify(initialRef.current?.images ?? [])
-
 
   const allowNavigation = useUnsavedChanges(dirty)
   const createFn = useServerFn(createProject)
@@ -109,8 +132,12 @@ export function ProjectForm({
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: () => { allowNavigation(); return navigate({ to: '/admin/portfolio' }) },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save project'),
+    onSuccess: () => {
+      allowNavigation()
+      return navigate({ to: '/admin/portfolio' })
+    },
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : 'Failed to save project'),
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -161,7 +188,9 @@ export function ProjectForm({
             onChange={(e) => setCategoryId(Number(e.target.value))}
           >
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </FormSelect>
         </FormField>
@@ -238,8 +267,15 @@ export function ProjectForm({
       <FormField label="Screenshots">
         <div className="space-y-3">
           {images.map((img, i) => (
-            <div key={i} className="flex items-start gap-3 border border-[var(--border-color)] p-3">
-              <img src={img.url} alt={img.alt} className="h-20 w-20 object-cover" />
+            <div
+              key={i}
+              className="flex items-start gap-3 border border-[var(--border-color)] p-3"
+            >
+              <img
+                src={img.url}
+                alt={img.alt}
+                className="h-20 w-20 object-cover"
+              />
               <div className="flex-1">
                 <FormInput
                   type="text"
@@ -254,14 +290,15 @@ export function ProjectForm({
                   placeholder="Alt text"
                 />
               </div>
-              <button
+              <Button
+                variant="danger"
+                size="icon"
                 type="button"
                 aria-label={`Remove image ${i + 1}`}
                 onClick={() => setImages(images.filter((_, j) => j !== i))}
-                className="text-red-500 hover:text-red-600"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

@@ -1,6 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ProjectForm } from '@/components/admin/ProjectForm'
-import { getProjectById, getCategories } from '@/server/functions/portfolio.functions'
+import {
+  getProjectById,
+  getCategories,
+} from '@/server/functions/portfolio.functions'
+
+import { PageHeader, PageState } from '@/components/ui'
 
 export const Route = createFileRoute('/admin/_layout/portfolio/$id/edit')({
   loader: async ({ params }) => {
@@ -17,15 +22,24 @@ function EditProjectPage() {
   const { project, categories } = Route.useLoaderData()
 
   if (!project) {
-    return <div className="py-12 text-center text-[var(--text-secondary)]">Project not found</div>
+    return (
+      <PageState>
+        <h1>Project not found</h1>
+        <p>Return to the collection to choose another entry.</p>
+      </PageState>
+    )
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Edit Project</h1>
-      <p className="mt-1 text-sm text-[var(--text-secondary)]">
-        Editing: {project.title}
-      </p>
+      <PageHeader>
+        <div>
+          <h1 className="text-2xl font-bold">Edit Project</h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Editing: {project.title}
+          </p>
+        </div>
+      </PageHeader>
       <div className="mt-6">
         <ProjectForm
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}

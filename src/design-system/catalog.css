@@ -1,0 +1,23 @@
+.system-catalog section + section { margin-top: var(--space-12); }
+.system-catalog section > h2 { margin-bottom: var(--space-4); }
+.system-catalog section > p { margin-bottom: var(--space-6); color: var(--foreground-muted); }
+.system-catalog__toolbar { display: flex; align-items: end; gap: var(--space-6); margin-bottom: var(--space-8); }
+.system-catalog__toolbar .ui-field { flex: 0 0 220px; }
+.system-catalog__toolbar > p { max-width: 65ch; color: var(--foreground-muted); font-size: var(--text-sm); }
+.system-catalog__preview { background: var(--surface-canvas); color: var(--foreground); padding: var(--space-6); border: var(--border-hairline) solid var(--color-outline); }
+.system-catalog__swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-4); }
+.system-catalog__swatch { height: 76px; margin-bottom: var(--space-2); border: var(--border-hairline) solid var(--color-outline); }
+.system-catalog code { font-family: var(--font-code); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.system-catalog__type > div { display: grid; grid-template-columns: 125px minmax(0, 1fr); align-items: baseline; gap: var(--space-4); padding-block: var(--space-3); border-bottom: var(--border-hairline) solid var(--color-outline); }
+.system-catalog__type span { overflow-wrap: anywhere; line-height: var(--leading-heading); }
+.system-catalog__row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-4); }
+.system-catalog__form { display: grid; gap: var(--space-6); max-width: 680px; }
+.system-catalog__check { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); }
+.system-catalog__states { display: grid; gap: var(--space-6); }
+.system-catalog__states .ui-page-state { width: 100%; margin: 0; }
+@media (max-width: 767px) {
+  .system-catalog__toolbar { display: block; }
+  .system-catalog__toolbar > p { margin-top: var(--space-4); }
+  .system-catalog__preview { padding: var(--space-4); }
+  .system-catalog__type > div { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AboutSystemScene } from './about-system-scene'
 
+import { Button } from '@/components/ui'
 const practices = ['Applications', 'Backend', 'Delivery'] as const
 
 type AboutSystemModelProps = {
@@ -12,7 +13,9 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sceneRef = useRef<AboutSystemScene | null>(null)
   const onSelectRef = useRef(onSelect)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'fallback'>('loading')
+  const [status, setStatus] = useState<'loading' | 'ready' | 'fallback'>(
+    'loading',
+  )
 
   onSelectRef.current = onSelect
 
@@ -21,7 +24,9 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
     if (!canvas) return
 
     const controller = new AbortController()
-    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const motionPreference = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    )
     let started = false
     let visible = false
     let scene: AboutSystemScene | null = null
@@ -82,8 +87,12 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
 
   return (
     <div className="about-model" data-status={status}>
-      <span className="about-model__hint">Click a practice to focus the model</span>
-      <span className="about-model__status" aria-live="polite">{practices[active]}</span>
+      <span className="about-model__hint">
+        Click a practice to focus the model
+      </span>
+      <span className="about-model__status" aria-live="polite">
+        {practices[active]}
+      </span>
       <img
         className="about-model__poster"
         src="/models/about-system-poster.png"
@@ -98,16 +107,21 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
         data-ready={status === 'ready' ? '' : undefined}
         aria-hidden="true"
       />
-      <div className="about-model__controls" role="group" aria-label="Focus a practice in the model">
+      <div
+        className="about-model__controls"
+        role="group"
+        aria-label="Focus a practice in the model"
+      >
         {practices.map((practice, index) => (
-          <button
+          <Button
+            variant="plain"
             key={practice}
             type="button"
             aria-pressed={active === index}
             onClick={() => onSelect(index)}
           >
             {practice}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

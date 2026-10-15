@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { useScrollLock } from '@/hooks/useScrollLock'
 
 import { useDialogFocus } from '@/hooks/useDialogFocus'
+import { Button, Input } from '@/components/ui'
 const HELP_TEXT = `Available commands:
   help      - Show this help message
   whoami    - Display info about me
@@ -23,14 +24,46 @@ GITHUB: github.com/adryanev
 EMAIL: me@adryanev.com
 `
 
-const FILE_SYSTEM: Record<string, { type: 'dir' | 'file'; children?: string[]; content?: string }> = {
-  '/': { type: 'dir', children: ['about.md', 'resume/', 'blog/', 'portfolio/', 'saas/', 'contact.md'] },
-  '/about.md': { type: 'file', content: 'Software Engineer based in Indonesia.\nBuilding resilient, high-performance systems with a focus on clean architecture.' },
-  '/resume/': { type: 'dir', children: ['experience/', 'education/', 'skills/'] },
+const FILE_SYSTEM: Record<
+  string,
+  { type: 'dir' | 'file'; children?: string[]; content?: string }
+> = {
+  '/': {
+    type: 'dir',
+    children: [
+      'about.md',
+      'resume/',
+      'blog/',
+      'portfolio/',
+      'saas/',
+      'contact.md',
+    ],
+  },
+  '/about.md': {
+    type: 'file',
+    content:
+      'Software Engineer based in Indonesia.\nBuilding resilient, high-performance systems with a focus on clean architecture.',
+  },
+  '/resume/': {
+    type: 'dir',
+    children: ['experience/', 'education/', 'skills/'],
+  },
   '/blog/': { type: 'dir', children: ['(posts loaded from database)'] },
-  '/portfolio/': { type: 'dir', children: ['college/', 'freelance/', 'work/', 'apple-developer-academy/', 'lexicon/'] },
+  '/portfolio/': {
+    type: 'dir',
+    children: [
+      'college/',
+      'freelance/',
+      'work/',
+      'apple-developer-academy/',
+      'lexicon/',
+    ],
+  },
   '/saas/': { type: 'dir', children: ['(SaaS products loaded from database)'] },
-  '/contact.md': { type: 'file', content: 'Want to get in touch?\nVisit /contact or email me@adryanev.com' },
+  '/contact.md': {
+    type: 'file',
+    content: 'Want to get in touch?\nVisit /contact or email me@adryanev.com',
+  },
 }
 
 const PATH_MAP: Record<string, string> = {
@@ -74,7 +107,10 @@ export function TerminalOverlay() {
       }
     }
     document.addEventListener('keydown', handler)
-    const show = () => { window.dispatchEvent(new Event('site:close-search')); setOpen(true) }
+    const show = () => {
+      window.dispatchEvent(new Event('site:close-search'))
+      setOpen(true)
+    }
     window.addEventListener('site:terminal', show)
     window.addEventListener('site:close-terminal', close)
     return () => {
@@ -136,7 +172,12 @@ export function TerminalOverlay() {
           break
 
         case 'history':
-          addLine('output', history.map((h, i) => `  ${(i + 1).toString().padStart(2, '0')}  ${h}`).join('\n') || '(empty)')
+          addLine(
+            'output',
+            history
+              .map((h, i) => `  ${(i + 1).toString().padStart(2, '0')}  ${h}`)
+              .join('\n') || '(empty)',
+          )
           break
 
         case 'ls': {
@@ -210,7 +251,10 @@ export function TerminalOverlay() {
         }
 
         default:
-          addLine('output', `command not found: ${command}. Type "help" for available commands.`)
+          addLine(
+            'output',
+            `command not found: ${command}. Type "help" for available commands.`,
+          )
       }
     },
     [cwd, history, addLine, navigate],
@@ -223,7 +267,8 @@ export function TerminalOverlay() {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       if (history.length > 0) {
-        const idx = historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1)
+        const idx =
+          historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1)
         setHistoryIdx(idx)
         setInput(history[idx])
       }
@@ -272,13 +317,14 @@ export function TerminalOverlay() {
               Terminal
             </span>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setOpen(false)}
-            className="text-text-secondary hover:text-accent transition-colors"
             aria-label="Close terminal"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Terminal body */}
@@ -287,12 +333,22 @@ export function TerminalOverlay() {
           className="chapter-terminal__body overflow-y-auto font-mono text-sm leading-relaxed"
           onClick={() => inputRef.current?.focus()}
         >
-          <div className="space-y-2" role="log" aria-live="polite" aria-relevant="additions">
+          <div
+            className="space-y-2"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+          >
             {lines.map((line, i) => (
-              <div key={i} className={cn(
-                'whitespace-pre-wrap break-words',
-                line.type === 'input' ? 'text-accent font-bold' : 'text-text-primary'
-              )}>
+              <div
+                key={i}
+                className={cn(
+                  'whitespace-pre-wrap break-words',
+                  line.type === 'input'
+                    ? 'text-accent font-bold'
+                    : 'text-text-primary',
+                )}
+              >
                 {line.type === 'input' ? (
                   <span className="flex gap-2">
                     <span>{line.text}</span>
@@ -307,7 +363,8 @@ export function TerminalOverlay() {
           {/* Input line */}
           <div className="flex items-center gap-2 text-accent font-bold mt-4">
             <span>{cwd} $ </span>
-            <input
+            <Input
+              appearance="plain"
               ref={inputRef}
               data-dialog-autofocus
               value={input}

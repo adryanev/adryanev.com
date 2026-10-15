@@ -5,14 +5,20 @@ import { useMutation } from '@tanstack/react-query'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { SlugInput } from './SlugInput'
 import { ImageUploader } from './ImageUploader'
-import { FormField } from './form/FormField'
-import { FormInput } from './form/FormInput'
-import { FormTextarea } from './form/FormTextarea'
-import { FormSelect } from './form/FormSelect'
-import { FormError } from './form/FormError'
+import {
+  Field as FormField,
+  Input as FormInput,
+  Textarea as FormTextarea,
+  Select as FormSelect,
+  FormError,
+} from '@/components/ui'
+
 import { FormActions } from './form/FormActions'
 import { TagInput } from './form/TagInput'
-import { createSaasListing, updateSaasListing } from '@/server/functions/saas.functions'
+import {
+  createSaasListing,
+  updateSaasListing,
+} from '@/server/functions/saas.functions'
 
 type SaasData = {
   id?: number
@@ -37,13 +43,18 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
   const [url, setUrl] = useState(initial?.url ?? '')
   const [githubUrl, setGithubUrl] = useState(initial?.githubUrl ?? '')
   const [logoUrl, setLogoUrl] = useState(initial?.logoUrl ?? '')
-  const [technology, setTechnology] = useState<string[]>(initial?.technology ?? [])
-  const [status, setStatus] = useState<'active' | 'beta' | 'retired'>(initial?.status ?? 'active')
+  const [technology, setTechnology] = useState<string[]>(
+    initial?.technology ?? [],
+  )
+  const [status, setStatus] = useState<'active' | 'beta' | 'retired'>(
+    initial?.status ?? 'active',
+  )
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
   const [error, setError] = useState('')
   const initialRef = useRef(initial)
 
-  const dirty = name !== (initialRef.current?.name ?? '') ||
+  const dirty =
+    name !== (initialRef.current?.name ?? '') ||
     slug !== (initialRef.current?.slug ?? '') ||
     description !== (initialRef.current?.description ?? '') ||
     url !== (initialRef.current?.url ?? '') ||
@@ -51,7 +62,8 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
     logoUrl !== (initialRef.current?.logoUrl ?? '') ||
     sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
     status !== (initialRef.current?.status ?? 'active') ||
-    JSON.stringify(technology) !== JSON.stringify(initialRef.current?.technology ?? [])
+    JSON.stringify(technology) !==
+      JSON.stringify(initialRef.current?.technology ?? [])
 
   const allowNavigation = useUnsavedChanges(dirty)
 
@@ -74,13 +86,21 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
     },
-    onSuccess: () => { allowNavigation(); return navigate({ to: '/admin/saas' }) },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save'),
+    onSuccess: () => {
+      allowNavigation()
+      return navigate({ to: '/admin/saas' })
+    },
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : 'Failed to save'),
   })
 
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); setError(''); saveMutation.mutate() }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        setError('')
+        saveMutation.mutate()
+      }}
       className="space-y-6 max-w-4xl"
     >
       <FormError message={error} />
@@ -136,7 +156,9 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
         <FormField label="Status">
           <FormSelect
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'active' | 'beta' | 'retired')}
+            onChange={(e) =>
+              setStatus(e.target.value as 'active' | 'beta' | 'retired')
+            }
           >
             <option value="active">Active</option>
             <option value="beta">Beta</option>

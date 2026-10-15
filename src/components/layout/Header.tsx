@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { MobileNav } from './MobileNav'
 
+import { Button } from '@/components/ui'
 const navItems = [
   { label: 'About', to: '/about' },
   { label: 'Resume', to: '/resume' },
@@ -36,15 +37,30 @@ export function Header() {
             </Link>
           ))}
           <div className="site-masthead__theme">
-            <button className="site-search-toggle" aria-label="Search website" onClick={() => window.dispatchEvent(new Event('site:search'))}><Search size={18} /></button>
+            <Button
+              variant="plain"
+              className="site-search-toggle"
+              aria-label="Search website"
+              onClick={() => window.dispatchEvent(new Event('site:search'))}
+            >
+              <Search size={18} />
+            </Button>
             <ThemeToggle />
           </div>
         </nav>
 
         <div className="site-masthead__mobile">
-          <button className="site-search-toggle" aria-label="Search website" onClick={() => window.dispatchEvent(new Event('site:search'))}><Search size={18} /></button>
+          <Button
+            variant="plain"
+            className="site-search-toggle"
+            aria-label="Search website"
+            onClick={() => window.dispatchEvent(new Event('site:search'))}
+          >
+            <Search size={18} />
+          </Button>
           <ThemeToggle />
-          <button
+          <Button
+            variant="plain"
             onClick={() => setMobileOpen(true)}
             className="site-masthead__menu"
             aria-label="Open menu"
@@ -52,7 +68,7 @@ export function Header() {
             aria-controls="mobile-navigation"
           >
             <Menu aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       </div>
 

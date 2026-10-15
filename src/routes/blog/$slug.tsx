@@ -4,10 +4,21 @@ import { useEffect, useRef, useState } from 'react'
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
-import { seoMeta, canonicalLink, articleJsonLd, breadcrumbJsonLd, jsonLdScript, SITE_URL } from '@/lib/seo'
-import { recordPostView, getPostViewCount } from '@/server/functions/views.functions'
+import {
+  seoMeta,
+  canonicalLink,
+  articleJsonLd,
+  breadcrumbJsonLd,
+  jsonLdScript,
+  SITE_URL,
+} from '@/lib/seo'
+import {
+  recordPostView,
+  getPostViewCount,
+} from '@/server/functions/views.functions'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
+import { Button, PageState } from '@/components/ui'
 export const Route = createFileRoute('/blog/$slug')({
   loader: async ({ params }) => {
     const post = await getPublishedPostBySlug({ data: { slug: params.slug } })
@@ -16,17 +27,21 @@ export const Route = createFileRoute('/blog/$slug')({
   },
   component: BlogPostPage,
   notFoundComponent: () => (
-    <div className="chapter-page chapter-notice mx-auto max-w-4xl px-6 py-20 text-center">
+    <PageState className="text-center">
       <h1 className="text-4xl font-bold">Article not found</h1>
-      <p className="mt-4 font-sans text-lg text-text-secondary">Post not found</p>
-      <Link
-        to="/blog"
-        search={{ page: undefined, tag: undefined }}
-        className="mt-6 inline-block font-mono text-sm font-bold text-accent hover:underline"
-      >
-        Back to blog
-      </Link>
-    </div>
+      <p className="mt-4 font-sans text-lg text-text-secondary">
+        Post not found
+      </p>
+      <Button asChild variant="secondary" size="lg">
+        <Link
+          to="/blog"
+          search={{ page: undefined, tag: undefined }}
+          className="mt-6"
+        >
+          Back to blog
+        </Link>
+      </Button>
+    </PageState>
   ),
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -86,10 +101,14 @@ function BlogPostPage() {
   useEffect(() => {
     let cancelled = false
     recordPostView({ data: { postId: post.id } }).catch(() => {})
-    getPostViewCount({ data: { postId: post.id } }).then((result) => {
-      if (!cancelled) setViewCount(result.views)
-    }).catch(() => {})
-    return () => { cancelled = true }
+    getPostViewCount({ data: { postId: post.id } })
+      .then((result) => {
+        if (!cancelled) setViewCount(result.views)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
   }, [post.id])
 
   // Inject copy buttons into code blocks
@@ -108,20 +127,31 @@ function BlogPostPage() {
         const code = pre.querySelector('code')
         if (!code) return
         const text = code.innerText
-        navigator.clipboard.writeText(text).then(() => {
-          btn.textContent = 'Copied!'
-          btn.dataset.copied = 'true'
-          setTimeout(() => {
-            btn.textContent = 'Copy'
-            delete btn.dataset.copied
-          }, 2000)
-        }).catch(() => { btn.textContent = 'Select code to copy'; btn.setAttribute('aria-label', 'Clipboard unavailable. Select the code and copy it manually.') })
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            btn.textContent = 'Copied!'
+            btn.dataset.copied = 'true'
+            setTimeout(() => {
+              btn.textContent = 'Copy'
+              delete btn.dataset.copied
+            }, 2000)
+          })
+          .catch(() => {
+            btn.textContent = 'Select code to copy'
+            btn.setAttribute(
+              'aria-label',
+              'Clipboard unavailable. Select the code and copy it manually.',
+            )
+          })
       })
       pre.appendChild(btn)
       buttons.push(btn)
     })
 
-    return () => { buttons.forEach((b) => b.remove()) }
+    return () => {
+      buttons.forEach((b) => b.remove())
+    }
   }, [post.html])
 
   // Client-side mermaid rendering

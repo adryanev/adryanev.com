@@ -3,9 +3,14 @@ import { Github, Linkedin, Mail } from 'lucide-react'
 import { useRef } from 'react'
 import { useEntrance } from '@/components/motion/Reveal'
 
+import { Button } from '@/components/ui'
 const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/adryanev', icon: Github },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/adryanev', icon: Linkedin },
+  {
+    label: 'LinkedIn',
+    href: 'https://linkedin.com/in/adryanev',
+    icon: Linkedin,
+  },
   { label: 'Email', href: 'mailto:me@adryanev.com', icon: Mail },
 ]
 
@@ -28,14 +33,29 @@ export function Footer() {
           <Link to="/resume">Resume</Link>
           <Link to="/contact">Contact</Link>
           {socialLinks.slice(0, 2).map(({ label, href }) => (
-            <a key={label} href={href} target="_blank" rel="noopener noreferrer">
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {label}
             </a>
           ))}
         </nav>
         <div className="site-tools" aria-label="Website tools">
-          <button onClick={() => window.dispatchEvent(new Event('site:search'))}>Search <span aria-hidden="true">⌘K</span></button>
-          <button onClick={() => window.dispatchEvent(new Event('site:terminal'))}>Open terminal</button>
+          <Button
+            variant="secondary"
+            onClick={() => window.dispatchEvent(new Event('site:search'))}
+          >
+            Search <span aria-hidden="true">⌘K</span>
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => window.dispatchEvent(new Event('site:terminal'))}
+          >
+            Open terminal
+          </Button>
         </div>
       </div>
     </footer>

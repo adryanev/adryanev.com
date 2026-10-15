@@ -3,11 +3,19 @@ import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
-import { FormField } from './form/FormField'
-import { FormInput } from './form/FormInput'
-import { FormError } from './form/FormError'
+import {
+  Field as FormField,
+  Input as FormInput,
+  FormError,
+  Button,
+  Input,
+} from '@/components/ui'
+
 import { FormActions } from './form/FormActions'
-import { createWebhook, updateWebhook } from '@/server/functions/webhooks.functions'
+import {
+  createWebhook,
+  updateWebhook,
+} from '@/server/functions/webhooks.functions'
 import { WEBHOOK_EVENTS, type WebhookEvent } from '@/lib/webhook-events'
 
 const WEBHOOK_EVENT_LABELS: Record<WebhookEvent, string> = {
@@ -28,7 +36,9 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
   const isEditing = !!initial?.id
 
   const [url, setUrl] = useState(initial?.url ?? '')
-  const [events, setEvents] = useState<WebhookEvent[]>(initial?.events ?? ['post.created', 'post.updated', 'post.deleted'])
+  const [events, setEvents] = useState<WebhookEvent[]>(
+    initial?.events ?? ['post.created', 'post.updated', 'post.deleted'],
+  )
   const [active, setActive] = useState(initial?.active ?? true)
   const [error, setError] = useState('')
   const [newSecret, setNewSecret] = useState('')
@@ -37,9 +47,13 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
 
   useEffect(() => {
     const init = initialRef.current
-    const changed = url !== (init?.url ?? '') ||
+    const changed =
+      url !== (init?.url ?? '') ||
       active !== (init?.active ?? true) ||
-      JSON.stringify(events) !== JSON.stringify(init?.events ?? ['post.created', 'post.updated', 'post.deleted'])
+      JSON.stringify(events) !==
+        JSON.stringify(
+          init?.events ?? ['post.created', 'post.updated', 'post.deleted'],
+        )
     setDirty(changed)
   }, [url, events, active])
 
@@ -56,28 +70,34 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
     },
     onSuccess: (result) => {
       allowNavigation()
-      if (!isEditing && result && 'secret' in result && typeof result.secret === 'string') {
+      if (
+        !isEditing &&
+        result &&
+        'secret' in result &&
+        typeof result.secret === 'string'
+      ) {
         setNewSecret(result.secret)
       } else {
         navigate({ to: '/admin/webhooks' })
       }
     },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Failed to save'),
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : 'Failed to save'),
   })
 
   function toggleEvent(event: WebhookEvent) {
     setEvents((prev) =>
-      prev.includes(event)
-        ? prev.filter((e) => e !== event)
-        : [...prev, event],
+      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event],
     )
   }
 
   if (newSecret) {
     return (
       <div className="max-w-4xl space-y-6">
-        <div className="border border-green-500/30 bg-green-500/5 p-6">
-          <h2 className="text-lg font-bold text-green-500">Webhook Created</h2>
+        <div className="border border-[var(--color-success)] bg-[var(--color-success-surface)] p-6">
+          <h2 className="text-lg font-bold text-[var(--color-success)]">
+            Webhook Created
+          </h2>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
             Copy the signing secret below. It will not be shown again.
           </p>
@@ -86,12 +106,13 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
               {newSecret}
             </code>
           </div>
-          <button
+          <Button
+            variant="secondary"
             onClick={() => navigate({ to: '/admin/webhooks' })}
-            className="mt-4 border border-[var(--border-color)] px-4 py-2 text-sm hover:bg-[var(--bg-secondary)] transition-colors"
+            className="mt-4"
           >
             Done
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -99,7 +120,11 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
 
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); setError(''); saveMutation.mutate() }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        setError('')
+        saveMutation.mutate()
+      }}
       className="space-y-6 max-w-4xl"
     >
       <FormError message={error} />
@@ -118,7 +143,8 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
         <div className="space-y-2">
           {WEBHOOK_EVENTS.map((evt) => (
             <label key={evt} className="flex items-center gap-3 cursor-pointer">
-              <input
+              <Input
+                appearance="plain"
                 type="checkbox"
                 checked={events.includes(evt)}
                 onChange={() => toggleEvent(evt)}
@@ -128,7 +154,9 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
                 <code className="text-xs bg-[var(--bg-secondary)] border border-[var(--border-color)] px-1.5 py-0.5">
                   {evt}
                 </code>
-                <span className="ml-2 text-[var(--text-secondary)]">{WEBHOOK_EVENT_LABELS[evt]}</span>
+                <span className="ml-2 text-[var(--text-secondary)]">
+                  {WEBHOOK_EVENT_LABELS[evt]}
+                </span>
               </span>
             </label>
           ))}
@@ -137,7 +165,8 @@ export function WebhookForm({ initial }: { initial?: WebhookData }) {
 
       <FormField label="Status">
         <label className="flex items-center gap-3 cursor-pointer">
-          <input
+          <Input
+            appearance="plain"
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}

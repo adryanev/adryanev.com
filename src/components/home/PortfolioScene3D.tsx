@@ -3,12 +3,16 @@ import { ArrowUpRight, MoveHorizontal, Pause, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { PortfolioScene, SceneDestination } from './portfolio-scene'
 
+import { Button } from '@/components/ui'
+
 export function PortfolioScene3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sceneRef = useRef<PortfolioScene | null>(null)
   const navigationRef = useRef<HTMLElement>(null)
   const [active, setActive] = useState<SceneDestination | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'fallback'>('loading')
+  const [status, setStatus] = useState<'loading' | 'ready' | 'fallback'>(
+    'loading',
+  )
   const [paused, setPaused] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
 
@@ -38,7 +42,9 @@ export function PortfolioScene3D() {
           onSelect: setActive,
           onNavigate: (destination) => {
             navigationRef.current
-              ?.querySelector<HTMLAnchorElement>('[data-scene-link="' + destination + '"]')
+              ?.querySelector<HTMLAnchorElement>(
+                '[data-scene-link="' + destination + '"]',
+              )
               ?.click()
           },
           onFailure: () => setStatus('fallback'),
@@ -52,7 +58,10 @@ export function PortfolioScene3D() {
         setStatus('ready')
       } catch (error) {
         if (!controller.signal.aborted) {
-          console.warn('Interactive portfolio could not load; using its static view.', error)
+          console.warn(
+            'Interactive portfolio could not load; using its static view.',
+            error,
+          )
           setStatus('fallback')
         }
       }
@@ -103,23 +112,36 @@ export function PortfolioScene3D() {
         <div className="adventure-scene__toolbar">
           <span className="adventure-scene__hint">
             <MoveHorizontal size={14} aria-hidden="true" />
-            {status === 'ready' ? 'Drag to explore · pick an object' : 'The workspace'}
+            {status === 'ready'
+              ? 'Drag to explore · pick an object'
+              : 'The workspace'}
           </span>
           {status === 'ready' && !reducedMotion ? (
-            <button
+            <Button
+              variant="plain"
               className="adventure-scene__pause"
               type="button"
               onClick={() => setPaused((value) => !value)}
-              aria-label={paused ? 'Play scene animation' : 'Pause scene animation'}
+              aria-label={
+                paused ? 'Play scene animation' : 'Pause scene animation'
+              }
               title={paused ? 'Play animation' : 'Pause animation'}
             >
-              {paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
-            </button>
+              {paused ? (
+                <Play size={15} aria-hidden="true" />
+              ) : (
+                <Pause size={15} aria-hidden="true" />
+              )}
+            </Button>
           ) : null}
         </div>
       </div>
 
-      <nav ref={navigationRef} className="adventure-scene__nav" aria-label="Explore this portfolio">
+      <nav
+        ref={navigationRef}
+        className="adventure-scene__nav"
+        aria-label="Explore this portfolio"
+      >
         <a
           href="#selected-work"
           data-scene-link="work"
@@ -129,7 +151,9 @@ export function PortfolioScene3D() {
           onFocus={() => select('work')}
           onBlur={() => select(null)}
         >
-          <strong>Work <ArrowUpRight size={15} aria-hidden="true" /></strong>
+          <strong>
+            Work <ArrowUpRight size={15} aria-hidden="true" />
+          </strong>
           <span>Selected projects</span>
         </a>
         <Link
@@ -142,7 +166,9 @@ export function PortfolioScene3D() {
           onFocus={() => select('writing')}
           onBlur={() => select(null)}
         >
-          <strong>Writing <ArrowUpRight size={15} aria-hidden="true" /></strong>
+          <strong>
+            Writing <ArrowUpRight size={15} aria-hidden="true" />
+          </strong>
           <span>Technical notes</span>
         </Link>
         <Link
@@ -154,13 +180,15 @@ export function PortfolioScene3D() {
           onFocus={() => select('contact')}
           onBlur={() => select(null)}
         >
-          <strong>Contact <ArrowUpRight size={15} aria-hidden="true" /></strong>
+          <strong>
+            Contact <ArrowUpRight size={15} aria-hidden="true" />
+          </strong>
           <span>Start a conversation</span>
         </Link>
       </nav>
       <figcaption className="sr-only">
-        The laptop opens selected work, the notebook opens writing, and the rocket opens contact.
-        The same links are available below the scene.
+        The laptop opens selected work, the notebook opens writing, and the
+        rocket opens contact. The same links are available below the scene.
       </figcaption>
     </figure>
   )

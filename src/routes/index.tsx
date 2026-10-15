@@ -6,6 +6,7 @@ import { PortfolioScene3D } from '@/components/home/PortfolioScene3D'
 import { getHomePageData } from '@/server/functions/public.functions'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
+import { Button } from '@/components/ui'
 export const Route = createFileRoute('/')({
   loader: () => getHomePageData(),
   component: HomePage,
@@ -57,13 +58,15 @@ function HomePage() {
             I work on mobile apps, backend systems, and delivery infrastructure.
           </p>
           <div className="adventure-actions">
-            <a className="adventure-button adventure-button--primary" href="#selected-work">
-              See my work
-              <ArrowRight aria-hidden="true" />
-            </a>
-            <Link className="adventure-button adventure-button--secondary" to="/contact">
-              Get in touch
-            </Link>
+            <Button asChild variant="primary" size="feature">
+              <a href="#selected-work">
+                See my work
+                <ArrowRight aria-hidden="true" />
+              </a>
+            </Button>
+            <Button asChild variant="accent" size="feature">
+              <Link to="/contact">Get in touch</Link>
+            </Button>
           </div>
         </div>
 
@@ -97,9 +100,11 @@ function HomePage() {
             </div>
             <div className="adventure-work__evidence">
               <div className="adventure-tags" aria-label="Technologies">
-                {leadProject.technology.slice(0, 5).map((technology: string) => (
-                  <span key={technology}>{technology}</span>
-                ))}
+                {leadProject.technology
+                  .slice(0, 5)
+                  .map((technology: string) => (
+                    <span key={technology}>{technology}</span>
+                  ))}
               </div>
               <span className="adventure-work__link">
                 Open case study
@@ -109,7 +114,10 @@ function HomePage() {
           </Link>
 
           {supportingProjects.length > 0 ? (
-            <div className="adventure-work__index" aria-label="More selected work">
+            <div
+              className="adventure-work__index"
+              aria-label="More selected work"
+            >
               {supportingProjects.map((project: Project) => (
                 <Link
                   key={project.id}
@@ -124,7 +132,9 @@ function HomePage() {
                     {project.year.toString()} · {project.category.name}
                   </span>
                   <h3>{project.title}</h3>
-                  <p>{project.role} · {project.workplace}</p>
+                  <p>
+                    {project.role} · {project.workplace}
+                  </p>
                   <span className="adventure-work__link">
                     View project
                     <ArrowRight aria-hidden="true" />
@@ -136,11 +146,17 @@ function HomePage() {
         </section>
       ) : null}
 
-      <section className="adventure-closing" data-enter="panel" aria-label="Writing and contact">
+      <section
+        className="adventure-closing"
+        data-enter="panel"
+        aria-label="Writing and contact"
+      >
         <article className="adventure-writing">
           <p className="adventure-eyebrow">Writing</p>
           <h2>I write about the work.</h2>
-          <p>Technical notes, project decisions, and operational documentation.</p>
+          <p>
+            Technical notes, project decisions, and operational documentation.
+          </p>
           {latestPosts.length > 0 ? (
             <ul className="adventure-writing__list">
               {latestPosts.slice(0, 2).map((post: Post) => (
@@ -173,7 +189,9 @@ function HomePage() {
         <Link className="adventure-contact" to="/contact">
           <span className="adventure-eyebrow">Contact</span>
           <h2>Have something to discuss?</h2>
-          <p>Send a note about the role, project, or problem you're working on.</p>
+          <p>
+            Send a note about the role, project, or problem you're working on.
+          </p>
           <span className="adventure-contact__link">
             Get in touch
             <ArrowRight aria-hidden="true" />

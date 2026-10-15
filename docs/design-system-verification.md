@@ -25,11 +25,13 @@ Browser checks used a compiled local production runtime, owned PostgreSQL fixtur
 | --- | --- |
 | Automated tests | 14 passed, including field IDs/feedback, native button/link semantics, table semantics, dashboard/work/resume regressions and single-element composition at every slotted control consumer |
 | TypeScript | `tsc --noEmit` passed |
+| Production build | Client, SSR and Nitro completed with Node 22.23.1 and a 4096MB heap after the 404 correction. Existing bundle-size and dependency module-directive warnings remain |
 | Authentication | Protected catalog redirected to login; native login submission opened the authenticated studio |
 | Content and images | Created a draft project, saved EditorJS text and a technology tag, uploaded a PNG through the file picker, reopened and verified persistence and the loaded S3 image, edited it, then deleted the fixture |
 | Public forms | Native contact validation focused the missing name; completed submission showed Message Sent. Confirmation and unsubscribe actions changed an owned subscriber fixture to unsubscribed |
 | Search and terminal | Search returned matching articles; terminal accepted `help`; Escape closed each and restored focus to its launcher |
 | Responsive controls | Mobile admin navigation opened and accepted keyboard focus. Catalog density changed input heights; pending controls were disabled and tables retained internal horizontal scrolling |
+| Route states | The final bundle returned HTTP 404 and the expected text for unknown root, article and project routes, and HTTP 200 for incomplete newsletter links, without stream errors. The mobile 404 showed two separate shared link buttons; Explore work opened the archive |
 | PDF | Browser completed `Adryan_Eka_Vandra_Resume.pdf`, 5,858 bytes |
 | Visual evidence | Desktop 1440px, mobile 390px and actual 1280px viewport; light/dark and focused/invalid states captured. Tall catalog coverage uses overlapping 3840px-high top/end captures |
 | Finish review | `ship` after a fresh full review of all 24 valid captures and sampled canonical implementation files; no material visual fixes. This verdict does not certify runtime behavior or production |
@@ -46,3 +48,5 @@ These PNGs are native T3 browser captures from the local fixture runtime, with o
 - [Writing, desktop dark](images/design-system/writing-desktop-dark.png)
 
 The complete 24-capture packet and the single detector run are retained locally under `.impeccable/review/design-system/`. The detector's remaining findings concern authored rules/scene geometry and the separate PDF print medium; its Mermaid font finding was corrected to the shared code-font token. No new product raster or 3D asset was introduced.
+
+Delivery is tracked in [PR #18](https://github.com/adryanev/adryanev.com/pull/18), stacked on the open dashboard [PR #17](https://github.com/adryanev/adryanev.com/pull/17). The repository build workflow targets pull requests against `main`; this layer must be retargeted after the parent merges before that workflow runs. These local results are separate from CI and deployment status.

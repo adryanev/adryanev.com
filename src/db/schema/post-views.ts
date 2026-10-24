@@ -1,17 +1,17 @@
-import { integer, pgTable, timestamp, date, uniqueIndex } from 'drizzle-orm/pg-core'
+import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { createdAt, id } from './columns'
 import { posts } from './posts'
 
-export const postViews = pgTable('post_views', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const postViews = sqliteTable('post_views', {
+  id: id(),
   postId: integer('post_id')
     .notNull()
     .references(() => posts.id, { onDelete: 'cascade' }),
-  viewDate: date('view_date').notNull().defaultNow(),
+  // ISO calendar date (YYYY-MM-DD) in UTC
+  viewDate: text('view_date').notNull(),
   viewCount: integer('view_count').notNull().default(1),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
 }, (table) => [
   uniqueIndex('post_views_post_date_uniq').on(table.postId, table.viewDate),
 ])

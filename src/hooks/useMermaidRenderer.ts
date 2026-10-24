@@ -1,5 +1,9 @@
 import { useEffect } from 'react'
 import type { RefObject } from 'react'
+import { createClientOnlyFn } from '@tanstack/react-start'
+
+// mermaid stays out of the Worker bundle
+const loadMermaid = createClientOnlyFn(() => import('mermaid'))
 
 export function useMermaidRenderer(
   containerRef: RefObject<HTMLElement | null>,
@@ -12,7 +16,7 @@ export function useMermaidRenderer(
     const blocks = el.querySelectorAll<HTMLElement>('[data-mermaid]')
     if (blocks.length === 0) return
     let cancelled = false
-    import('mermaid').then(({ default: mermaid }) => {
+    loadMermaid().then(({ default: mermaid }) => {
       if (cancelled) return
       const isDark = document.documentElement.classList.contains('dark')
       mermaid.initialize({

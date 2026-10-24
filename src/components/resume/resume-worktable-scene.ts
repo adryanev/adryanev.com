@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { createGltfLoader } from '@/lib/gltf-loader'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import type { WorktableRole } from './ResumeWorktable'
 import { experiencePoints } from './experience-points'
@@ -84,7 +84,7 @@ export async function mountResumeWorktableScene({ canvas, roles, selected, signa
 
   let model: THREE.Group
   try {
-    const gltf = await new GLTFLoader().loadAsync('/models/resume-worktable.glb')
+    const gltf = await createGltfLoader().loadAsync('/models/resume-worktable.glb')
     model = gltf.scene
     if (signal.aborted) {
       renderer.dispose()

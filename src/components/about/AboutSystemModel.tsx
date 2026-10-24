@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import type { AboutSystemScene } from './about-system-scene'
 
 import { Button } from '@/components/ui'
-const practices = ['Applications', 'Backend', 'Delivery'] as const
+
+// three.js stays out of the Worker bundle
+const loadAboutScene = createClientOnlyFn(() => import('./about-system-scene'))
+
+const practices =['Applications', 'Backend', 'Delivery'] as const
 
 type AboutSystemModelProps = {
   active: number
@@ -35,7 +40,7 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
       if (started) return
       started = true
       try {
-        const { mountAboutSystemScene } = await import('./about-system-scene')
+        const { mountAboutSystemScene } = await loadAboutScene()
         if (controller.signal.aborted) return
         scene = await mountAboutSystemScene({
           canvas,
@@ -95,7 +100,7 @@ export function AboutSystemModel({ active, onSelect }: AboutSystemModelProps) {
       </span>
       <img
         className="about-model__poster"
-        src="/models/about-system-poster.png"
+        src="/models/about-system-poster.webp"
         width="1400"
         height="750"
         alt="A model connecting application interfaces, a backend core, and a delivery rack"

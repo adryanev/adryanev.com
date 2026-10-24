@@ -33,14 +33,9 @@ export function ImageUploader({
     }
     setUploading(true)
     try {
-      const buffer = await file.arrayBuffer()
-      const result = await uploadFn({
-        data: {
-          contentType: file.type,
-          fileSize: file.size,
-          bytes: Array.from(new Uint8Array(buffer)),
-        },
-      })
+      const formData = new FormData()
+      formData.append('file', file)
+      const result = await uploadFn({ data: formData })
       onChange(result.publicUrl)
     } catch {
       setError(

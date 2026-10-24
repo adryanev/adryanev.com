@@ -13,8 +13,9 @@ scene.render.engine = 'BLENDER_EEVEE'
 scene.render.resolution_x = 1400
 scene.render.resolution_y = 750
 scene.render.resolution_percentage = 100
-scene.render.image_settings.file_format = 'PNG'
-scene.render.filepath = str(ROOT / 'public/models/resume-worktable-poster.png')
+scene.render.image_settings.file_format = 'WEBP'
+scene.render.image_settings.quality = 82
+scene.render.filepath = str(ROOT / 'public/models/resume-worktable-poster.webp')
 scene.render.film_transparent = False
 
 world = bpy.data.worlds.new('Worktable backdrop')

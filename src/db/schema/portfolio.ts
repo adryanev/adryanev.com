@@ -1,17 +1,18 @@
-import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { contentStatusEnum } from './enums'
+import { createdAt, id, timestamp, updatedAt } from './columns'
+import { contentStatuses } from './enums'
 
-export const portfolioCategories = pgTable('portfolio_categories', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const portfolioCategories = sqliteTable('portfolio_categories', {
+  id: id(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
   sortOrder: integer('sort_order').notNull().default(0),
 })
 
-export const portfolioProjects = pgTable('portfolio_projects', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const portfolioProjects = sqliteTable('portfolio_projects', {
+  id: id(),
   categoryId: integer('category_id')
     .notNull()
     .references(() => portfolioCategories.id),
@@ -21,24 +22,20 @@ export const portfolioProjects = pgTable('portfolio_projects', {
   year: integer('year').notNull(),
   role: text('role').notNull(),
   workplace: text('workplace').notNull(),
-  technology: text('technology').array().notNull(),
+  technology: text('technology', { mode: 'json' }).$type<string[]>().notNull(),
   githubUrl: text('github_url'),
   externalUrl: text('external_url'),
-  status: contentStatusEnum('status').notNull().default('draft'),
+  status: text('status', { enum: contentStatuses }).notNull().default('draft'),
   sortOrder: integer('sort_order').notNull().default(0),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 }, (table) => [
   index('portfolio_projects_status_idx').on(table.status),
 ])
 
-export const projectImages = pgTable('project_images', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const projectImages = sqliteTable('project_images', {
+  id: id(),
   projectId: integer('project_id')
     .notNull()
     .references(() => portfolioProjects.id, { onDelete: 'cascade' }),

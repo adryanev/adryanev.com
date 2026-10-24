@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import type { WorkCategory } from './work-types'
 import type { mountWorkArchive } from './work-archive-scene'
 
 type ArchiveScene = Awaited<ReturnType<typeof mountWorkArchive>>
+
+// three.js stays out of the Worker bundle
+const loadArchiveScene = createClientOnlyFn(() => import('./work-archive-scene'))
 
 export function WorkArchive({ categories, selected, onSelect }: {
   categories: WorkCategory[]
@@ -33,7 +37,7 @@ export function WorkArchive({ categories, selected, onSelect }: {
       if (started) return
       started = true
       try {
-        const { mountWorkArchive } = await import('./work-archive-scene')
+        const { mountWorkArchive } = await loadArchiveScene()
         if (controller.signal.aborted) return
         scene = await mountWorkArchive({
           canvas, categories, selected: selectionRef.current,
@@ -76,7 +80,7 @@ export function WorkArchive({ categories, selected, onSelect }: {
   return (
     <figure className="work-archive" data-status={status}>
       <div className="work-archive__model">
-        <img src="/models/work-archive-poster.png" width="1400" height="900" alt="An illustrated archive of project folders, devices, and books, made in Blender" />
+        <img src="/models/work-archive-poster.webp" width="1400" height="900" alt="An illustrated archive of project folders, devices, and books, made in Blender" />
         <canvas ref={canvasRef} aria-hidden="true" />
       </div>
       <figcaption className="work-archive__help">

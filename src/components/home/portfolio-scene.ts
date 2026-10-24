@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { createGltfLoader } from '@/lib/gltf-loader'
 
 export type SceneDestination = 'work' | 'writing' | 'contact'
 export type PortfolioScene = {
@@ -56,7 +56,7 @@ export async function mountPortfolioScene(options: SceneOptions): Promise<Portfo
   if (!response.ok) throw new Error(`Portfolio model returned ${response.status}`)
   const bytes = await response.arrayBuffer()
   signal.throwIfAborted()
-  const model = await new GLTFLoader().parseAsync(bytes, '')
+  const model = await createGltfLoader().parseAsync(bytes, '')
   if (signal.aborted) {
     disposeModel(model.scene)
     signal.throwIfAborted()

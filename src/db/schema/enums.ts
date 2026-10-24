@@ -1,19 +1,16 @@
-import { pgEnum } from 'drizzle-orm/pg-core'
+export const contentStatuses = ['draft', 'published'] as const
 
-export const contentStatusEnum = pgEnum('content_status', [
-  'draft',
-  'published',
-])
-
-export const resumeTypeEnum = pgEnum('resume_type', [
+export const resumeTypes = [
   'experience',
   'education',
   'certification',
   'skill',
-])
+] as const
 
-export const saasStatusEnum = pgEnum('saas_status', [
-  'active',
-  'beta',
-  'retired',
-])
+export const saasStatuses = ['active', 'beta', 'retired'] as const
+
+export const subscriberStatuses = [
+  'pending',
+  'confirmed',
+  'unsubscribed',
+] as const

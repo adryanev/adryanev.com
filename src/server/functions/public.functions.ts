@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestIP } from '@tanstack/react-start/server'
-import { eq, and, isNull, desc, asc, count, sql, inArray } from 'drizzle-orm'
+import { eq, and, isNull, desc, asc, count, sql, sum, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, postsToTags, tags } from '@/db/schema/posts'
 import {
@@ -11,6 +10,8 @@ import {
 import { resumeEntries } from '@/db/schema/resume'
 import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
+import { postViews } from '@/db/schema/post-views'
+import { checkRateLimit, getClientIp } from '@/server/rate-limit'
 import { renderEditorJs, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
@@ -47,11 +48,20 @@ export const getPublishedPosts = createServerFn({ method: 'GET' })
       ? and(...conditions, inArray(posts.id, tagPostIds))
       : and(...conditions)
 
-    // Run paginated query and count in parallel
-    const [paginatedPosts, [{ total }]] = await Promise.all([
+    // Both the page query and the view sum must select the same rows
+    const pageOrder = [desc(posts.publishedAt), desc(posts.id)]
+    const pagePostIds = db
+      .select({ id: posts.id })
+      .from(posts)
+      .where(whereCondition)
+      .orderBy(...pageOrder)
+      .limit(perPage)
+      .offset(offset)
+
+    const [paginatedPosts, [{ total }], viewRows] = await Promise.all([
       db.query.posts.findMany({
         where: whereCondition,
-        orderBy: desc(posts.publishedAt),
+        orderBy: pageOrder,
         limit: perPage,
         offset,
         with: { postsToTags: { with: { tag: true } } },
@@ -69,20 +79,29 @@ export const getPublishedPosts = createServerFn({ method: 'GET' })
         },
       }),
       db.select({ total: count() }).from(posts).where(whereCondition),
+      db
+        .select({ postId: postViews.postId, views: sum(postViews.viewCount) })
+        .from(postViews)
+        .where(inArray(postViews.postId, pagePostIds))
+        .groupBy(postViews.postId),
     ])
 
+    const viewsByPostId = new Map(
+      viewRows.map((row) => [row.postId, Number(row.views ?? 0)]),
+    )
+
     // Compute reading time server-side and strip content from response
-    const postsWithReadingTime = paginatedPosts.map((post) => {
+    const pagePosts = paginatedPosts.map((post) => {
       let readingTime = 1
       try {
         readingTime = estimateReadingTime(JSON.parse(post.content) as OutputData)
       } catch { /* corrupted content, use default */ }
       const { content: _content, ...rest } = post
-      return { ...rest, readingTime }
+      return { ...rest, readingTime, views: viewsByPostId.get(post.id) ?? 0 }
     })
 
     return {
-      posts: postsWithReadingTime,
+      posts: pagePosts,
       total,
       page,
       totalPages: Math.ceil(total / perPage),
@@ -132,7 +151,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
         : Promise.resolve(undefined),
     ])
 
-    return { ...post, html, readingTime, prev, next }
+    // The page renders html; sending the source content too doubles the payload
+    const { content: _content, ...rest } = post
+    return { ...rest, html, readingTime, prev, next }
   })
 
 export const getAllTags = createServerFn({ method: 'GET' }).handler(
@@ -284,7 +305,7 @@ export const getPublicSaas = createServerFn({ method: 'GET' }).handler(
 
 // ── Contact ──────────────────────────────────────────
 
-const contactRateLimit = new Map<string, { count: number; resetAt: number }>()
+const CONTACT_RATE_LIMIT = { max: 3, windowMs: 60 * 60 * 1000 }
 
 export const submitContact = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -314,26 +335,12 @@ export const submitContact = createServerFn({ method: 'POST' })
 
     if (Object.keys(errors).length > 0) return { errors }
 
-    // Rate limit: 3 per hour per IP
-    const ip = getRequestIP({ xForwardedFor: false }) ?? 'unknown'
-    const key = ip
-    const now = Date.now()
-
-    // Prune expired entries to prevent memory leak
-    for (const [k, v] of contactRateLimit) {
-      if (now > v.resetAt) {
-        contactRateLimit.delete(k)
-      }
-    }
-
-    const limit = contactRateLimit.get(key)
-    if (limit && limit.resetAt > now && limit.count >= 3) {
+    const rateCheck = await checkRateLimit(
+      `contact:${getClientIp()}`,
+      CONTACT_RATE_LIMIT,
+    )
+    if (!rateCheck.allowed) {
       throw new Error('Too many submissions. Please try again later.')
-    }
-    if (!limit || limit.resetAt <= now) {
-      contactRateLimit.set(key, { count: 1, resetAt: now + 60 * 60 * 1000 })
-    } else {
-      limit.count++
     }
 
     await db.insert(contacts).values({
@@ -350,12 +357,12 @@ export const submitContact = createServerFn({ method: 'POST' })
 
 export const getHomePageData = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const [latestPosts, featuredProjects, activeSaas] = await Promise.all([
+    const [latestPosts, featuredProjects] = await Promise.all([
       db.query.posts.findMany({
         where: and(eq(posts.status, 'published'), isNull(posts.deletedAt)),
         orderBy: desc(posts.publishedAt),
-        limit: 3,
-        with: { postsToTags: { with: { tag: true } } },
+        limit: 2,
+        columns: { id: true, slug: true, title: true, publishedAt: true },
       }),
       db.query.portfolioProjects.findMany({
         where: and(
@@ -363,21 +370,15 @@ export const getHomePageData = createServerFn({ method: 'GET' }).handler(
           isNull(portfolioProjects.deletedAt),
         ),
         orderBy: asc(portfolioProjects.sortOrder),
-        limit: 4,
-        with: {
-          category: true,
-          images: { orderBy: asc(projectImages.sortOrder), limit: 1 },
-        },
-      }),
-      db.query.saasListings.findMany({
-        where: and(
-          isNull(saasListings.deletedAt),
-        ),
-        orderBy: asc(saasListings.sortOrder),
         limit: 3,
+        columns: {
+          id: true, title: true, slug: true, role: true,
+          workplace: true, year: true, technology: true,
+        },
+        with: { category: { columns: { slug: true, name: true } } },
       }),
     ])
 
-    return { latestPosts, featuredProjects, activeSaas }
+    return { latestPosts, featuredProjects }
   },
 )

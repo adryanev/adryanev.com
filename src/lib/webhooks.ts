@@ -1,5 +1,6 @@
 import { createHmac } from 'crypto'
-import { and, eq, arrayContains } from 'drizzle-orm'
+import { waitUntil } from 'cloudflare:workers'
+import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { webhooks, webhookDeliveryLogs } from '@/db/schema/webhooks'
 import { MAX_RETRIES, type WebhookEvent } from '@/lib/webhook-events'
@@ -111,11 +112,14 @@ async function deliverWebhook(
 }
 
 export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>) {
-  // Fire-and-forget: intentionally not returning or awaiting the promise
-  void (async () => {
+  // Fire-and-forget: waitUntil keeps the Worker alive after the response is sent
+  waitUntil((async () => {
     try {
       const matching = await db.query.webhooks.findMany({
-        where: and(eq(webhooks.active, true), arrayContains(webhooks.events, [event])),
+        where: and(
+          eq(webhooks.active, true),
+          sql`exists (select 1 from json_each(${webhooks.events}) where value = ${event})`,
+        ),
       })
 
       if (matching.length === 0) return
@@ -139,5 +143,5 @@ export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>)
     } catch (err) {
       console.error('[webhooks] delivery error:', err)
     }
-  })()
+  })())
 }

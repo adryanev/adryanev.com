@@ -7,18 +7,19 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
+    "preview": "vite preview",
+    "deploy": "pnpm build && wrangler deploy",
     "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "db:seed": "tsx --env-file=.env src/db/seed.ts",
     "db:seed-user": "tsx --env-file=.env src/db/seed-user.ts",
     "db:seed-resume": "tsx --env-file=.env src/db/seed-resume.ts",
-    "db:seed-portfolio": "tsx --env-file=.env src/db/seed-portfolio.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:seed-portfolio": "tsx --env-file=.env src/db/seed-portfolio.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1005.0",
     "@editorjs/delimiter": "^1.4.2",
     "@editorjs/editorjs": "^2.31.5",
     "@editorjs/embed": "^2.8.0",
@@ -39,7 +40,6 @@
     "@tanstack/react-router": "1.166.2",
     "@tanstack/react-router-with-query": "^1.130.17",
     "@tanstack/react-start": "1.166.2",
-    "argon2": "^0.41.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "drizzle-orm": "^0.45.0",
@@ -47,7 +47,6 @@
     "lucide-react": "^0.577.0",
     "mermaid": "^11.13.0",
     "motion": "^12.35.2",
-    "pg": "^8.13.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "shiki": "^4.0.2",
@@ -56,20 +55,20 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.64.0",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-router-devtools": "1.166.2",
     "@types/node": "22.13.4",
-    "@types/pg": "^8.11.0",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "5.1.4",
     "drizzle-kit": "^0.31.0",
-    "nitro": "npm:nitro-nightly@3.0.1-20260309-234459-49093eb6",
     "tailwindcss": "^4.2.0",
     "tsx": "^4.19.0",
     "typescript": "5.7.3",
     "vite": "7.3.1",
-    "vite-tsconfig-paths": "5.1.4"
+    "vite-tsconfig-paths": "5.1.4",
+    "wrangler": "^4.151.3"
   }
 }

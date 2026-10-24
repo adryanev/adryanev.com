@@ -1,9 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowUpRight, MoveHorizontal, Pause, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import type { PortfolioScene, SceneDestination } from './portfolio-scene'
 
 import { Button } from '@/components/ui'
+
+// three.js stays out of the Worker bundle
+const loadPortfolioScene = createClientOnlyFn(() => import('./portfolio-scene'))
 
 export function PortfolioScene3D() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -33,7 +37,7 @@ export function PortfolioScene3D() {
       if (started) return
       started = true
       try {
-        const { mountPortfolioScene } = await import('./portfolio-scene')
+        const { mountPortfolioScene } = await loadPortfolioScene()
         if (controller.signal.aborted) return
         scene = await mountPortfolioScene({
           canvas,

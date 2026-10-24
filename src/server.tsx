@@ -5,6 +5,7 @@ import {
 import { createServerEntry } from '@tanstack/react-start/server-entry'
 import { generateRssFeed } from '@/lib/feed'
 import { generateSitemap, generateRobotsTxt } from '@/lib/sitemap'
+import { MEDIA_PATH_PREFIX, serveMedia } from '@/lib/storage'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 
@@ -59,6 +60,10 @@ async function handleSeoEndpoints(request: Request): Promise<Response | null> {
     })
   }
 
+  if (url.pathname.startsWith(MEDIA_PATH_PREFIX)) {
+    return serveMedia(url.pathname.slice(MEDIA_PATH_PREFIX.length))
+  }
+
   if (url.pathname === '/robots.txt') {
     return new Response(generateRobotsTxt(), {
       headers: {
@@ -70,7 +75,7 @@ async function handleSeoEndpoints(request: Request): Promise<Response | null> {
 
   if (url.pathname === '/health') {
     try {
-      await db.execute(sql`SELECT 1`)
+      await db.run(sql`SELECT 1`)
       return new Response(JSON.stringify({ status: 'ok', db: 'connected' }), {
         headers: { 'Content-Type': 'application/json' },
       })

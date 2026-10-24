@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, ImageOff } from 'lucide-react'
 import './project-dossier.css'
 
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
+import { useCodeHighlighter } from '@/hooks/useCodeHighlighter'
 
 import { Button } from '@/components/ui'
 
@@ -72,6 +73,7 @@ function ProjectImage({
 export function ProjectDossier({ project }: { project: ProjectDossierData }) {
   const contentRef = useRef<HTMLDivElement>(null)
   useMermaidRenderer(contentRef, project.descriptionHtml, true)
+  useCodeHighlighter(contentRef, project.descriptionHtml)
 
   return (
     <div className="project-dossier">

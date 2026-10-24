@@ -1,12 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestIP } from '@tanstack/react-start/server'
-import { eq, desc, count, lt } from 'drizzle-orm'
+import { eq, desc, count } from 'drizzle-orm'
 import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import { db } from '@/db'
 import { subscribers } from '@/db/schema/subscribers'
-import { rateLimits } from '@/db/schema/rate-limits'
 import { getCurrentUser } from '@/server/functions/auth.functions'
+import { checkRateLimit, getClientIp } from '@/server/rate-limit'
 
 // ── Constants ──────────────────────────────────────────
 const TOKEN_EXPIRY_MS = 48 * 60 * 60 * 1000 // 48 hours
@@ -49,37 +48,6 @@ function tokenExpiresAt() {
   return new Date(Date.now() + TOKEN_EXPIRY_MS)
 }
 
-async function checkRateLimit(key: string): Promise<boolean> {
-  const now = new Date()
-
-  // Clean up expired entries
-  await db.delete(rateLimits).where(lt(rateLimits.resetAt, now))
-
-  const existing = await db.query.rateLimits.findFirst({
-    where: eq(rateLimits.key, key),
-  })
-
-  if (!existing) {
-    await db.insert(rateLimits).values({
-      key,
-      count: 1,
-      resetAt: new Date(Date.now() + RATE_LIMIT_WINDOW_MS),
-    })
-    return true
-  }
-
-  if (existing.count >= RATE_LIMIT_MAX) {
-    return false
-  }
-
-  await db
-    .update(rateLimits)
-    .set({ count: existing.count + 1 })
-    .where(eq(rateLimits.id, existing.id))
-
-  return true
-}
-
 function sendConfirmationEmail(email: string, confirmToken: string) {
   const confirmUrl = `${process.env.SITE_URL ?? 'http://localhost:3000'}/newsletter/confirm?token=${confirmToken}`
   console.log(
@@ -98,9 +66,11 @@ export const subscribe = createServerFn({ method: 'POST' })
     }
 
     // Rate limit by IP
-    const ip = getRequestIP({ xForwardedFor: true }) ?? '127.0.0.1'
-    const allowed = await checkRateLimit(`subscribe:${ip}`)
-    if (!allowed) {
+    const rateCheck = await checkRateLimit(`subscribe:${getClientIp()}`, {
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    })
+    if (!rateCheck.allowed) {
       return { error: 'Too many attempts. Please try again later.' }
     }
 

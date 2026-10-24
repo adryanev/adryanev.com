@@ -1,22 +1,20 @@
-import { date, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
-import { resumeTypeEnum } from './enums'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createdAt, id, updatedAt } from './columns'
+import { resumeTypes } from './enums'
 
-export const resumeEntries = pgTable('resume_entries', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  type: resumeTypeEnum('type').notNull(),
+export const resumeEntries = sqliteTable('resume_entries', {
+  id: id(),
+  type: text('type', { enum: resumeTypes }).notNull(),
   title: text('title').notNull(),
   organization: text('organization'),
   organizationUrl: text('organization_url'),
   location: text('location'),
   description: text('description'),
-  technology: text('technology').array(),
-  startDate: date('start_date'),
-  endDate: date('end_date'),
+  technology: text('technology', { mode: 'json' }).$type<string[]>(),
+  // ISO calendar dates (YYYY-MM-DD)
+  startDate: text('start_date'),
+  endDate: text('end_date'),
   sortOrder: integer('sort_order').notNull().default(0),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 })

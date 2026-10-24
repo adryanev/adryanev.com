@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { createGltfLoader } from '@/lib/gltf-loader'
 
 export type AboutSystemScene = {
   select: (index: number) => void
@@ -34,7 +34,7 @@ export async function mountAboutSystemScene(options: SceneOptions): Promise<Abou
   if (!response.ok) throw new Error(`About model returned ${response.status}`)
   const bytes = await response.arrayBuffer()
   signal.throwIfAborted()
-  const model = await new GLTFLoader().parseAsync(bytes, '')
+  const model = await createGltfLoader().parseAsync(bytes, '')
   if (signal.aborted) {
     disposeModel(model.scene)
     signal.throwIfAborted()

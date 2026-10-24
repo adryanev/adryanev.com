@@ -1,47 +1,13 @@
 import type { BlockTool, BlockToolConstructorOptions, BlockToolData } from '@editorjs/editorjs'
-import type { Highlighter } from 'shiki'
+import { highlightCode } from '@/lib/code-highlighter'
+import { CODE_LANGUAGES, isCodeLanguage } from '@/lib/code-languages'
 
 interface CodeData extends BlockToolData {
   code: string
   language: string
 }
 
-const LANGUAGES = [
-  'text',
-  'typescript',
-  'javascript',
-  'tsx',
-  'jsx',
-  'json',
-  'bash',
-  'css',
-  'html',
-  'yaml',
-  'sql',
-  'dockerfile',
-  'go',
-  'rust',
-  'python',
-  'ruby',
-  'dart',
-  'kotlin',
-  'swift',
-  'markdown',
-] as const
-
-let highlighterPromise: Promise<Highlighter> | null = null
-
-function getHighlighter(): Promise<Highlighter> {
-  if (!highlighterPromise) {
-    highlighterPromise = import('shiki').then(({ createHighlighter }) =>
-      createHighlighter({
-        themes: ['github-dark', 'github-light'],
-        langs: [...LANGUAGES].filter((l) => l !== 'text'),
-      }),
-    )
-  }
-  return highlighterPromise
-}
+const LANGUAGES = ['text', ...CODE_LANGUAGES] as const
 
 export default class CodeTool implements BlockTool {
   private data: CodeData
@@ -162,20 +128,13 @@ export default class CodeTool implements BlockTool {
   }
 
   private async renderHighlight() {
-    if (!this.preview || !this.data.code.trim() || this.data.language === 'text') {
+    const { language } = this.data
+    if (!this.preview || !this.data.code.trim() || !isCodeLanguage(language)) {
       return
     }
 
     try {
-      const highlighter = await getHighlighter()
-      const supported = highlighter.getLoadedLanguages().includes(this.data.language)
-      if (!supported) return
-
-      const html = highlighter.codeToHtml(this.data.code, {
-        themes: { dark: 'github-dark', light: 'github-light' },
-        lang: this.data.language,
-        defaultColor: false,
-      })
+      const html = await highlightCode(this.data.code, language)
       this.preview.innerHTML = html
 
       // Style the generated <pre> to match the textarea

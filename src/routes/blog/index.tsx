@@ -4,7 +4,6 @@ import {
   getPublishedPosts,
   getAllTags,
 } from '@/server/functions/public.functions'
-import { getPostViewCounts } from '@/server/functions/views.functions'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
@@ -21,12 +20,7 @@ export const Route = createFileRoute('/blog/')({
       getPublishedPosts({ data: { page, tag: deps.tag } }),
       getAllTags(),
     ])
-    const postIds = data.posts.map((p) => p.id)
-    const { views } =
-      postIds.length > 0
-        ? await getPostViewCounts({ data: { postIds } })
-        : { views: {} as Record<number, number> }
-    return { ...data, tags, currentTag: deps.tag, views }
+    return { ...data, tags, currentTag: deps.tag }
   },
   component: BlogListPage,
   head: () => ({
@@ -41,7 +35,7 @@ export const Route = createFileRoute('/blog/')({
 })
 
 function BlogListPage() {
-  const { posts, page, totalPages, tags, currentTag, views } =
+  const { posts, page, totalPages, tags, currentTag } =
     Route.useLoaderData()
   const navigate = Route.useNavigate()
 
@@ -114,13 +108,8 @@ function BlogListPage() {
                     }).format(new Date(post.publishedAt))}
                   </time>
                 )}
-                {(views as Record<number, number>)[post.id] > 0 && (
-                  <span>
-                    {(views as Record<number, number>)[
-                      post.id
-                    ].toLocaleString()}{' '}
-                    views
-                  </span>
+                {post.views > 0 && (
+                  <span>{post.views.toLocaleString()} views</span>
                 )}
               </div>
               <h2>

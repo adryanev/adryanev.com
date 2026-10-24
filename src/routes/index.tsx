@@ -19,32 +19,11 @@ export const Route = createFileRoute('/')({
   }),
 })
 
-type Post = {
-  id: number
-  slug: string
-  title: string
-  publishedAt: Date | null
-  excerpt: string | null
-  postsToTags: { tag: { id: number; name: string } }[]
-}
-
-type Project = {
-  id: number
-  title: string
-  slug: string
-  role: string
-  workplace: string
-  year: number
-  technology: string[]
-  category: { slug: string; name: string }
-}
-
 function HomePage() {
   const homeRef = useRef<HTMLDivElement>(null)
   useEntrance(homeRef, { selector: '[data-enter]', stagger: 0.06 })
   const { latestPosts, featuredProjects } = Route.useLoaderData()
-  const [leadProject, ...remainingProjects] = featuredProjects
-  const supportingProjects = remainingProjects.slice(0, 2)
+  const [leadProject, ...supportingProjects] = featuredProjects
 
   return (
     <div ref={homeRef} className="adventure-home">
@@ -118,7 +97,7 @@ function HomePage() {
               className="adventure-work__index"
               aria-label="More selected work"
             >
-              {supportingProjects.map((project: Project) => (
+              {supportingProjects.map((project) => (
                 <Link
                   key={project.id}
                   to="/portfolio/$category/$slug"
@@ -159,7 +138,7 @@ function HomePage() {
           </p>
           {latestPosts.length > 0 ? (
             <ul className="adventure-writing__list">
-              {latestPosts.slice(0, 2).map((post: Post) => (
+              {latestPosts.map((post) => (
                 <li key={post.id}>
                   <Link to="/blog/$slug" params={{ slug: post.slug }}>
                     <span>{post.title}</span>

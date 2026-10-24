@@ -1,16 +1,15 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { createdAt, timestamp } from './columns'
 import { users } from './users'
 
-export const sessions = pgTable('sessions', {
+export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: createdAt(),
 })
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({

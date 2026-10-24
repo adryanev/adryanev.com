@@ -28,3 +28,7 @@ src/routeTree.gen.ts
 # Logs
 *.log
 npm-debug.log*
+
+# Cloudflare local state and build output
+.wrangler/
+.dev.vars*

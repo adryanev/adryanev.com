@@ -1,17 +1,13 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
-import { hash } from 'argon2'
+import { hashPassword } from '../lib/password'
+import { openSeedDb } from './seed-db'
 import { users } from './schema/users'
 
 async function seedUser() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  })
-  const db = drizzle(pool)
+  const { db, close } = await openSeedDb()
 
   const email = process.env.ADMIN_EMAIL ?? 'admin@adryanev.com'
   const password = process.env.ADMIN_PASSWORD ?? 'changeme'
-  const passwordHash = await hash(password)
+  const passwordHash = await hashPassword(password)
 
   await db
     .insert(users)
@@ -23,7 +19,7 @@ async function seedUser() {
 
   console.log(`Admin user upserted: ${email}`)
 
-  await pool.end()
+  await close()
 }
 
 seedUser().catch((err) => {

@@ -4,12 +4,33 @@ import type {
   EditorConfig,
   ToolConstructable,
 } from '@editorjs/editorjs'
-import { useServerFn } from '@tanstack/react-start'
+import { createClientOnlyFn, useServerFn } from '@tanstack/react-start'
 import { upload } from '@/server/functions/upload.functions'
 import { FileText } from 'lucide-react'
 import { markdownToEditorJs } from '@/lib/markdown-to-editorjs'
 
 import { Feedback, Button, Textarea } from '@/components/ui'
+
+// EditorJS, its tools, mermaid and the editor's Shiki stay out of the Worker bundle
+const loadEditorModules = createClientOnlyFn(() =>
+  Promise.all([
+    import('@editorjs/editorjs'),
+    import('@editorjs/header'),
+    import('@editorjs/nested-list'),
+    import('@editorjs/quote'),
+    import('./editorjs-code-tool'),
+    import('@editorjs/delimiter'),
+    import('@editorjs/image'),
+    import('@editorjs/inline-code'),
+    import('./editorjs-mermaid-tool'),
+    import('@editorjs/table'),
+    import('@editorjs/embed'),
+    import('@editorjs/warning'),
+    import('@editorjs/marker'),
+    import('@editorjs/underline'),
+    import('@editorjs/raw'),
+  ]),
+)
 
 interface EditorJsEditorProps {
   value: OutputData | null
@@ -36,14 +57,9 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
     () => ({
       async uploadByFile(file: File) {
         try {
-          const buffer = await file.arrayBuffer()
-          const result = await uploadFn({
-            data: {
-              contentType: file.type,
-              fileSize: file.size,
-              bytes: Array.from(new Uint8Array(buffer)),
-            },
-          })
+          const formData = new FormData()
+          formData.append('file', file)
+          const result = await uploadFn({ data: formData })
           return {
             success: 1,
             file: { url: result.publicUrl },
@@ -81,23 +97,7 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
         { default: Marker },
         { default: Underline },
         { default: Raw },
-      ] = await Promise.all([
-        import('@editorjs/editorjs'),
-        import('@editorjs/header'),
-        import('@editorjs/nested-list'),
-        import('@editorjs/quote'),
-        import('./editorjs-code-tool'),
-        import('@editorjs/delimiter'),
-        import('@editorjs/image'),
-        import('@editorjs/inline-code'),
-        import('./editorjs-mermaid-tool'),
-        import('@editorjs/table'),
-        import('@editorjs/embed'),
-        import('@editorjs/warning'),
-        import('@editorjs/marker'),
-        import('@editorjs/underline'),
-        import('@editorjs/raw'),
-      ])
+      ] = await loadEditorModules()
 
       const config: EditorConfig = {
         holder: holderRef.current!,

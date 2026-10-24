@@ -1,6 +1,5 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
 import { eq } from 'drizzle-orm'
+import { openSeedDb } from './seed-db'
 import { portfolioCategories, portfolioProjects } from './schema/portfolio'
 import { siteSettings } from './schema/settings'
 import { posts, tags, postsToTags } from './schema/posts'
@@ -49,10 +48,7 @@ function orderedList(items: string[]) {
 }
 
 async function seed() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  })
-  const db = drizzle(pool)
+  const { db, close } = await openSeedDb()
 
   console.log('Seeding database...')
 
@@ -958,7 +954,7 @@ git rebase -i origin/main`, 'bash'),
   console.log(`Contact submissions seeded: ${contactData.length} contacts`)
 
   // ── Done ────────────────────────────────────────────────────
-  await pool.end()
+  await close()
   console.log('Seeding complete!')
 }
 

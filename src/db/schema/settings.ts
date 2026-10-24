@@ -1,9 +1,8 @@
-import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { updatedAt } from './columns'
 
-export const siteSettings = pgTable('site_settings', {
+export const siteSettings = sqliteTable('site_settings', {
   key: text('key').primaryKey(),
   value: text('value').notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  updatedAt: updatedAt(),
 })

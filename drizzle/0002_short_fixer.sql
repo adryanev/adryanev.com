@@ -1,1 +1,0 @@
-ALTER TABLE "resume_entries" ADD COLUMN "technology" text[];

@@ -24,11 +24,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Build first: it generates the gitignored src/routeTree.gen.ts that typecheck needs
+      - run: pnpm build
+
       - run: pnpm typecheck
 
       - run: pnpm exec tsx --test --test-concurrency=1 tests/*.test.ts
-
-      - run: pnpm build
 
   deploy:
     needs: check

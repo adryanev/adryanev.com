@@ -1,5 +1,5 @@
 import { getRequestHeader, getRequestIP } from '@tanstack/react-start/server'
-import { eq, lt } from 'drizzle-orm'
+import { eq, lt, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { rateLimits } from '@/db/schema/rate-limits'
 
@@ -23,34 +23,26 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const now = new Date()
 
-  await db.delete(rateLimits).where(lt(rateLimits.resetAt, now))
+  // One atomic upsert per request, so concurrent requests cannot both see "no row"
+  // or both read the same count; expired windows are cleared in the same batch
+  const [, [window]] = await db.batch([
+    db.delete(rateLimits).where(lt(rateLimits.resetAt, now)),
+    db
+      .insert(rateLimits)
+      .values({ key, count: 1, resetAt: new Date(now.getTime() + windowMs) })
+      .onConflictDoUpdate({
+        target: rateLimits.key,
+        set: { count: sql`${rateLimits.count} + 1` },
+      })
+      .returning({ count: rateLimits.count, resetAt: rateLimits.resetAt }),
+  ])
 
-  const existing = await db.query.rateLimits.findFirst({
-    where: eq(rateLimits.key, key),
-  })
+  if (window.count <= max) return { allowed: true }
 
-  if (!existing) {
-    await db.insert(rateLimits).values({
-      key,
-      count: 1,
-      resetAt: new Date(now.getTime() + windowMs),
-    })
-    return { allowed: true }
-  }
-
-  if (existing.count >= max) {
-    const retryAfterSeconds = Math.ceil(
-      (existing.resetAt.getTime() - now.getTime()) / 1000,
-    )
-    return { allowed: false, retryAfterSeconds }
-  }
-
-  await db
-    .update(rateLimits)
-    .set({ count: existing.count + 1 })
-    .where(eq(rateLimits.id, existing.id))
-
-  return { allowed: true }
+  const retryAfterSeconds = Math.ceil(
+    (window.resetAt.getTime() - now.getTime()) / 1000,
+  )
+  return { allowed: false, retryAfterSeconds }
 }
 
 export async function clearRateLimit(key: string): Promise<void> {

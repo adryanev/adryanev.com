@@ -19,17 +19,18 @@ export function useCodeHighlighter(
     loadHighlighter().then(({ highlightCode }) => {
       blocks.forEach(async (block) => {
         const language = block.dataset.codeLanguage ?? ''
-        if (cancelled || !isCodeLanguage(language)) return
+        // Read the <code> only: controls such as the copy button live in the <pre>
+        const code = block.querySelector('code')
+        if (cancelled || !code || !isCodeLanguage(language)) return
         try {
-          const html = await highlightCode(block.textContent ?? '', language)
+          const html = await highlightCode(code.textContent ?? '', language)
           if (cancelled) return
           // Restyle the existing <pre> in place so controls attached to it survive
           const template = document.createElement('template')
           template.innerHTML = html
           const highlighted = template.content.querySelector('pre')
           const highlightedCode = highlighted?.querySelector('code')
-          const code = block.querySelector('code')
-          if (!highlighted || !highlightedCode || !code) return
+          if (!highlighted || !highlightedCode) return
           block.className = highlighted.className
           block.setAttribute('style', highlighted.getAttribute('style') ?? '')
           code.replaceWith(highlightedCode)

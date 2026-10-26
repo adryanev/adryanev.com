@@ -39,7 +39,7 @@ pnpm db:seed-user       # Upsert admin user from ADMIN_EMAIL / ADMIN_PASSWORD
 - **DB schema:** Individual files in `src/db/schema/`, barrel export from `src/db/schema.ts`
 - **Column helpers:** Use `id()`, `timestamp()`, `createdAt()`, `updatedAt()`, `boolean()` from `src/db/schema/columns.ts`
 - **Bindings:** Read D1 (`DB`), R2 (`MEDIA`) and vars through `env` from `cloudflare:workers`
-- **Browser-only libraries** (three, @react-pdf, mermaid, EditorJS): load them with `createClientOnlyFn(() => import(...))` so they stay out of the Worker bundle (Free plan limit: 3 MB gzip)
+- **Browser-only libraries** (three, @react-pdf, mermaid, EditorJS): load them with `createClientOnlyFn(() => import(...))` so they stay out of the Worker bundle and off its startup time (limits: 64 MiB uncompressed, 1 s startup)
 
 ## Workers Free plan limits
 

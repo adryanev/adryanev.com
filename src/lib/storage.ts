@@ -30,7 +30,8 @@ export async function uploadFile(
   const ext = EXT_MAP[file.type] ?? 'bin'
   const key = `uploads/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
-  await env.MEDIA.put(key, file.stream(), {
+  // R2 needs a known length; a File (Blob) carries its size, file.stream() does not
+  await env.MEDIA.put(key, file, {
     httpMetadata: { contentType: file.type },
   })
 

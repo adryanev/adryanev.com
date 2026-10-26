@@ -19,6 +19,11 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts", "drizzle.config.ts"],
+  "include": [
+    "src/**/*",
+    "vite.config.ts",
+    "drizzle.config.ts",
+    "worker-configuration.d.ts"
+  ],
   "exclude": ["node_modules", ".output", "dist"]
 }

@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adryanev-com",
+  "account_id": "b4e3d0f0e6d6ed22ddccf04711298baa",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./src/server.tsx",
+  "observability": { "enabled": true },
+  // Route, not custom_domain: it runs in front of the existing proxied DNS record
+  "routes": [{ "pattern": "adryanev.com/*", "zone_name": "adryanev.com" }],
+  "workers_dev": false,
+  "vars": {
+    "SITE_URL": "https://adryanev.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "adryanev-com",
+      "database_id": "42239149-3c37-4a2f-b509-e9f5335dc399",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "adryanev-com-media"
+    }
+  ]
+}

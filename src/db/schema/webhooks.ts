@@ -1,22 +1,19 @@
-import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { boolean, createdAt, id, updatedAt } from './columns'
 
-export const webhooks = pgTable('webhooks', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const webhooks = sqliteTable('webhooks', {
+  id: id(),
   url: text('url').notNull(),
   secret: text('secret').notNull(),
-  events: text('events').array().notNull(),
+  events: text('events', { mode: 'json' }).$type<string[]>().notNull(),
   active: boolean('active').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 })
 
-export const webhookDeliveryLogs = pgTable('webhook_delivery_logs', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const webhookDeliveryLogs = sqliteTable('webhook_delivery_logs', {
+  id: id(),
   webhookId: integer('webhook_id')
     .notNull()
     .references(() => webhooks.id, { onDelete: 'cascade' }),
@@ -26,9 +23,7 @@ export const webhookDeliveryLogs = pgTable('webhook_delivery_logs', {
   response: text('response'),
   attempt: integer('attempt').notNull().default(1),
   success: boolean('success').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
 }, (table) => [
   index('webhook_delivery_logs_webhook_id_created_idx').on(table.webhookId, table.createdAt),
 ])

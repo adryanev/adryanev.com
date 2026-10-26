@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import { MoveHorizontal } from 'lucide-react'
 import { experiencePoints } from './experience-points'
 import './resume-worktable.css'
 
 import { Button } from '@/components/ui'
+
+// three.js stays out of the Worker bundle
+const loadWorktableScene = createClientOnlyFn(
+  () => import('./resume-worktable-scene'),
+)
+
 export type ResumeExperience = {
   id: number
   title: string
@@ -116,8 +123,7 @@ export function ResumeWorktable({
       if (started) return
       started = true
       try {
-        const { mountResumeWorktableScene } =
-          await import('./resume-worktable-scene')
+        const { mountResumeWorktableScene } = await loadWorktableScene()
         if (controller.signal.aborted) return
         scene = await mountResumeWorktableScene({
           canvas,
@@ -176,7 +182,7 @@ export function ResumeWorktable({
         <figure className="resume-worktable__stage" data-status={status}>
           <img
             className="resume-worktable__poster"
-            src="/models/resume-worktable-poster.png"
+            src="/models/resume-worktable-poster.webp"
             width="1400"
             height="750"
             alt="A three-dimensional worktable with small devices and a pull-out record tray"

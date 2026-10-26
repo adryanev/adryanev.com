@@ -1,16 +1,15 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
 import { sql } from 'drizzle-orm'
+import { insertEach, openSeedDb } from './seed-db'
 import { resumeEntries } from './schema/resume'
 
 async function seedResume() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  })
-  const db = drizzle(pool)
+  const { db, close } = await openSeedDb()
 
   console.log('Truncating resume_entries...')
-  await db.execute(sql`TRUNCATE TABLE resume_entries RESTART IDENTITY`)
+  await db.batch([
+    db.delete(resumeEntries),
+    db.run(sql`DELETE FROM sqlite_sequence WHERE name = 'resume_entries'`),
+  ])
 
   console.log('Seeding resume entries...')
 
@@ -236,7 +235,7 @@ async function seedResume() {
     },
   ]
 
-  await db.insert(resumeEntries).values(entries)
+  await insertEach(db, resumeEntries, entries)
 
   console.log(`Resume entries seeded: ${entries.length} entries`)
   console.log('  - Experience: 8')
@@ -244,7 +243,7 @@ async function seedResume() {
   console.log('  - Certifications: 3')
   console.log('  - Skills: 4')
 
-  await pool.end()
+  await close()
   console.log('Resume seeding complete!')
 }
 

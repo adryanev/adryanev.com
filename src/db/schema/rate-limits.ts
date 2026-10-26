@@ -1,8 +1,9 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { id, timestamp } from './columns'
 
-export const rateLimits = pgTable('rate_limits', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const rateLimits = sqliteTable('rate_limits', {
+  id: id(),
   key: text('key').notNull().unique(),
   count: integer('count').notNull().default(1),
-  resetAt: timestamp('reset_at', { withTimezone: true }).notNull(),
+  resetAt: timestamp('reset_at').notNull(),
 })

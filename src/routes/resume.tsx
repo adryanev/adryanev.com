@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { Download, Loader2 } from 'lucide-react'
 import { getPublicResume } from '@/server/functions/public.functions'
@@ -12,7 +13,13 @@ import { experiencePoints } from '@/components/resume/experience-points'
 import { seoMeta, canonicalLink } from '@/lib/seo'
 
 import { PageHeader, Button } from '@/components/ui'
-export const Route = createFileRoute('/resume')({
+
+// @react-pdf stays out of the Worker bundle
+const loadResumePdf = createClientOnlyFn(
+  () => import('@/components/resume/ResumePDF'),
+)
+
+export const Route =createFileRoute('/resume')({
   loader: () => getPublicResume(),
   component: ResumePage,
   head: () => ({
@@ -58,8 +65,7 @@ function ResumePage() {
   async function handleDownload() {
     setGenerating(true)
     try {
-      const { generateResumePDF } =
-        await import('@/components/resume/ResumePDF')
+      const { generateResumePDF } = await loadResumePdf()
       await generateResumePDF(resume)
     } finally {
       setGenerating(false)

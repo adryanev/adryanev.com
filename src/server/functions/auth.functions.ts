@@ -1,11 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestIP, useSession } from '@tanstack/react-start/server'
+import { useSession } from '@tanstack/react-start/server'
 import { redirect } from '@tanstack/react-router'
-import { verify } from 'argon2'
 import { eq, and, gt } from 'drizzle-orm'
 import { db } from '@/db'
 import { users } from '@/db/schema/users'
 import { sessions } from '@/db/schema/sessions'
+import { verifyPassword } from '@/lib/password'
+import { checkRateLimit, clearRateLimit, getClientIp } from '@/server/rate-limit'
 
 // Session cookie configuration
 type SessionData = {
@@ -25,41 +26,15 @@ function useAppSession() {
 }
 
 // Rate limiting: 5 attempts per 15 minutes per IP
-const loginAttempts = new Map<string, { count: number; resetAt: number }>()
-const MAX_ATTEMPTS = 5
-const WINDOW_MS = 15 * 60 * 1000 // 15 minutes
-
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds?: number } {
-  const now = Date.now()
-
-  // Prune expired entries to prevent memory leak
-  for (const [k, v] of loginAttempts) {
-    if (now > v.resetAt) loginAttempts.delete(k)
-  }
-
-  const entry = loginAttempts.get(ip)
-
-  if (!entry || now > entry.resetAt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS })
-    return { allowed: true }
-  }
-
-  if (entry.count >= MAX_ATTEMPTS) {
-    const retryAfterSeconds = Math.ceil((entry.resetAt - now) / 1000)
-    return { allowed: false, retryAfterSeconds }
-  }
-
-  entry.count++
-  return { allowed: true }
-}
+const LOGIN_RATE_LIMIT = { max: 5, windowMs: 15 * 60 * 1000 }
 
 // Login server function
 export const login = createServerFn({ method: 'POST' })
   .inputValidator((data: { email: string; password: string }) => data)
   .handler(async ({ data }) => {
     // Rate limiting by IP
-    const ip = getRequestIP({ xForwardedFor: false }) ?? '127.0.0.1'
-    const rateCheck = checkRateLimit(ip)
+    const rateLimitKey = `login:${getClientIp()}`
+    const rateCheck = await checkRateLimit(rateLimitKey, LOGIN_RATE_LIMIT)
     if (!rateCheck.allowed) {
       throw new Error(`Too many login attempts. Try again in ${rateCheck.retryAfterSeconds} seconds.`)
     }
@@ -74,7 +49,7 @@ export const login = createServerFn({ method: 'POST' })
     }
 
     // Verify password
-    const valid = await verify(user.passwordHash, data.password)
+    const valid = await verifyPassword(user.passwordHash, data.password)
     if (!valid) {
       throw new Error('Invalid email or password')
     }
@@ -94,7 +69,7 @@ export const login = createServerFn({ method: 'POST' })
     await session.update({ sessionId })
 
     // Reset rate limit on successful login
-    loginAttempts.delete(ip)
+    await clearRateLimit(rateLimitKey)
 
     return { success: true }
   })

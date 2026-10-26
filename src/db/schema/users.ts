@@ -1,14 +1,13 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { createdAt, id } from './columns'
 import { sessions } from './sessions'
 
-export const users = pgTable('users', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const users = sqliteTable('users', {
+  id: id(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
 })
 
 export const usersRelations = relations(users, ({ many }) => ({

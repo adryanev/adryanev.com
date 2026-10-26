@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { env } from 'cloudflare:workers'
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -15,41 +15,43 @@ const EXT_MAP: Record<string, string> = {
 }
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
-const s3 = new S3Client({
-  endpoint: process.env.S3_ENDPOINT,
-  region: process.env.S3_REGION ?? 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY!,
-    secretAccessKey: process.env.S3_SECRET_KEY!,
-  },
-  forcePathStyle: true,
-})
+export const MEDIA_PATH_PREFIX = '/media/'
 
 export async function uploadFile(
-  contentType: string,
-  fileSize: number,
-  body: Uint8Array,
+  file: File,
 ): Promise<{ key: string; publicUrl: string }> {
-  if (!ALLOWED_TYPES.includes(contentType)) {
+  if (!ALLOWED_TYPES.includes(file.type)) {
     throw new Error(`File type not allowed. Allowed: ${ALLOWED_TYPES.join(', ')}`)
   }
-  if (fileSize > MAX_FILE_SIZE) {
+  if (file.size > MAX_FILE_SIZE) {
     throw new Error('File too large. Maximum size: 10MB')
   }
 
-  const ext = EXT_MAP[contentType] ?? 'bin'
+  const ext = EXT_MAP[file.type] ?? 'bin'
   const key = `uploads/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
-  await s3.send(new PutObjectCommand({
-    Bucket: process.env.S3_BUCKET!,
-    Key: key,
-    ContentType: contentType,
-    Body: body,
-  }))
+  // R2 needs a known length; a File (Blob) carries its size, file.stream() does not
+  await env.MEDIA.put(key, file, {
+    httpMetadata: { contentType: file.type },
+  })
 
   return { key, publicUrl: getPublicUrl(key) }
 }
 
 export function getPublicUrl(key: string): string {
-  return `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${key}`
+  return `${MEDIA_PATH_PREFIX}${key}`
+}
+
+// Keys are timestamped and never overwritten, so responses are immutable
+export async function serveMedia(key: string): Promise<Response> {
+  const object = await env.MEDIA.get(key)
+  if (!object) {
+    return new Response('Not found', { status: 404 })
+  }
+
+  const headers = new Headers()
+  object.writeHttpMetadata(headers)
+  headers.set('ETag', object.httpEtag)
+  headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+  return new Response(object.body, { headers })
 }

@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { Calendar, Clock, ArrowLeft, ArrowRight, Eye } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
+import { useCodeHighlighter } from '@/hooks/useCodeHighlighter'
 import { cn } from '@/lib/utils'
 import { getPublishedPostBySlug } from '@/server/functions/public.functions'
 import {
@@ -12,10 +13,7 @@ import {
   jsonLdScript,
   SITE_URL,
 } from '@/lib/seo'
-import {
-  recordPostView,
-  getPostViewCount,
-} from '@/server/functions/views.functions'
+import { recordPostView } from '@/server/functions/views.functions'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 
 import { Button, PageState } from '@/components/ui'
@@ -97,11 +95,10 @@ function BlogPostPage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [viewCount, setViewCount] = useState<number | null>(null)
 
-  // Record view and fetch count
+  // Record the view; the response carries the updated total
   useEffect(() => {
     let cancelled = false
-    recordPostView({ data: { postId: post.id } }).catch(() => {})
-    getPostViewCount({ data: { postId: post.id } })
+    recordPostView({ data: { postId: post.id } })
       .then((result) => {
         if (!cancelled) setViewCount(result.views)
       })
@@ -116,7 +113,7 @@ function BlogPostPage() {
     const el = contentRef.current
     if (!el) return
 
-    const pres = el.querySelectorAll<HTMLPreElement>('pre.shiki')
+    const pres = el.querySelectorAll<HTMLPreElement>('pre[data-code-language]')
     const buttons: HTMLButtonElement[] = []
 
     pres.forEach((pre) => {
@@ -154,8 +151,9 @@ function BlogPostPage() {
     }
   }, [post.html])
 
-  // Client-side mermaid rendering
+  // Client-side mermaid rendering and code highlighting
   useMermaidRenderer(contentRef, post.html, true)
+  useCodeHighlighter(contentRef, post.html)
 
   return (
     <article className="chapter-page chapter-article mx-auto max-w-3xl px-6 py-12 md:py-24">

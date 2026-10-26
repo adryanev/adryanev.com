@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { createGltfLoader } from '@/lib/gltf-loader'
 import type { WorkCategory } from './work-types'
 
 function disposeScene(scene: THREE.Object3D) {
@@ -48,7 +48,7 @@ export async function mountWorkArchive({ canvas, categories, selected, signal, m
   onSelect: (slug: string) => void
   onContextLost: () => void
 }) {
-  const { scene: model } = await new GLTFLoader().loadAsync('/models/work-archive.glb')
+  const { scene: model } = await createGltfLoader().loadAsync('/models/work-archive.glb')
   await document.fonts.ready
   if (signal.aborted) { disposeScene(model); throw new Error('Work archive load cancelled') }
   let renderer: THREE.WebGLRenderer

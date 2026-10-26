@@ -1,4 +1,9 @@
-export { contentStatusEnum, resumeTypeEnum, saasStatusEnum } from './schema/enums'
+export {
+  contentStatuses,
+  resumeTypes,
+  saasStatuses,
+  subscriberStatuses,
+} from './schema/enums'
 export { users, usersRelations } from './schema/users'
 export { sessions, sessionsRelations } from './schema/sessions'
 export {
@@ -28,5 +33,5 @@ export {
   webhookDeliveryLogsRelations,
 } from './schema/webhooks'
 export { postViews, postViewsRelations } from './schema/post-views'
-export { subscriberStatusEnum, subscribers } from './schema/subscribers'
+export { subscribers } from './schema/subscribers'
 export { rateLimits } from './schema/rate-limits'

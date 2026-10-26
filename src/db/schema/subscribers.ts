@@ -1,24 +1,18 @@
-import { index, integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createdAt, id, timestamp } from './columns'
+import { subscriberStatuses } from './enums'
 
-export const subscriberStatusEnum = pgEnum('subscriber_status', [
-  'pending',
-  'confirmed',
-  'unsubscribed',
-])
-
-export const subscribers = pgTable('subscribers', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const subscribers = sqliteTable('subscribers', {
+  id: id(),
   email: text('email').notNull().unique(),
   name: text('name'),
-  status: subscriberStatusEnum('status').notNull().default('pending'),
+  status: text('status', { enum: subscriberStatuses }).notNull().default('pending'),
   confirmToken: text('confirm_token').notNull(),
   unsubscribeToken: text('unsubscribe_token').notNull(),
-  tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }).notNull(),
-  confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
-  unsubscribedAt: timestamp('unsubscribed_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  tokenExpiresAt: timestamp('token_expires_at').notNull(),
+  confirmedAt: timestamp('confirmed_at'),
+  unsubscribedAt: timestamp('unsubscribed_at'),
+  createdAt: createdAt(),
 }, (table) => [
   index('subscribers_status_idx').on(table.status),
   index('subscribers_confirm_token_idx').on(table.confirmToken),

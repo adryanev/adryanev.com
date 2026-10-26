@@ -65,7 +65,7 @@ test('Work server-renders project evidence and real case study links without Web
     ])
       assert.ok(html.includes(evidence), evidence)
     assert.match(html, /aria-pressed="true"/)
-    assert.match(html, /work-archive-poster.png/)
+    assert.match(html, /work-archive-poster\.webp/)
     const empty = await render([])
     assert.match(empty, /No projects yet/)
     assert.doesNotMatch(empty, /work-ledger__row/)

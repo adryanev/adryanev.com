@@ -1,11 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, isNull, ilike, desc, asc } from 'drizzle-orm'
+import { eq, and, isNull, desc, asc, sql, type Column } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts } from '@/db/schema/posts'
 import { portfolioProjects } from '@/db/schema/portfolio'
 
 function escapeLike(str: string): string {
   return str.replace(/[%_\\]/g, '\\$&')
+}
+
+// SQLite LIKE is case-insensitive for ASCII but has no default escape character
+function likeEscaped(column: Column, pattern: string) {
+  return sql`${column} like ${pattern} escape '\\'`
 }
 
 export const searchContent = createServerFn({ method: 'GET' })
@@ -21,7 +26,7 @@ export const searchContent = createServerFn({ method: 'GET' })
         where: and(
           eq(posts.status, 'published'),
           isNull(posts.deletedAt),
-          ilike(posts.title, pattern),
+          likeEscaped(posts.title, pattern),
         ),
         orderBy: desc(posts.publishedAt),
         limit: 5,
@@ -31,7 +36,7 @@ export const searchContent = createServerFn({ method: 'GET' })
         where: and(
           eq(portfolioProjects.status, 'published'),
           isNull(portfolioProjects.deletedAt),
-          ilike(portfolioProjects.title, pattern),
+          likeEscaped(portfolioProjects.title, pattern),
         ),
         orderBy: asc(portfolioProjects.sortOrder),
         limit: 5,

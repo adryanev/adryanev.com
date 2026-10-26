@@ -1,18 +1,17 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
 import { sql } from 'drizzle-orm'
-import { portfolioCategories, portfolioProjects } from './schema/portfolio'
+import { insertEach, openSeedDb } from './seed-db'
+import { portfolioCategories, portfolioProjects, projectImages } from './schema/portfolio'
 
 async function seedPortfolio() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  })
-  const db = drizzle(pool)
+  const { db, close } = await openSeedDb()
 
   console.log('Truncating portfolio tables...')
-  await db.execute(sql`TRUNCATE TABLE project_images RESTART IDENTITY CASCADE`)
-  await db.execute(sql`TRUNCATE TABLE portfolio_projects RESTART IDENTITY CASCADE`)
-  await db.execute(sql`TRUNCATE TABLE portfolio_categories RESTART IDENTITY CASCADE`)
+  await db.batch([
+    db.delete(projectImages),
+    db.delete(portfolioProjects),
+    db.delete(portfolioCategories),
+    db.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('project_images', 'portfolio_projects', 'portfolio_categories')`),
+  ])
 
   console.log('Seeding portfolio categories...')
   const categories = [
@@ -450,11 +449,11 @@ async function seedPortfolio() {
     },
   ]
 
-  await db.insert(portfolioProjects).values(projects)
+  await insertEach(db, portfolioProjects, projects)
 
   console.log(`Portfolio seeded: ${categories.length} categories, ${projects.length} projects`)
 
-  await pool.end()
+  await close()
   console.log('Done!')
 }
 

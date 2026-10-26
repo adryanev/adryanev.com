@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, sql, sum, desc, and, isNull, inArray } from 'drizzle-orm'
+import { eq, sql, sum, desc, and, isNull } from 'drizzle-orm'
 import { db } from '@/db'
 import { postViews } from '@/db/schema/post-views'
 import { posts } from '@/db/schema/posts'
@@ -13,56 +13,26 @@ export const recordPostView = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const today = new Date().toISOString().split('T')[0]
 
-    // Upsert: increment view_count for (postId, viewDate) pair
-    await db
-      .insert(postViews)
-      .values({
-        postId: data.postId,
-        viewDate: today,
-        viewCount: 1,
-      })
-      .onConflictDoUpdate({
-        target: [postViews.postId, postViews.viewDate],
-        set: { viewCount: sql`${postViews.viewCount} + 1` },
-      })
+    // One D1 round trip: increment today's (postId, viewDate) row, then read the total
+    const [, [result]] = await db.batch([
+      db
+        .insert(postViews)
+        .values({
+          postId: data.postId,
+          viewDate: today,
+          viewCount: 1,
+        })
+        .onConflictDoUpdate({
+          target: [postViews.postId, postViews.viewDate],
+          set: { viewCount: sql`${postViews.viewCount} + 1` },
+        }),
+      db
+        .select({ total: sum(postViews.viewCount) })
+        .from(postViews)
+        .where(eq(postViews.postId, data.postId)),
+    ])
 
-    return { ok: true }
-  })
-
-// ── Public: Get view count for a single post ───────────
-
-export const getPostViewCount = createServerFn({ method: 'GET' })
-  .inputValidator((data: { postId: number }) => data)
-  .handler(async ({ data }) => {
-    const result = await db
-      .select({ total: sum(postViews.viewCount) })
-      .from(postViews)
-      .where(eq(postViews.postId, data.postId))
-
-    return { views: Number(result[0]?.total ?? 0) }
-  })
-
-// ── Public: Get view counts for multiple posts ─────────
-
-export const getPostViewCounts = createServerFn({ method: 'GET' })
-  .inputValidator((data: { postIds: number[] }) => data)
-  .handler(async ({ data }) => {
-    if (data.postIds.length === 0) return { views: {} }
-
-    const rows = await db
-      .select({
-        postId: postViews.postId,
-        total: sum(postViews.viewCount),
-      })
-      .from(postViews)
-      .where(inArray(postViews.postId, data.postIds))
-      .groupBy(postViews.postId)
-
-    const views: Record<number, number> = {}
-    for (const row of rows) {
-      views[row.postId] = Number(row.total ?? 0)
-    }
-    return { views }
+    return { views: Number(result?.total ?? 0) }
   })
 
 // ── Admin: Get analytics for dashboard ─────────────────

@@ -1,11 +1,16 @@
 import { createHmac } from 'crypto'
-import { and, eq, arrayContains } from 'drizzle-orm'
+import { waitUntil } from 'cloudflare:workers'
+import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { webhooks, webhookDeliveryLogs } from '@/db/schema/webhooks'
 import { MAX_RETRIES, type WebhookEvent } from '@/lib/webhook-events'
 
 export { type WebhookEvent, WEBHOOK_EVENTS, MAX_RETRIES } from '@/lib/webhook-events'
 const MAX_CONCURRENT_DELIVERIES = 5
+const ATTEMPT_TIMEOUT_MS = 10_000
+// waitUntil work is cancelled 30 s after the response; finish (and log) before that
+const DELIVERY_BUDGET_MS = 25_000
+const MIN_ATTEMPT_MS = 1_000
 
 type WebhookPayload = {
   event: WebhookEvent
@@ -57,12 +62,15 @@ async function deliverWebhook(
   url: string,
   secret: string,
   payload: WebhookPayload,
-  maxRetries = MAX_RETRIES,
+  deadline: number,
 ) {
   const body = JSON.stringify(payload)
   const signature = signPayload(body, secret)
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const remainingMs = deadline - Date.now()
+    if (remainingMs < MIN_ATTEMPT_MS) return
+
     let statusCode: number | null = null
     let responseText: string | null = null
     let success = false
@@ -76,7 +84,7 @@ async function deliverWebhook(
           'X-Webhook-Event': payload.event,
         },
         body,
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, remainingMs)),
       })
 
       statusCode = res.status
@@ -103,19 +111,24 @@ async function deliverWebhook(
 
     if (success) return
 
-    // Exponential backoff: 1s, 4s, 9s
-    if (attempt < maxRetries) {
-      await new Promise((r) => setTimeout(r, attempt * attempt * 1000))
-    }
+    // Exponential backoff: 1s, 4s, 9s, unless it would run past the deadline
+    const backoffMs = attempt * attempt * 1000
+    const hasTimeForRetry = deadline - Date.now() - backoffMs >= MIN_ATTEMPT_MS
+    if (attempt === MAX_RETRIES || !hasTimeForRetry) return
+    await new Promise((r) => setTimeout(r, backoffMs))
   }
 }
 
 export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>) {
-  // Fire-and-forget: intentionally not returning or awaiting the promise
-  void (async () => {
+  // Fire-and-forget: waitUntil keeps the Worker alive after the response is sent
+  waitUntil((async () => {
+    const deadline = Date.now() + DELIVERY_BUDGET_MS
     try {
       const matching = await db.query.webhooks.findMany({
-        where: and(eq(webhooks.active, true), arrayContains(webhooks.events, [event])),
+        where: and(
+          eq(webhooks.active, true),
+          sql`exists (select 1 from json_each(${webhooks.events}) where value = ${event})`,
+        ),
       })
 
       if (matching.length === 0) return
@@ -133,11 +146,11 @@ export function fireWebhooks(event: WebhookEvent, data: Record<string, unknown>)
       }
       for (const batch of batches) {
         await Promise.allSettled(
-          batch.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload)),
+          batch.map((wh) => deliverWebhook(wh.id, wh.url, wh.secret, payload, deadline)),
         )
       }
     } catch (err) {
       console.error('[webhooks] delivery error:', err)
     }
-  })()
+  })())
 }

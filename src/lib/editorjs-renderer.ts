@@ -1,4 +1,4 @@
-import { createHighlighter, type Highlighter } from 'shiki'
+import { isCodeLanguage } from '@/lib/code-languages'
 
 export type OutputData = {
   time?: number
@@ -17,24 +17,6 @@ type ListItem = {
   items: ListItem[]
 }
 
-const SHIKI_THEMES = { dark: 'github-dark', light: 'github-light' } as const
-const SHIKI_LANGS = [
-  'typescript', 'javascript', 'tsx', 'jsx', 'json', 'bash', 'css', 'html',
-  'yaml', 'sql', 'dockerfile', 'go', 'rust', 'python', 'ruby', 'dart',
-  'kotlin', 'swift', 'markdown',
-] as const
-
-let highlighterPromise: Promise<Highlighter> | null = null
-
-function getHighlighter(): Promise<Highlighter> {
-  if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: [SHIKI_THEMES.dark, SHIKI_THEMES.light],
-      langs: [...SHIKI_LANGS],
-    })
-  }
-  return highlighterPromise
-}
 
 const ALLOWED_TAGS = new Set([
   'b', 'i', 'em', 'strong', 'a', 'code', 'mark', 'br', 'u', 's',
@@ -66,7 +48,7 @@ function renderListItems(items: ListItem[], style: string): string {
   }).join('')
 }
 
-async function renderBlock(block: Block, highlighter: Highlighter): Promise<string> {
+function renderBlock(block: Block): string {
   const { type, data } = block
 
   switch (type) {
@@ -94,15 +76,11 @@ async function renderBlock(block: Block, highlighter: Highlighter): Promise<stri
     case 'code': {
       const code = data.code as string
       const lang = (data.language as string) || 'text'
-      const supported = (SHIKI_LANGS as readonly string[]).includes(lang)
-      if (supported) {
-        return highlighter.codeToHtml(code, {
-          themes: SHIKI_THEMES,
-          lang,
-          defaultColor: false,
-        })
-      }
-      return `<pre><code>${escapeHtml(code)}</code></pre>`
+      // useCodeHighlighter colours marked blocks in the browser
+      const languageAttribute = isCodeLanguage(lang)
+        ? ` data-code-language="${lang}"`
+        : ''
+      return `<pre${languageAttribute}><code>${escapeHtml(code)}</code></pre>`
     }
 
     case 'delimiter':
@@ -160,11 +138,7 @@ async function renderBlock(block: Block, highlighter: Highlighter): Promise<stri
 }
 
 export async function renderEditorJs(data: OutputData): Promise<string> {
-  const highlighter = await getHighlighter()
-  const htmlParts = await Promise.all(
-    data.blocks.map((block) => renderBlock(block, highlighter)),
-  )
-  return htmlParts.join('\n')
+  return data.blocks.map(renderBlock).join('\n')
 }
 
 export async function renderProjectDescription(description: string): Promise<string> {

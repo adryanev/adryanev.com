@@ -1,35 +1,32 @@
-import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { contentStatusEnum } from './enums'
+import { createdAt, id, timestamp, updatedAt } from './columns'
+import { contentStatuses } from './enums'
 import { postViews } from './post-views'
 
-export const posts = pgTable('posts', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const posts = sqliteTable('posts', {
+  id: id(),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   content: text('content').notNull(),
   excerpt: text('excerpt'),
   coverImage: text('cover_image'),
-  status: contentStatusEnum('status').notNull().default('draft'),
-  publishedAt: timestamp('published_at', { withTimezone: true }),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  status: text('status', { enum: contentStatuses }).notNull().default('draft'),
+  publishedAt: timestamp('published_at'),
+  deletedAt: timestamp('deleted_at'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 }, (table) => [
   index('posts_status_published_at_idx').on(table.status, table.publishedAt),
 ])
 
-export const tags = pgTable('tags', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+export const tags = sqliteTable('tags', {
+  id: id(),
   name: text('name').notNull().unique(),
   slug: text('slug').notNull().unique(),
 })
 
-export const postsToTags = pgTable(
+export const postsToTags = sqliteTable(
   'posts_to_tags',
   {
     postId: integer('post_id')

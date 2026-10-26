@@ -72,18 +72,23 @@ pnpm db:migrate:remote
 
 # Seed production with the content tables of a freshly seeded local database
 # (skips local sessions, sample contacts and migration bookkeeping)
+pnpm db:seed && pnpm db:seed-resume && pnpm db:seed-portfolio
 ADMIN_PASSWORD='<long random password>' pnpm db:seed-user
-pnpm exec wrangler d1 export DB --local --no-schema --output seed.sql \
-  --table users --table site_settings --table portfolio_categories \
-  --table portfolio_projects --table tags --table posts --table posts_to_tags \
-  --table resume_entries --table saas_listings
+# d1 export writes tables alphabetically and remote import enforces foreign
+# keys per statement, so export parents before children
+for table in users site_settings portfolio_categories portfolio_projects \
+  tags posts posts_to_tags resume_entries saas_listings; do
+  pnpm exec wrangler d1 export DB --local --no-schema --table "$table" --output "seed-$table.sql"
+  grep '^INSERT' "seed-$table.sql" >> seed.sql && rm "seed-$table.sql"
+done
 pnpm exec wrangler d1 execute DB --remote --file seed.sql && rm seed.sql
 
 pnpm deploy
 ```
 
 After that, pushes to `main` deploy through GitHub Actions. The workflow needs the
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
+`CLOUDFLARE_API_TOKEN` repository secret; the account comes from `account_id` in
+`wrangler.jsonc`.
 
 ## License
 

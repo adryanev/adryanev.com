@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "adryanev-com",
+  "account_id": "b4e3d0f0e6d6ed22ddccf04711298baa",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/server.tsx",
@@ -12,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "adryanev-com",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "42239149-3c37-4a2f-b509-e9f5335dc399",
       "migrations_dir": "drizzle"
     }
   ],

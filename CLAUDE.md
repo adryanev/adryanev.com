@@ -23,7 +23,9 @@ pnpm cf-typegen         # Regenerate worker-configuration.d.ts after editing wra
 pnpm db:generate        # Generate Drizzle migrations (SQL in drizzle/)
 pnpm db:migrate         # Apply migrations to local D1
 pnpm db:migrate:remote  # Apply migrations to production D1
-pnpm db:seed            # Seed categories, posts, resume, products, contacts
+pnpm db:seed            # Seed site settings
+pnpm db:seed-resume     # Replace resume entries
+pnpm db:seed-portfolio  # Replace portfolio categories and projects
 pnpm db:seed-user       # Upsert admin user from ADMIN_EMAIL / ADMIN_PASSWORD
 ```
 
@@ -54,7 +56,9 @@ pnpm db:seed-user       # Upsert admin user from ADMIN_EMAIL / ADMIN_PASSWORD
 cp .env.example .env   # Local secrets (SESSION_SECRET, admin seed credentials)
 pnpm install
 pnpm db:migrate        # Create local D1 tables (.wrangler/state)
-pnpm db:seed           # Seed data
+pnpm db:seed           # Seed site settings
+pnpm db:seed-resume    # Seed resume
+pnpm db:seed-portfolio # Seed portfolio
 pnpm db:seed-user      # Create admin user
 pnpm dev               # Start dev server
 ```

@@ -40,7 +40,7 @@ cp .env.example .env
 
 # Create local tables and seed
 pnpm db:migrate
-pnpm db:seed
+pnpm db:seed && pnpm db:seed-resume && pnpm db:seed-portfolio
 pnpm db:seed-user
 
 # Start dev server
@@ -57,7 +57,9 @@ pnpm typecheck          # TypeScript type check
 pnpm db:generate        # Generate Drizzle migrations
 pnpm db:migrate         # Apply migrations to local D1
 pnpm db:migrate:remote  # Apply migrations to production D1
-pnpm db:seed            # Seed content
+pnpm db:seed            # Seed site settings
+pnpm db:seed-resume     # Replace resume entries
+pnpm db:seed-portfolio  # Replace portfolio categories and projects
 pnpm db:seed-user       # Upsert admin user
 ```
 
@@ -71,7 +73,7 @@ pnpm exec wrangler secret put SESSION_SECRET       # long random string
 pnpm db:migrate:remote
 
 # Seed production with the content tables of a freshly seeded local database
-# (skips local sessions, sample contacts and migration bookkeeping)
+# (skips local sessions, contacts and migration bookkeeping)
 pnpm db:seed && pnpm db:seed-resume && pnpm db:seed-portfolio
 ADMIN_PASSWORD='<long random password>' pnpm db:seed-user
 # d1 export writes tables alphabetically and remote import enforces foreign

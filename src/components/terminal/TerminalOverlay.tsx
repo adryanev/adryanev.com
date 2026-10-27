@@ -24,10 +24,27 @@ GITHUB: github.com/adryanev
 EMAIL: me@adryanev.com
 `
 
+// Slugs of the portfolio categories seeded in src/db/seed-portfolio.ts
+const PORTFOLIO_CATEGORIES = [
+  'work',
+  'lexicon',
+  'topapp-id',
+  'apple-developer-academy',
+  'freelance',
+  'college',
+  'open-source',
+] as const
+
 const FILE_SYSTEM: Record<
   string,
   { type: 'dir' | 'file'; children?: string[]; content?: string }
 > = {
+  ...Object.fromEntries(
+    PORTFOLIO_CATEGORIES.map((slug) => [
+      `/portfolio/${slug}/`,
+      { type: 'dir', children: ['(projects loaded from database)'] },
+    ]),
+  ),
   '/': {
     type: 'dir',
     children: [
@@ -51,13 +68,7 @@ const FILE_SYSTEM: Record<
   '/blog/': { type: 'dir', children: ['(posts loaded from database)'] },
   '/portfolio/': {
     type: 'dir',
-    children: [
-      'college/',
-      'freelance/',
-      'work/',
-      'apple-developer-academy/',
-      'lexicon/',
-    ],
+    children: PORTFOLIO_CATEGORIES.map((slug) => `${slug}/`),
   },
   '/saas/': { type: 'dir', children: ['(SaaS products loaded from database)'] },
   '/contact.md': {
@@ -71,9 +82,12 @@ const PATH_MAP: Record<string, string> = {
   '/resume/': '/resume',
   '/blog/': '/blog',
   '/portfolio/': '/portfolio',
-  '/portfolio/college/': '/portfolio/college',
-  '/portfolio/freelance/': '/portfolio/freelance',
-  '/portfolio/work/': '/portfolio/work',
+  ...Object.fromEntries(
+    PORTFOLIO_CATEGORIES.map((slug) => [
+      `/portfolio/${slug}/`,
+      `/portfolio/${slug}`,
+    ]),
+  ),
   '/saas/': '/saas',
   '/contact.md': '/contact',
 }

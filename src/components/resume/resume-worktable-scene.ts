@@ -118,7 +118,7 @@ export async function mountResumeWorktableScene({ canvas, roles, selected, signa
   for (const role of roles) {
     const [x, depth, height] = role.position
     const plate = drawPlate(1.05, 0.46, (ctx) => {
-      ctx.fillStyle = role.index < 2 ? '#d8f3f1' : '#fff8e7'
+      ctx.fillStyle = role.job.endDate === null ? '#d8f3f1' : '#fff8e7'
       ctx.beginPath()
       ctx.roundRect(0.01, 0.01, 1.03, 0.44, 0.05)
       ctx.fill()

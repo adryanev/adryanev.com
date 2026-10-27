@@ -36,8 +36,8 @@ export const WORKTABLE_SLOTS = [
   { index: 2, short: 'Majoo', match: 'majoo', position: [0.1, -0.85, 0.29] },
   {
     index: 3,
-    short: 'Academy',
-    match: 'apple developer academy',
+    short: 'Lexicon',
+    match: 'lexicon',
     position: [1.17, 0.9, 0.29],
   },
   {
@@ -47,12 +47,6 @@ export const WORKTABLE_SLOTS = [
     position: [-0.96, 0.9, 0.29],
   },
   { index: 5, short: 'TopApp', match: 'topapp', position: [-3.05, 0.9, 0.29] },
-  {
-    index: 6,
-    short: 'Flashsoft',
-    match: 'flashsoft',
-    position: [-2.02, -0.85, 0.29],
-  },
 ] as const
 
 export type WorktableRole = {

@@ -22,7 +22,7 @@ export function Footer() {
       <div ref={ref} className="site-footer__inner">
         <div>
           <strong>Adryan Eka Vandra</strong>
-          <span>Software Engineer · Jakarta · {new Date().getFullYear()}</span>
+          <span>Software Engineer · Pekanbaru · {new Date().getFullYear()}</span>
         </div>
 
         <nav aria-label="Footer navigation">

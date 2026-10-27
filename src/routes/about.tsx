@@ -21,25 +21,25 @@ export const Route = createFileRoute('/about')({
 
 const selectedWork = [
   {
-    workplace: 'PT Telkom Indonesia',
-    role: 'Full Stack Developer',
-    title: 'Enterprise Document Management System',
-    category: 'work',
-    slug: 'enterprise-dms',
-  },
-  {
     workplace: 'Lexicon',
-    role: 'Backend Engineer',
-    title: 'Lexicon Platform API',
+    role: 'Technical Co-founder',
+    title: 'Lexicon Beneficial Ownership',
     category: 'lexicon',
-    slug: 'lexicon-platform-api',
+    slug: 'lexicon-beneficial-ownership',
   },
   {
-    workplace: 'ITS',
-    role: 'Full Stack Developer',
-    title: 'Smart Campus IoT Dashboard',
-    category: 'college',
-    slug: 'smart-campus-iot',
+    workplace: 'SawitPRO',
+    role: 'Software Engineer, Mobile',
+    title: 'AgenPRO',
+    category: 'work',
+    slug: 'agenpro',
+  },
+  {
+    workplace: 'EngageMedia',
+    role: 'DevOps Lead',
+    title: 'Cinemata',
+    category: 'work',
+    slug: 'cinemata',
   },
 ] as const
 

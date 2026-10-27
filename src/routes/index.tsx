@@ -29,7 +29,7 @@ function HomePage() {
     <div ref={homeRef} className="adventure-home">
       <section className="adventure-hero" aria-labelledby="intro-title">
         <div className="adventure-hero__copy" data-enter="bubble">
-          <p className="adventure-eyebrow">Software engineer · Jakarta</p>
+          <p className="adventure-eyebrow">Software engineer · Pekanbaru</p>
           <h1 id="intro-title">
             Hi, I'm <em>Adryan.</em>
           </h1>

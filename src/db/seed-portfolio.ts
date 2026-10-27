@@ -21,6 +21,7 @@ async function seedPortfolio() {
     { name: 'Apple Developer Academy', slug: 'apple-developer-academy', description: 'Projects from Apple Developer Academy @BINUS', sortOrder: 3 },
     { name: 'Freelance', slug: 'freelance', description: 'Freelance and contract work', sortOrder: 4 },
     { name: 'College', slug: 'college', description: 'University projects at UIN Suska Riau', sortOrder: 5 },
+    { name: 'Open Source', slug: 'open-source', description: 'Open source projects', sortOrder: 6 },
   ]
 
   const insertedCategories = await db
@@ -36,6 +37,53 @@ async function seedPortfolio() {
     // ── Work ──────────────────────────────────────────────
     {
       categoryId: catMap['work'],
+      title: 'AgenPRO',
+      slug: 'agenpro',
+      description:
+        'AgenPRO is the SawitPRO app for palm oil agents who run their fresh fruit bunch business digitally, including buying supplies through the Toko Sawit marketplace. ' +
+        'I build fresh fruit bunch supply workflows for field agents, covering commodity pricing, mill locations, clustered maps, and cached master data. ' +
+        'While I owned the cart-to-order flows, monthly sales value grew 30x and store-visit-to-purchase conversion increased 6x with a flat active user base. ' +
+        'I integrated QR payments, e-wallets, vouchers, and account balance into checkout; these methods now carry most of the marketplace transaction value.',
+      year: 2025,
+      role: 'Software Engineer, Mobile',
+      workplace: 'PT Digital Sawit Pro',
+      technology: ['SwiftUI', 'Swift Concurrency', 'Jetpack Compose', 'Firebase', 'OpenAPI'],
+      externalUrl: 'https://apps.apple.com/id/app/agenpro/id6504548403',
+      status: 'published' as const,
+      sortOrder: 0,
+    },
+    {
+      categoryId: catMap['work'],
+      title: 'TimPRO',
+      slug: 'timpro',
+      description:
+        'TimPRO is the SawitPRO app for delivery-order agent owners and administrators to track daily fresh fruit bunch deliveries to mills and claim loyalty rewards. ' +
+        'I launched the iOS app from scratch and built its loyalty campaigns, streak milestones, reward claiming, and leaderboards.',
+      year: 2026,
+      role: 'Software Engineer, Mobile',
+      workplace: 'PT Digital Sawit Pro',
+      technology: ['SwiftUI', 'Swift Concurrency', 'Fastlane', 'Firebase', 'OpenAPI'],
+      externalUrl: 'https://apps.apple.com/id/app/timpro/id6759028450',
+      status: 'published' as const,
+      sortOrder: 1,
+    },
+    {
+      categoryId: catMap['work'],
+      title: 'PetaniPRO',
+      slug: 'petanipro',
+      description:
+        'PetaniPRO is the SawitPRO assistant for palm oil farmers to record harvest and plantation work, analyse production, yield, and finances, and buy fertiliser and seedlings through Toko Sawit. ' +
+        'I launched the iOS app from scratch on the shared runtime feature-gating platform and crash reporting that keep the SawitPRO apps at 99.9% crash-free sessions.',
+      year: 2026,
+      role: 'Software Engineer, Mobile',
+      workplace: 'PT Digital Sawit Pro',
+      technology: ['SwiftUI', 'Swift Concurrency', 'Fastlane', 'Firebase', 'OpenAPI'],
+      externalUrl: 'https://apps.apple.com/id/app/petanipro/id6786538018',
+      status: 'published' as const,
+      sortOrder: 2,
+    },
+    {
+      categoryId: catMap['work'],
       title: 'majoo',
       slug: 'majoo',
       description:
@@ -43,14 +91,15 @@ async function seedPortfolio() {
         'As a key member of the development team, I played a crucial role in maintaining the stability and performance of the Majoo application. ' +
         'My contributions encompassed addressing critical bugs, leading architectural improvements through code refactoring and implementing Clean Architecture, and driving feature development through design, analysis, and review. ' +
         'Furthermore, I focused on optimizing application performance by conducting thorough benchmarking and root cause analysis, identifying and resolving performance bottlenecks. ' +
-        'I also actively contributed to improving code quality by establishing technical documentation and coding standards, ensuring maintainability and long-term sustainability of the Majoo platform.',
+        'I also actively contributed to improving code quality by establishing technical documentation and coding standards, ensuring maintainability and long-term sustainability of the Majoo platform. ' +
+        'As technical lead for the mobile team, I led a six-person task force that redesigned and replaced the legacy point-of-sale codebase, serving 35,000+ merchants across 600 Indonesian cities.',
       year: 2025,
-      role: 'Mobile Engineer',
+      role: 'Mobile Engineer, Acting Supervisor',
       workplace: 'PT Majoo Teknologi Indonesia',
       technology: ['Android', 'SQLite', 'REST API', 'Flutter'],
-      externalUrl: 'https://play.google.com/store/apps/details?id=com.majoo.android',
+      externalUrl: 'https://apps.apple.com/id/app/aplikasi-kasir-wirausaha-majoo/id1642259472',
       status: 'published' as const,
-      sortOrder: 0,
+      sortOrder: 4,
     },
     {
       categoryId: catMap['work'],
@@ -66,9 +115,9 @@ async function seedPortfolio() {
       role: 'Android Engineer',
       workplace: 'PT Sprint Asia Technology',
       technology: ['Android', 'SQLite', 'REST API', 'Flutter'],
-      externalUrl: 'https://play.google.com/store/apps/details?id=com.gaidz.sprintasia',
+      externalUrl: 'https://play.google.com/store/apps/details?id=com.gaidz.bayarind',
       status: 'published' as const,
-      sortOrder: 1,
+      sortOrder: 5,
     },
     {
       categoryId: catMap['work'],
@@ -82,9 +131,26 @@ async function seedPortfolio() {
       role: 'Android Engineer',
       workplace: 'PT Sprint Asia Technology',
       technology: ['Android', 'SQLite', 'REST API', 'Flutter'],
-      externalUrl: 'https://play.google.com/store/apps/details?id=net.sprintasia.bayarind.wallet',
       status: 'published' as const,
-      sortOrder: 2,
+      sortOrder: 6,
+    },
+    {
+      categoryId: catMap['work'],
+      title: 'Cinemata',
+      slug: 'cinemata',
+      description:
+        'Cinemata is the video platform of EngageMedia, a non-profit for digital rights across Asia-Pacific, serving millions of requests a month to viewers in the US, Southeast Asia, and Europe from a multi-terabyte video library. ' +
+        'I was promoted from contributor to DevOps lead and direct three developers and the technical working group. ' +
+        'I cut page load times by 87% using a CDN, query caching, and content-hashed static assets, and hardened password-protected video by replacing plaintext verification with tokens, hashing credentials at rest, and closing an exposure path in the admin interface. ' +
+        'I also added metrics and distributed tracing, capped encoder CPU per process to stabilise the transcoding pipeline, and migrated the frontend from Webpack to Vite and React 19.',
+      year: 2025,
+      role: 'Platform Maintainer / DevOps Lead',
+      workplace: 'EngageMedia',
+      technology: ['Django', 'React', 'Vite', 'Celery', 'Redis', 'FFmpeg', 'Nginx', 'OpenTelemetry'],
+      externalUrl: 'https://cinemata.org/blog-cinematacms-experience',
+      githubUrl: 'https://github.com/EngageMedia-video/cinematacms',
+      status: 'published' as const,
+      sortOrder: 3,
     },
 
     // ── Lexicon ──────────────────────────────────────────
@@ -93,29 +159,76 @@ async function seedPortfolio() {
       title: 'Lexicon Beneficial Ownership',
       slug: 'lexicon-beneficial-ownership',
       description:
-        'A web platform aggregating fraudulent entity data from multiple countries, utilizing web crawlers and LLM technology to compile and summarize information from official sources like court judgments, blacklists, and international sanctions across Indonesia, Singapore, Malaysia, and global databases.',
+        'A web platform aggregating fraudulent entity data from multiple countries, utilizing web crawlers and LLM technology to compile and summarize information from official sources like court judgments, blacklists, and international sanctions across Indonesia, Singapore, Malaysia, and global databases. ' +
+        'I built the multi-jurisdiction ingestion platform and the Airflow entity-resolution pipeline behind it, which resolves 8.9M actor events into 239k entities in a 64M-row warehouse. ' +
+        'Its anti-money-laundering screening covers 161k sanctioned entities and 470k name variants, and is used by a national digital identity provider and government agencies.',
       year: 2024,
-      role: 'Backend Engineer / DevOps',
+      role: 'Technical Co-founder',
       workplace: 'Lexicon',
       technology: ['Go', 'PostgreSQL', 'NextJS', 'NATS', 'Jetstream', 'LLM'],
-      externalUrl: 'https://bit.ly/beneficial-owner-lexicon',
-      githubUrl: 'https://github.com/Lexicon-Open-Source',
+      githubUrl: 'https://github.com/Lexicon-Open-Source/lexicon-beneficial-ownership',
       status: 'published' as const,
       sortOrder: 0,
     },
     {
       categoryId: catMap['lexicon'],
-      title: 'Stop-TB Policy Tracker',
+      title: 'Indonesia TB Policy Tracker',
       slug: 'stop-tb-policy-tracker',
       description:
-        'A comprehensive digital platform extracting and mapping Tuberculosis regulations across Indonesian governmental levels, analyzing metadata, hierarchical connections, and inter-regulatory relationships.',
+        'A comprehensive digital platform extracting and mapping Tuberculosis regulations across Indonesian governmental levels, from central to regional government, analyzing metadata, hierarchical connections, and inter-regulatory relationships.',
       year: 2024,
-      role: 'Backend Engineer / DevOps',
+      role: 'Technical Co-founder',
       workplace: 'Lexicon',
       technology: ['Go', 'MariaDB', 'MongoDB', 'Javascript', 'Angular'],
-      externalUrl: 'https://bit.ly/stop-tb-lexicon',
+      externalUrl: 'https://stoptbindonesia.org/en/we-do/tb-policy-advocacy',
       status: 'published' as const,
       sortOrder: 1,
+    },
+    {
+      categoryId: catMap['lexicon'],
+      title: 'Specus',
+      slug: 'specus',
+      description:
+        'Specus is a compliance intelligence platform for anti-corruption and safer procurement, covering four countries and funded by the US State Department. ' +
+        'I built the web app, the sanctions and anti-money-laundering screening module, and the Indonesian procurement mapping.',
+      year: 2025,
+      role: 'Technical Co-founder',
+      workplace: 'Lexicon',
+      technology: ['Go', 'PostgreSQL', 'TypeScript'],
+      externalUrl: 'https://specus.biz',
+      status: 'published' as const,
+      sortOrder: 2,
+    },
+    {
+      categoryId: catMap['lexicon'],
+      title: 'Legal Council',
+      slug: 'legal-council',
+      description:
+        'Legal Council is a multi-agent AI council of judges that deliberates Indonesian criminal cases, searches jurisprudence, and drafts a legal opinion. ' +
+        'A Next.js frontend talks to a Go API that adds Turnstile, rate limiting, and bot detection in front of a Python LLM service, which runs retrieval-augmented search over court decisions stored in PostgreSQL with pgvector.',
+      year: 2026,
+      role: 'Technical Co-founder',
+      workplace: 'Lexicon',
+      technology: ['Go', 'Python', 'Next.js', 'PostgreSQL', 'pgvector', 'Redis', 'LLM/RAG'],
+      externalUrl: 'https://counsel.lexicon.id',
+      githubUrl: 'https://github.com/Lexicon-Open-Source/legal-council',
+      status: 'published' as const,
+      sortOrder: 3,
+    },
+    {
+      categoryId: catMap['lexicon'],
+      title: 'Indonesia Supreme Court AI Extraction',
+      slug: 'indonesia-supreme-court-ai-extraction',
+      description:
+        'A backend service that extracts structured data from Indonesian Supreme Court decision documents with an LLM. ' +
+        'It extracts PDF text with an OCR fallback, processes large documents in chunks, pulls out 50+ structured fields, and writes bilingual summaries in Indonesian and English, with work queued through NATS.',
+      year: 2024,
+      role: 'Technical Co-founder',
+      workplace: 'Lexicon',
+      technology: ['Python', 'FastAPI', 'NATS', 'LLM', 'OCR'],
+      githubUrl: 'https://github.com/Lexicon-Open-Source/indonesia-supreme-court-ai-summarization',
+      status: 'published' as const,
+      sortOrder: 4,
     },
 
     // ── TopApp.id ────────────────────────────────────────
@@ -146,7 +259,6 @@ async function seedPortfolio() {
       role: 'Fullstack Developer',
       workplace: 'TopApp.id',
       technology: ['PHP', 'Yii2', 'MySQL', 'Javascript', 'REST API'],
-      externalUrl: 'https://mutu.com/adryanev/dashboard-mutu',
       githubUrl: 'https://github.com/adryanev/mutu-bimas',
       status: 'published' as const,
       sortOrder: 1,
@@ -194,7 +306,6 @@ async function seedPortfolio() {
       workplace: 'Apple Developer Academy',
       technology: ['CloudKit', 'CoreData', 'Go', 'MariaDB', 'MongoDB', 'Javascript'],
       externalUrl: 'https://apple.co/47viIS9',
-      githubUrl: 'https://github.com/Copy-Cut-Paste/Lexicon',
       status: 'published' as const,
       sortOrder: 0,
     },
@@ -209,7 +320,7 @@ async function seedPortfolio() {
       workplace: 'Apple Developer Academy',
       technology: ['AVFoundation', 'Xcode', 'Speech Framework', 'Combine'],
       externalUrl: 'https://apple.co/4t5untl',
-      githubUrl: 'https://github.com/asc-mc2/Cheffin',
+      githubUrl: 'https://github.com/adryanev/Cheffin',
       status: 'published' as const,
       sortOrder: 1,
     },
@@ -240,7 +351,7 @@ async function seedPortfolio() {
       workplace: 'Apple Developer Academy',
       technology: ['CoreML', 'PhotoKit', 'PencilKit', 'MapKit', 'Combine'],
       externalUrl: 'https://apple.co/49735et',
-      githubUrl: 'https://github.com/Copy-Cut-Paste/Memoria',
+      githubUrl: 'https://github.com/adryanev/Memoria',
       status: 'published' as const,
       sortOrder: 3,
     },
@@ -322,7 +433,6 @@ async function seedPortfolio() {
       role: 'Developer',
       workplace: 'Freelance',
       technology: ['PHP', 'Yii2', 'MySQL', 'Payment Gateway'],
-      githubUrl: 'https://github.com/adryanev/maizavalinkupdate',
       status: 'published' as const,
       sortOrder: 1,
     },
@@ -364,7 +474,7 @@ async function seedPortfolio() {
       role: 'Developer',
       workplace: 'Freelance',
       technology: ['Android', 'SQLite', 'PDF'],
-      githubUrl: 'https://github.com/adryanev/EILearning',
+      githubUrl: 'https://github.com/adryanev/ElLearning',
       status: 'published' as const,
       sortOrder: 4,
     },
@@ -382,7 +492,6 @@ async function seedPortfolio() {
       role: 'Student',
       workplace: 'UIN Suska Riau',
       technology: ['PHP', 'Yii2', 'MySQL', 'REST API'],
-      githubUrl: 'https://github.com/adryanev/kriteria',
       status: 'published' as const,
       sortOrder: 0,
     },
@@ -446,6 +555,96 @@ async function seedPortfolio() {
       githubUrl: 'https://github.com/adryanev/Tinker-Browser',
       status: 'published' as const,
       sortOrder: 4,
+    },
+
+    // ── Open Source ──────────────────────────────────────
+    {
+      categoryId: catMap['open-source'],
+      title: 'Flutter Clean Architecture Template',
+      slug: 'flutter-clean-architecture-template',
+      description:
+        'A Flutter mobile app template built on Clean Architecture with test-driven development, starred by 50+ developers on GitHub.',
+      year: 2022,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['Flutter', 'Dart', 'Clean Architecture', 'TDD'],
+      githubUrl: 'https://github.com/adryanev/flutter-mobile-clean-architecture-template',
+      status: 'published' as const,
+      sortOrder: 0,
+    },
+    {
+      categoryId: catMap['open-source'],
+      title: 'Orkestra',
+      slug: 'orkestra',
+      description:
+        'Orkestra is a CLI for running Claude Code and Codex in isolated git workspaces while keeping enough state to stop, resume, stream, and inspect those agent sessions. ' +
+        'It creates git worktrees per workspace, stores agent session IDs for resume, verifies the live process before stopping it, injects per-profile GitHub tokens, and exposes workspace and LSP tools over MCP.',
+      year: 2026,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['Go', 'Git', 'MCP', 'Claude Code', 'Codex'],
+      githubUrl: 'https://github.com/adryanev/orkestra',
+      externalUrl: 'https://github.com/adryanev/orkestra/releases/latest',
+      status: 'published' as const,
+      sortOrder: 1,
+    },
+    {
+      categoryId: catMap['open-source'],
+      title: 'PostKit',
+      slug: 'postkit',
+      description:
+        'PostKit is a native macOS HTTP client for API development and testing, a lightweight alternative to Postman and Insomnia. ' +
+        'It supports collections with nested folders, environments and variables, common body and authentication types, and Keychain-backed credential storage in a three-column layout.',
+      year: 2026,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['Swift', 'SwiftUI', 'SwiftData', 'macOS'],
+      githubUrl: 'https://github.com/adryanev/PostKit',
+      status: 'published' as const,
+      sortOrder: 2,
+    },
+    {
+      categoryId: catMap['open-source'],
+      title: 'Frontend Benchmark',
+      slug: 'frontend-benchmark',
+      description:
+        'A TypeScript CLI that measures website performance and Cloudflare caching effectiveness in a real browser under throttled network conditions. ' +
+        'It tests every static resource, tracks Cloudflare and Worker cache hits, simulates first-time visits, and exports results to CSV and charts.',
+      year: 2025,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['TypeScript', 'Puppeteer', 'Cloudflare'],
+      githubUrl: 'https://github.com/adryanev/frontend-benchmark',
+      status: 'published' as const,
+      sortOrder: 3,
+    },
+    {
+      categoryId: catMap['open-source'],
+      title: 'Go HTTP Service Template',
+      slug: 'go-http-service-template',
+      description:
+        'A production-ready Go HTTP service template with dependency injection, graceful shutdown, structured logging, PostgreSQL connection pooling, request validation, NATS JetStream messaging, and OpenAPI documentation.',
+      year: 2025,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['Go', 'Chi', 'PostgreSQL', 'NATS', 'OpenAPI'],
+      githubUrl: 'https://github.com/adryanev/go-http-service-template',
+      status: 'published' as const,
+      sortOrder: 4,
+    },
+    {
+      categoryId: catMap['open-source'],
+      title: 'iNewsOS',
+      slug: 'inewsos',
+      description:
+        'A news aggregator iOS app built with SwiftUI on the MVI pattern and Clean Architecture, with home, detail, web view, and blog pages.',
+      year: 2023,
+      role: 'Author',
+      workplace: 'Open Source',
+      technology: ['SwiftUI', 'Combine', 'Alamofire', 'Swinject'],
+      githubUrl: 'https://github.com/adryanev/iNewsOS',
+      status: 'published' as const,
+      sortOrder: 5,
     },
   ]
 

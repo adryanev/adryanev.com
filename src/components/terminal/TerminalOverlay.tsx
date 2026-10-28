@@ -33,6 +33,7 @@ const PORTFOLIO_CATEGORIES = [
   'freelance',
   'college',
   'open-source',
+  'side-projects',
 ] as const
 
 const FILE_SYSTEM: Record<

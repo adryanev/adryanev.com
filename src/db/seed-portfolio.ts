@@ -22,6 +22,7 @@ async function seedPortfolio() {
     { name: 'Freelance', slug: 'freelance', description: 'Freelance and contract work', sortOrder: 4 },
     { name: 'College', slug: 'college', description: 'University projects at UIN Suska Riau', sortOrder: 5 },
     { name: 'Open Source', slug: 'open-source', description: 'Open source projects', sortOrder: 6 },
+    { name: 'Side Projects', slug: 'side-projects', description: 'Hobby projects built for fun', sortOrder: 7 },
   ]
 
   const insertedCategories = await db
@@ -645,6 +646,26 @@ async function seedPortfolio() {
       githubUrl: 'https://github.com/adryanev/iNewsOS',
       status: 'published' as const,
       sortOrder: 5,
+    },
+
+    // ── Side Projects ────────────────────────────────────
+    {
+      categoryId: catMap['side-projects'],
+      title: 'Dunia Zee',
+      slug: 'dunia-zee',
+      description:
+        'A calm browser playroom for toddlers, with no score, timer, or failure state. ' +
+        'Depot Tenang is a 3D toy diorama of Blender-modelled trucks, trains, and airplanes rendered with Three.js, with Rapier physics for loose rocks. ' +
+        'Cilukba Hewan, Ketuk-Ketuk, and Beres-Beres Rumah add peekaboo, keyboard, and sorting play. ' +
+        'Tap, keyboard, mouse, and touch all trigger the same actions, and it installs as an offline PWA.',
+      year: 2026,
+      role: 'Author',
+      workplace: 'Side Project',
+      technology: ['TypeScript', 'Three.js', 'Rapier', 'Blender', 'Vite', 'Playwright', 'Cloudflare Workers'],
+      githubUrl: 'https://github.com/adryanev/zeeapps',
+      externalUrl: 'https://playground.adryanev.com',
+      status: 'published' as const,
+      sortOrder: 0,
     },
   ]
 

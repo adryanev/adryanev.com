@@ -33,7 +33,8 @@ async function seedResume() {
         'Owned cart-to-order flows for six months, during which monthly sales value grew 30x and store-visit-to-purchase conversion increased 6x while the active user base stayed flat. ' +
         "Integrated QR payments, e-wallets, vouchers, and account balance into checkout; these methods now carry most of the marketplace's transaction value. " +
         'Rolled out crash reporting and performance monitoring; the apps maintain 99.9% crash-free sessions. ' +
-        'Defined the workflow the team uses to port Android features to iOS.',
+        'Defined the workflow the team uses to port Android features to iOS. ' +
+        'Migrating the Business modules to observable view models and generated OpenAPI clients with typed results.',
       technology: ['SwiftUI', 'Swift Concurrency', 'Jetpack Compose', 'Fastlane', 'Firebase', 'OpenAPI'],
       startDate: '2025-06-01',
       endDate: null,
@@ -52,7 +53,8 @@ async function seedResume() {
         'Promoted from contributor to DevOps lead; direct three developers and the technical working group. ' +
         'Hardened password-protected video: replaced plaintext verification with tokens, hashed credentials at rest, and closed an exposure path in the admin interface. ' +
         'Added metrics and distributed tracing, and capped encoder CPU per process to stabilise the transcoding pipeline. ' +
-        'Migrated the frontend from Webpack to Vite and React 19, moving legacy stylesheets into Tailwind.',
+        'Migrated the frontend from Webpack to Vite and React 19, moving legacy stylesheets into Tailwind. ' +
+        'Upgraded the stack to PostgreSQL 18, Python 3.14, and Ubuntu 24.04, replaced uWSGI with gunicorn, and serve the frontend from immutable releases.',
       technology: ['Django', 'React', 'Vite', 'Celery', 'Redis', 'FFmpeg', 'Nginx', 'OpenTelemetry'],
       startDate: '2025-05-01',
       endDate: null,
@@ -69,6 +71,8 @@ async function seedResume() {
         'Built a multi-jurisdiction ingestion platform and an Airflow entity-resolution pipeline for a 64M-row warehouse that resolves 8.9M actor events into 239k entities. ' +
         'Built the Go backend for eight product domains, including beneficial ownership, procurement analytics, sanctions screening, and relationship graphs. ' +
         'Shipped a self-hosted LLM gateway, retrieval-augmented search over Indonesian court decisions, multi-agent judicial analysis, and a metered API. ' +
+        'Built a public Model Context Protocol edge with OAuth, free and pro tiers, and curated legal-corpus tools, plus internal servers behind the LLM gateway. ' +
+        'Built an operations agent on Google ADK for Go that triages ETL, crawler, and server signals into GitHub issues and proposes reversible fixes that an operator confirms in Discord. ' +
         'Delivered anti-money-laundering screening over 161k sanctioned entities and 470k name variants, used by a national digital identity provider and government agencies. ' +
         'Operate production infrastructure across multiple hosts with PostgreSQL, Redis, NATS, Grafana, and OpenTelemetry. ' +
         'Built the web app, screening module, and Indonesian procurement mapping for Specus, a four-country anti-corruption platform funded by the US State Department. ' +

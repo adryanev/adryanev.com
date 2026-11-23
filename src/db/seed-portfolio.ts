@@ -1,6 +1,24 @@
+import { existsSync, readdirSync } from 'node:fs'
 import { sql } from 'drizzle-orm'
 import { insertEach, openSeedDb } from './seed-db'
 import { portfolioCategories, portfolioProjects, projectImages } from './schema/portfolio'
+
+// Screenshots live in assets/portfolio/<project slug>/<n>.webp and reach R2
+// under the same key through `pnpm media:upload-portfolio`
+const PORTFOLIO_IMAGE_DIR = new URL('../../assets/portfolio/', import.meta.url)
+const PORTFOLIO_IMAGE_URL_PREFIX = '/media/portfolio/'
+
+function listProjectImageFiles(slug: string): string[] {
+  const directory = new URL(`${slug}/`, PORTFOLIO_IMAGE_DIR)
+  if (!existsSync(directory)) return []
+  return readdirSync(directory).sort((a, b) => parseInt(a) - parseInt(b))
+}
+
+function listImageDirectorySlugs(): string[] {
+  return readdirSync(PORTFOLIO_IMAGE_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+}
 
 async function seedPortfolio() {
   const { db, close } = await openSeedDb()
@@ -74,7 +92,7 @@ async function seedPortfolio() {
       slug: 'petanipro',
       description:
         'PetaniPRO is the SawitPRO assistant for palm oil farmers to record harvest and plantation work, analyse production, yield, and finances, and buy fertiliser and seedlings through Toko Sawit. ' +
-        'I launched the iOS app from scratch on the shared runtime feature-gating platform and crash reporting that keep the SawitPRO apps at 99.9% crash-free sessions.',
+        'I launched the iOS app from scratch on the shared runtime feature-gating platform and crash reporting that keep the SawitPRO apps at 99.9% crash-free sessions, and built its Cek Hama Penyakit pest and disease check.',
       year: 2026,
       role: 'Software Engineer, Mobile',
       workplace: 'PT Digital Sawit Pro',
@@ -143,7 +161,8 @@ async function seedPortfolio() {
         'Cinemata is the video platform of EngageMedia, a non-profit for digital rights across Asia-Pacific, serving millions of requests a month to viewers in the US, Southeast Asia, and Europe from a multi-terabyte video library. ' +
         'I was promoted from contributor to DevOps lead and direct three developers and the technical working group. ' +
         'I cut page load times by 87% using a CDN, query caching, and content-hashed static assets, and hardened password-protected video by replacing plaintext verification with tokens, hashing credentials at rest, and closing an exposure path in the admin interface. ' +
-        'I also added metrics and distributed tracing, capped encoder CPU per process to stabilise the transcoding pipeline, and migrated the frontend from Webpack to Vite and React 19.',
+        'I also added metrics and distributed tracing, capped encoder CPU per process to stabilise the transcoding pipeline, and migrated the frontend from Webpack to Vite and React 19. ' +
+        'I also upgraded the stack to PostgreSQL 18, Python 3.14, and Ubuntu 24.04, replaced uWSGI with gunicorn, and serve the frontend from immutable releases.',
       year: 2025,
       role: 'Platform Maintainer / DevOps Lead',
       workplace: 'EngageMedia',
@@ -230,6 +249,35 @@ async function seedPortfolio() {
       githubUrl: 'https://github.com/Lexicon-Open-Source/indonesia-supreme-court-ai-summarization',
       status: 'published' as const,
       sortOrder: 4,
+    },
+    {
+      categoryId: catMap['lexicon'],
+      title: 'Lexicon Ops Agent',
+      slug: 'lexicon-ops-agent',
+      description:
+        'The Lexicon operations agent triages ETL, crawler, and server signals into GitHub issues and proposes safe, reversible actions that an operator confirms in Discord. ' +
+        'It runs Gemini through the Bifrost gateway on Google ADK for Go, files application errors and Alertmanager alerts in the owning repository, and proposes closing issues once a resolution scan shows the fault is gone.',
+      year: 2026,
+      role: 'Technical Co-founder',
+      workplace: 'Lexicon',
+      technology: ['Go', 'Google ADK', 'Gemini', 'PostgreSQL', 'Redis', 'Discord'],
+      status: 'published' as const,
+      sortOrder: 5,
+    },
+    {
+      categoryId: catMap['lexicon'],
+      title: 'Lexicon MCP',
+      slug: 'lexicon-mcp',
+      description:
+        'Model Context Protocol servers for Lexicon, split into a public edge and an internal control plane. ' +
+        'The public edge adds OAuth discovery, free and pro tiers, and curated read-only legal-corpus and search tools. ' +
+        'Privileged internal tools are reachable only through an internal key on the Bifrost gateway and never share the public runtime.',
+      year: 2026,
+      role: 'Technical Co-founder',
+      workplace: 'Lexicon',
+      technology: ['Go', 'MCP', 'OAuth', 'PostgreSQL', 'Bifrost'],
+      status: 'published' as const,
+      sortOrder: 6,
     },
 
     // ── TopApp.id ────────────────────────────────────────
@@ -373,35 +421,6 @@ async function seedPortfolio() {
       githubUrl: 'https://github.com/adryanev/Fooney',
       status: 'published' as const,
       sortOrder: 4,
-    },
-    {
-      categoryId: catMap['apple-developer-academy'],
-      title: 'Swee',
-      slug: 'swee',
-      description:
-        'BLE-Based Payment and Ticketing System for MRT Jakarta. Using CoreBluetooth to reduce the ticketing queue by detecting the nearest user and payment status with Beacon.',
-      year: 2023,
-      role: 'Developer',
-      workplace: 'Apple Developer Academy',
-      technology: ['CoreLocation', 'CoreBluetooth', 'AVFoundation', 'AppIntent'],
-      externalUrl: 'https://bit.ly/SweePrototype',
-      status: 'published' as const,
-      sortOrder: 5,
-    },
-    {
-      categoryId: catMap['apple-developer-academy'],
-      title: 'iBLE',
-      slug: 'ible',
-      description:
-        'A gamification learning app that provides practice learning courses about daily recognition activities for children with autism. ' +
-        'Activities include constructing sentences, reading, and understanding the content with several answering techniques such as drag & drop, mix-matching, and clickable picture.',
-      year: 2023,
-      role: 'Developer',
-      workplace: 'Apple Developer Academy',
-      technology: ['Product Development', 'User Testing', 'Prototyping'],
-      externalUrl: 'https://bit.ly/iBLE-Prototype',
-      status: 'published' as const,
-      sortOrder: 6,
     },
 
     // ── Freelance ────────────────────────────────────────
@@ -671,7 +690,29 @@ async function seedPortfolio() {
 
   await insertEach(db, portfolioProjects, projects)
 
-  console.log(`Portfolio seeded: ${categories.length} categories, ${projects.length} projects`)
+  const storedProjects = await db
+    .select({ id: portfolioProjects.id, slug: portfolioProjects.slug, title: portfolioProjects.title })
+    .from(portfolioProjects)
+
+  const storedSlugs = new Set(storedProjects.map((project) => project.slug))
+  const orphanImageSlugs = listImageDirectorySlugs().filter((slug) => !storedSlugs.has(slug))
+  if (orphanImageSlugs.length > 0) {
+    throw new Error(`assets/portfolio has images for unknown projects: ${orphanImageSlugs.join(', ')}`)
+  }
+
+  const images = storedProjects.flatMap((project) =>
+    listProjectImageFiles(project.slug).map((file, index) => ({
+      projectId: project.id,
+      url: `${PORTFOLIO_IMAGE_URL_PREFIX}${project.slug}/${file}`,
+      alt: `${project.title} screenshot ${index + 1}`,
+      sortOrder: index,
+    })),
+  )
+  await insertEach(db, projectImages, images)
+
+  console.log(
+    `Portfolio seeded: ${categories.length} categories, ${projects.length} projects, ${images.length} images`,
+  )
 
   await close()
   console.log('Done!')

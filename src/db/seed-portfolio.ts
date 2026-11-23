@@ -92,7 +92,7 @@ async function seedPortfolio() {
       slug: 'petanipro',
       description:
         'PetaniPRO is the SawitPRO assistant for palm oil farmers to record harvest and plantation work, analyse production, yield, and finances, and buy fertiliser and seedlings through Toko Sawit. ' +
-        'I launched the iOS app from scratch on the shared runtime feature-gating platform and crash reporting that keep the SawitPRO apps at 99.9% crash-free sessions, and built its Cek Hama Penyakit pest and disease check.',
+        'I launched the iOS app from scratch on the shared runtime feature-gating platform and crash reporting that keep the SawitPRO apps at 99.9% crash-free sessions.',
       year: 2026,
       role: 'Software Engineer, Mobile',
       workplace: 'PT Digital Sawit Pro',
@@ -127,7 +127,7 @@ async function seedPortfolio() {
       description:
         'GAIDZ is a travel companion mobile application that assists travelers in planning, identifying, and organizing tourist attractions across various locations. ' +
         'Users can select points of interest, including places, streets, restaurants, cafes, local shops, and more, allowing GAIDZ to generate personalized itineraries. ' +
-        'As a developer, I contributed significantly to the project by developing the Itinerary feature, rewriting the application using Flutter for multi-platform support, ' +
+        'As a developer, I contributed significantly to the project by developing the staycation feature, rewriting the application using Flutter for multi-platform support, ' +
         'and redesigning the backend architecture with a microservices approach. ' +
         'My technical expertise includes Android development, Retrofit, MVP and MVVM patterns, Clean Architecture, SOLID principles, SQLite, Shared Preferences, and Flutter.',
       year: 2022,
@@ -161,8 +161,8 @@ async function seedPortfolio() {
         'Cinemata is the video platform of EngageMedia, a non-profit for digital rights across Asia-Pacific, serving millions of requests a month to viewers in the US, Southeast Asia, and Europe from a multi-terabyte video library. ' +
         'I was promoted from contributor to DevOps lead and direct three developers and the technical working group. ' +
         'I cut page load times by 87% using a CDN, query caching, and content-hashed static assets, and hardened password-protected video by replacing plaintext verification with tokens, hashing credentials at rest, and closing an exposure path in the admin interface. ' +
-        'I also added metrics and distributed tracing, capped encoder CPU per process to stabilise the transcoding pipeline, and migrated the frontend from Webpack to Vite and React 19. ' +
-        'I also upgraded the stack to PostgreSQL 18, Python 3.14, and Ubuntu 24.04, replaced uWSGI with gunicorn, and serve the frontend from immutable releases.',
+        'I also added metrics and distributed tracing and capped encoder CPU per process to stabilise the transcoding pipeline. ' +
+        'Migrating the frontend from Webpack to Vite and React 19 removed 615 KB of duplicated player code from every page and cut build time from 14 s to 2.6 s.',
       year: 2025,
       role: 'Platform Maintainer / DevOps Lead',
       workplace: 'EngageMedia',
@@ -181,6 +181,7 @@ async function seedPortfolio() {
       description:
         'A web platform aggregating fraudulent entity data from multiple countries, utilizing web crawlers and LLM technology to compile and summarize information from official sources like court judgments, blacklists, and international sanctions across Indonesia, Singapore, Malaysia, and global databases. ' +
         'I built the multi-jurisdiction ingestion platform and the Airflow entity-resolution pipeline behind it, which resolves 8.9M actor events into 239k entities in a 64M-row warehouse. ' +
+        'Its court-judgment extraction reaches 93.5% precision on core fields in a pre-registered held-out set. ' +
         'Its anti-money-laundering screening covers 161k sanctioned entities and 470k name variants, and is used by a national digital identity provider and government agencies.',
       year: 2024,
       role: 'Technical Co-founder',
@@ -270,7 +271,7 @@ async function seedPortfolio() {
       slug: 'lexicon-mcp',
       description:
         'Model Context Protocol servers for Lexicon, split into a public edge and an internal control plane. ' +
-        'The public edge adds OAuth discovery, free and pro tiers, and curated read-only legal-corpus and search tools. ' +
+        'The public edge adds OAuth discovery, tiered access, and curated read-only legal-corpus and search tools. ' +
         'Privileged internal tools are reachable only through an internal key on the Bifrost gateway and never share the public runtime.',
       year: 2026,
       role: 'Technical Co-founder',

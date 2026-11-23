@@ -1,17 +1,30 @@
 import { eq, and, isNull, desc, asc } from 'drizzle-orm'
 import { db } from '@/db'
-import { posts } from '@/db/schema/posts'
+import { posts, postsToTags, tags } from '@/db/schema/posts'
 import { portfolioCategories, portfolioProjects } from '@/db/schema/portfolio'
 
 const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
 
 export async function generateSitemap(): Promise<string> {
-  const [publishedPosts, categories, projects] = await Promise.all([
+  const [publishedPosts, publishedTags, categories, projects] = await Promise.all([
     db.query.posts.findMany({
       where: and(eq(posts.status, 'published'), isNull(posts.deletedAt)),
       orderBy: desc(posts.publishedAt),
       columns: { slug: true, updatedAt: true },
     }),
+    db
+      .selectDistinct({ slug: tags.slug })
+      .from(tags)
+      .innerJoin(postsToTags, eq(postsToTags.tagId, tags.id))
+      .innerJoin(
+        posts,
+        and(
+          eq(posts.id, postsToTags.postId),
+          eq(posts.status, 'published'),
+          isNull(posts.deletedAt),
+        ),
+      )
+      .orderBy(asc(tags.slug)),
     db.query.portfolioCategories.findMany({
       orderBy: asc(portfolioCategories.sortOrder),
       columns: { slug: true },
@@ -42,6 +55,14 @@ export async function generateSitemap(): Promise<string> {
       lastmod: post.updatedAt.toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: '0.8',
+    })
+  }
+
+  for (const tag of publishedTags) {
+    urls.push({
+      loc: `/blog/tag/${encodeURIComponent(tag.slug)}`,
+      changefreq: 'weekly',
+      priority: '0.5',
     })
   }
 

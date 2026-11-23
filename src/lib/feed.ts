@@ -4,7 +4,17 @@ import { db } from '@/db'
 import { posts } from '@/db/schema/posts'
 import { renderEditorJs, extractText, type OutputData } from '@/lib/editorjs-renderer'
 
+import { absoluteUrl, imageMimeType } from '@/lib/seo'
+
 const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
+
+// RSS enclosures need a MIME type; skip covers whose type cannot be told from the URL
+function coverEnclosure(coverImage: string | null) {
+  if (!coverImage) return undefined
+  const url = absoluteUrl(coverImage)
+  const type = imageMimeType(url)
+  return type ? { url, type } : undefined
+}
 
 export async function generateRssFeed(): Promise<string> {
   const feed = new Feed({
@@ -25,6 +35,7 @@ export async function generateRssFeed(): Promise<string> {
     where: and(eq(posts.status, 'published'), isNull(posts.deletedAt)),
     orderBy: desc(posts.publishedAt),
     limit: 20,
+    with: { postsToTags: { with: { tag: true } } },
   })
 
   for (const post of publishedPosts) {
@@ -42,6 +53,8 @@ export async function generateRssFeed(): Promise<string> {
       description: post.excerpt ?? text.slice(0, 300),
       content: html,
       date: post.publishedAt ?? post.createdAt,
+      category: post.postsToTags.map((pt) => ({ name: pt.tag.name })),
+      image: coverEnclosure(post.coverImage),
     })
   }
 

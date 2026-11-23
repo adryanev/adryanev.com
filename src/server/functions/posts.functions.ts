@@ -7,14 +7,18 @@ import { slugify } from '@/lib/slugify'
 import { fireWebhooks } from '@/lib/webhooks'
 import { extractText, type OutputData } from '@/lib/editorjs-renderer'
 
-function autoExcerpt(content: string): string {
+function contentToText(content: string): string {
   try {
     const data = JSON.parse(content) as OutputData
     if (!data.blocks || !Array.isArray(data.blocks)) return ''
-    return extractText(data).slice(0, 160)
+    return extractText(data)
   } catch {
     return ''
   }
+}
+
+function autoExcerpt(content: string): string {
+  return contentToText(content).slice(0, 160)
 }
 
 export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
@@ -82,6 +86,7 @@ export const createPost = createServerFn({ method: 'POST' })
         title: data.title,
         slug,
         content: data.content,
+        contentText: contentToText(data.content),
         excerpt: data.excerpt || autoExcerpt(data.content),
         coverImage: data.coverImage,
         status: data.status,
@@ -144,6 +149,7 @@ export const updatePost = createServerFn({ method: 'POST' })
         title: data.title,
         slug,
         content: data.content,
+        contentText: contentToText(data.content),
         excerpt: data.excerpt || autoExcerpt(data.content),
         coverImage: data.coverImage,
         status: data.status,

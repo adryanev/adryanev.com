@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, ArrowUpRight, ImageOff } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  ImageOff,
+} from 'lucide-react'
 import './project-dossier.css'
 
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
@@ -67,6 +73,102 @@ function ProjectImage({
       </a>
       {image.alt && <figcaption>{image.alt}</figcaption>}
     </figure>
+  )
+}
+
+const SUBPIXEL_SCROLL_TOLERANCE = 0.01
+
+function slidePosition(track: HTMLElement) {
+  return track.scrollLeft / track.clientWidth
+}
+
+function ProjectGallery({
+  images,
+  title,
+}: {
+  images: ProjectDossierData['images']
+  title: string
+}) {
+  const trackRef = useRef<HTMLUListElement>(null)
+  // The slide a button click is still scrolling to, so repeated clicks during
+  // a smooth scroll keep stepping instead of retargeting the same slide.
+  const pendingSlideRef = useRef<number | null>(null)
+  const [current, setCurrent] = useState(0)
+  const hasMultipleImages = images.length > 1
+
+  function showAdjacentSlide(direction: 1 | -1) {
+    const track = trackRef.current
+    if (!track) return
+    const from = pendingSlideRef.current ?? Math.round(slidePosition(track))
+    const index = Math.min(Math.max(from + direction, 0), images.length - 1)
+    pendingSlideRef.current = index
+    track.scrollTo({ left: index * track.clientWidth })
+  }
+
+  function syncCurrentSlide(track: HTMLElement) {
+    const position = slidePosition(track)
+    setCurrent(Math.round(position))
+    const pendingSlide = pendingSlideRef.current
+    const reachedPendingSlide =
+      pendingSlide !== null &&
+      Math.abs(position - pendingSlide) < SUBPIXEL_SCROLL_TOLERANCE
+    if (reachedPendingSlide) pendingSlideRef.current = null
+  }
+
+  function releasePendingSlide() {
+    pendingSlideRef.current = null
+  }
+
+  return (
+    <section
+      className="project-dossier__gallery"
+      aria-labelledby="project-images-heading"
+    >
+      <div className="project-dossier__gallery-header">
+        <h2 id="project-images-heading">Project images</h2>
+        {hasMultipleImages && (
+          <div className="project-dossier__gallery-controls">
+            <p aria-live="polite">
+              {current + 1} / {images.length}
+            </p>
+            <Button
+              variant="secondary"
+              size="icon"
+              aria-label="Previous image"
+              disabled={current === 0}
+              onClick={() => showAdjacentSlide(-1)}
+            >
+              <ChevronLeft aria-hidden="true" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              aria-label="Next image"
+              disabled={current === images.length - 1}
+              onClick={() => showAdjacentSlide(1)}
+            >
+              <ChevronRight aria-hidden="true" />
+            </Button>
+          </div>
+        )}
+      </div>
+      <ul
+        ref={trackRef}
+        className="project-dossier__gallery-track"
+        tabIndex={hasMultipleImages ? 0 : undefined}
+        aria-label={`${title} images`}
+        onScroll={(event) => syncCurrentSlide(event.currentTarget)}
+        onPointerDown={releasePendingSlide}
+        onWheel={releasePendingSlide}
+        onKeyDown={releasePendingSlide}
+      >
+        {images.map((image, index) => (
+          <li key={image.id}>
+            <ProjectImage image={image} title={title} number={index + 1} />
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -173,22 +275,7 @@ export function ProjectDossier({ project }: { project: ProjectDossierData }) {
       </div>
 
       {project.images.length > 0 && (
-        <section
-          className="project-dossier__gallery"
-          aria-labelledby="project-images-heading"
-        >
-          <h2 id="project-images-heading">Project images</h2>
-          <div>
-            {project.images.map((image, index) => (
-              <ProjectImage
-                key={image.id}
-                image={image}
-                title={project.title}
-                number={index + 1}
-              />
-            ))}
-          </div>
-        </section>
+        <ProjectGallery images={project.images} title={project.title} />
       )}
 
       <nav className="project-dossier__footer" aria-label="Project navigation">

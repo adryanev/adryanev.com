@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 import { MAX_RETRIES } from '@/lib/webhook-events'
 import {
@@ -42,78 +42,56 @@ function WebhookLogsPage() {
 
   return (
     <div>
-      <PageHeader className="justify-start">
-        <Button asChild variant="ghost" size="icon">
-          <Link to="/admin/webhooks" aria-label="Back to webhooks">
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+      <PageHeader>
+        <div>
+          <h1>Delivery logs</h1>
+          <p className="break-all">{webhook.url}</p>
+        </div>
+        <Button asChild variant="secondary">
+          <Link to="/admin/webhooks">
+            <ArrowLeft size={18} aria-hidden="true" /> Back to webhooks
           </Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Delivery Logs</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)] break-all">
-            {webhook.url}
-          </p>
-        </div>
       </PageHeader>
 
       {logs.length === 0 ? (
-        <EmptyState>No delivery attempts yet.</EmptyState>
+        <EmptyState>
+          <h2>No deliveries yet</h2>
+          <p>Delivery attempts for this webhook appear here.</p>
+        </EmptyState>
       ) : (
-        <TableScroll
-          role="region"
-          aria-label="Webhook delivery logs table, scroll for all columns"
-          tabIndex={0}
-        >
+        <TableScroll aria-label="Webhook delivery logs table, scroll for all columns">
           <Table>
             <thead>
-              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Event</th>
-                <th className="px-4 py-3 font-medium ">HTTP</th>
-                <th className="px-4 py-3 font-medium ">Attempt</th>
-                <th className="px-4 py-3 font-medium">Time</th>
-                <th className="px-4 py-3 font-medium lg:table-cell">
-                  Response
-                </th>
+              <tr>
+                <th>Event</th>
+                <th>Result</th>
+                <th>HTTP</th>
+                <th>Attempt</th>
+                <th>Time</th>
+                <th>Response</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr
-                  key={log.id}
-                  className="border-b border-[var(--border-color)]"
-                >
-                  <td className="px-4 py-3">
-                    {log.success ? (
-                      <CheckCircle className="h-4 w-4 text-[var(--color-success)]" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-[var(--color-danger)]" />
-                    )}
+                <tr key={log.id}>
+                  <td>
+                    <Badge>{log.event}</Badge>
                   </td>
-                  <td className="px-4 py-3">
-                    <code className="text-xs bg-[var(--bg-secondary)] border border-[var(--border-color)] px-1.5 py-0.5">
-                      {log.event}
-                    </code>
-                  </td>
-                  <td className="px-4 py-3 ">
-                    <Badge
-                      tone={
-                        log.statusCode && log.statusCode < 400
-                          ? 'success'
-                          : 'danger'
-                      }
-                    >
-                      {log.statusCode ?? '—'}
+                  <td>
+                    <Badge tone={log.success ? 'success' : 'danger'}>
+                      {log.success ? 'Delivered' : 'Failed'}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3  text-[var(--text-secondary)]">
+                  <td>{log.statusCode ?? '—'}</td>
+                  <td>
                     {log.attempt}/{MAX_RETRIES}
                   </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">
+                  <td className="whitespace-nowrap text-sm">
                     {new Date(log.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 lg:table-cell">
-                    <span className="text-xs text-[var(--text-secondary)] truncate block max-w-xs">
+                  <td>
+                    <span className="block max-w-xs truncate text-sm text-text-secondary">
                       {log.response?.slice(0, 100) ?? '—'}
                     </span>
                   </td>

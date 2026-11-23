@@ -4,6 +4,8 @@ import { db } from '@/db'
 import { saasListings } from '@/db/schema/saas'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
+import { parseReorderInput } from '@/lib/reorder'
+import { nextSortOrder, writeSortOrder } from '@/server/sort-order'
 
 export const getSaasListings = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -69,8 +71,20 @@ export const createSaasListing = createServerFn({ method: 'POST' })
       logoUrl: data.logoUrl,
       technology: data.technology,
       status: data.status,
-      sortOrder: data.sortOrder ?? 0,
+      sortOrder: data.sortOrder ?? nextSortOrder(saasListings),
     })
+    return { success: true }
+  })
+
+export const reorderSaasListings = createServerFn({ method: 'POST' })
+  .inputValidator(parseReorderInput)
+  .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
+    await writeSortOrder(saasListings, data.ids)
     return { success: true }
   })
 

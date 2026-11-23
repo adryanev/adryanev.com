@@ -11,8 +11,9 @@ import {
   Input as FormInput,
   Select as FormSelect,
   FormError,
-  Button,
 } from '@/components/ui'
+import { RowAction } from './RowActions'
+import { SortableList } from './SortableList'
 
 import { EditorJsEditor } from './EditorJsEditor'
 import type { OutputData } from '@editorjs/editorjs'
@@ -38,7 +39,6 @@ type ProjectData = {
   githubUrl: string
   externalUrl: string
   status: 'draft' | 'published'
-  sortOrder: number
   images: { url: string; alt?: string }[]
 }
 
@@ -84,7 +84,6 @@ export function ProjectForm({
   const [status, setStatus] = useState<'draft' | 'published'>(
     initial?.status ?? 'draft',
   )
-  const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
   const [images, setImages] = useState<{ url: string; alt?: string }[]>(
     initial?.images ?? [],
   )
@@ -103,7 +102,6 @@ export function ProjectForm({
     JSON.stringify(technology) !==
       JSON.stringify(initialRef.current?.technology ?? []) ||
     year !== (initialRef.current?.year ?? new Date().getFullYear()) ||
-    sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
     githubUrl !== (initialRef.current?.githubUrl ?? '') ||
     externalUrl !== (initialRef.current?.externalUrl ?? '') ||
     JSON.stringify(images) !== JSON.stringify(initialRef.current?.images ?? [])
@@ -126,7 +124,6 @@ export function ProjectForm({
         githubUrl: githubUrl || undefined,
         externalUrl: externalUrl || undefined,
         status,
-        sortOrder,
         images,
       }
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
@@ -181,7 +178,7 @@ export function ProjectForm({
         <SlugInput title={title} value={slug} onChange={setSlug} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         <FormField label="Category">
           <FormSelect
             value={categoryId}
@@ -200,13 +197,6 @@ export function ProjectForm({
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
             required
-          />
-        </FormField>
-        <FormField label="Sort Order">
-          <FormInput
-            type="number"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(Number(e.target.value))}
           />
         </FormField>
       </div>
@@ -263,45 +253,53 @@ export function ProjectForm({
         </FormField>
       </div>
 
-      {/* Screenshots */}
       <FormField label="Screenshots">
-        <div className="space-y-3">
-          {images.map((img, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 border border-[var(--border-color)] p-3"
-            >
-              <img
-                src={img.url}
-                alt={img.alt}
-                className="h-20 w-20 object-cover"
-              />
-              <div className="flex-1">
-                <FormInput
-                  type="text"
-                  aria-label={`Caption for image ${i + 1}`}
-                  id={`project-image-caption-${i}`}
-                  value={img.alt ?? ''}
-                  onChange={(e) => {
-                    const newImages = [...images]
-                    newImages[i] = { ...img, alt: e.target.value }
-                    setImages(newImages)
-                  }}
-                  placeholder="Alt text"
+        <SortableList
+          as="ul"
+          itemAs="li"
+          className="space-y-3"
+          items={images}
+          getKey={(img) => img.url}
+          itemLabel={(img) => img.alt || img.url.split('/').pop() || img.url}
+          onMove={setImages}
+          onDrop={setImages}
+        >
+          {(img, handle) => {
+            const position = images.indexOf(img) + 1
+            return (
+              <div className="flex items-start gap-3 border border-[var(--border-color)] bg-[var(--surface-paper)] p-3">
+                {handle}
+                <img
+                  src={img.url}
+                  alt={img.alt}
+                  className="h-20 w-20 object-cover"
                 />
+                <div className="flex-1">
+                  <FormInput
+                    type="text"
+                    aria-label={`Caption for image ${position}`}
+                    value={img.alt ?? ''}
+                    onChange={(e) =>
+                      setImages(
+                        images.map((image) =>
+                          image === img ? { ...img, alt: e.target.value } : image,
+                        ),
+                      )
+                    }
+                    placeholder="Alt text"
+                  />
+                </div>
+                <RowAction
+                  type="button"
+                  label={`Remove image ${position}`}
+                  onClick={() => setImages(images.filter((image) => image !== img))}
+                >
+                  <X size={16} aria-hidden="true" />
+                </RowAction>
               </div>
-              <Button
-                variant="danger"
-                size="icon"
-                type="button"
-                aria-label={`Remove image ${i + 1}`}
-                onClick={() => setImages(images.filter((_, j) => j !== i))}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+            )
+          }}
+        </SortableList>
         <div className="mt-3">
           <ImageUploader
             value=""

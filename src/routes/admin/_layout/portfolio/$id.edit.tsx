@@ -56,7 +56,6 @@ function EditProjectPage() {
             githubUrl: project.githubUrl ?? '',
             externalUrl: project.externalUrl ?? '',
             status: project.status,
-            sortOrder: project.sortOrder,
             images: project.images.map((img) => ({
               url: img.url,
               alt: img.alt ?? undefined,

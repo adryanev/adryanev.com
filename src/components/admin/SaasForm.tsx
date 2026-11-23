@@ -30,7 +30,6 @@ type SaasData = {
   logoUrl: string
   technology: string[]
   status: 'active' | 'beta' | 'retired'
-  sortOrder: number
 }
 
 export function SaasForm({ initial }: { initial?: SaasData }) {
@@ -49,7 +48,6 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
   const [status, setStatus] = useState<'active' | 'beta' | 'retired'>(
     initial?.status ?? 'active',
   )
-  const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0)
   const [error, setError] = useState('')
   const initialRef = useRef(initial)
 
@@ -60,7 +58,6 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
     url !== (initialRef.current?.url ?? '') ||
     githubUrl !== (initialRef.current?.githubUrl ?? '') ||
     logoUrl !== (initialRef.current?.logoUrl ?? '') ||
-    sortOrder !== (initialRef.current?.sortOrder ?? 0) ||
     status !== (initialRef.current?.status ?? 'active') ||
     JSON.stringify(technology) !==
       JSON.stringify(initialRef.current?.technology ?? [])
@@ -81,7 +78,6 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
         logoUrl: logoUrl || undefined,
         technology,
         status,
-        sortOrder,
       }
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
@@ -152,27 +148,18 @@ export function SaasForm({ initial }: { initial?: SaasData }) {
         </TagInput.Root>
       </FormField>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <FormField label="Status">
-          <FormSelect
-            value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as 'active' | 'beta' | 'retired')
-            }
-          >
-            <option value="active">Active</option>
-            <option value="beta">Beta</option>
-            <option value="retired">Retired</option>
-          </FormSelect>
-        </FormField>
-        <FormField label="Sort Order">
-          <FormInput
-            type="number"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(Number(e.target.value))}
-          />
-        </FormField>
-      </div>
+      <FormField label="Status">
+        <FormSelect
+          value={status}
+          onChange={(e) =>
+            setStatus(e.target.value as 'active' | 'beta' | 'retired')
+          }
+        >
+          <option value="active">Active</option>
+          <option value="beta">Beta</option>
+          <option value="retired">Retired</option>
+        </FormSelect>
+      </FormField>
 
       <FormActions
         isPending={saveMutation.isPending}

@@ -28,7 +28,7 @@ function HomePage() {
   return (
     <div ref={homeRef} className="adventure-home">
       <section className="adventure-hero" aria-labelledby="intro-title">
-        <div className="adventure-hero__copy" data-enter="bubble">
+        <div className="adventure-hero__copy">
           <p className="adventure-eyebrow">Software engineer · Pekanbaru</p>
           <h1 id="intro-title">
             Hi, I'm <em>Adryan.</em>
@@ -55,7 +55,6 @@ function HomePage() {
       {leadProject ? (
         <section
           className="adventure-work"
-          data-enter="panel"
           id="selected-work"
           aria-labelledby="selected-work-title"
         >
@@ -67,6 +66,7 @@ function HomePage() {
             }}
             className="adventure-work__lead"
             data-project-card
+            data-enter="panel"
           >
             <div>
               <span className="adventure-label">
@@ -106,6 +106,7 @@ function HomePage() {
                     slug: project.slug,
                   }}
                   data-project-card
+                  data-enter="panel"
                 >
                   <span className="adventure-label">
                     {project.year.toString()} · {project.category.name}
@@ -127,10 +128,9 @@ function HomePage() {
 
       <section
         className="adventure-closing"
-        data-enter="panel"
         aria-label="Writing and contact"
       >
-        <article className="adventure-writing">
+        <article className="adventure-writing" data-enter="panel">
           <p className="adventure-eyebrow">Writing</p>
           <h2>I write about the work.</h2>
           <p>
@@ -165,7 +165,7 @@ function HomePage() {
           </Link>
         </article>
 
-        <Link className="adventure-contact" to="/contact">
+        <Link className="adventure-contact" to="/contact" data-enter="panel">
           <span className="adventure-eyebrow">Contact</span>
           <h2>Have something to discuss?</h2>
           <p>

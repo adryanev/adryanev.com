@@ -52,7 +52,7 @@ async function seedResume() {
         'Promoted from contributor to DevOps lead; direct three developers and the technical working group. ' +
         'Hardened password-protected video: replaced plaintext verification with tokens, hashed credentials at rest, and closed an exposure path in the admin interface. ' +
         'Added metrics and distributed tracing, and capped encoder CPU per process to stabilise the transcoding pipeline. ' +
-        'Migrated the frontend from Webpack to Vite and React 19, moving legacy stylesheets into Tailwind.',
+        'Migrated the frontend from Webpack to Vite and React 19, removing 615 KB of duplicated player code from every page and cutting build time from 14 s to 2.6 s.',
       technology: ['Django', 'React', 'Vite', 'Celery', 'Redis', 'FFmpeg', 'Nginx', 'OpenTelemetry'],
       startDate: '2025-05-01',
       endDate: null,
@@ -68,6 +68,8 @@ async function seedResume() {
         'Legal-intelligence startup building beneficial-ownership, procurement, and legal-research products for Indonesia with a six-person team. ' +
         'Built a multi-jurisdiction ingestion platform and an Airflow entity-resolution pipeline for a 64M-row warehouse that resolves 8.9M actor events into 239k entities. ' +
         'Built the Go backend for eight product domains, including beneficial ownership, procurement analytics, sanctions screening, and relationship graphs. ' +
+        'Rebuilt the procurement analytics dashboard on a pre-aggregated view over 335k tenders, taking it from a 130-second query that timed out to about 40 ms. ' +
+        'Built extraction pipelines for court judgments, at 93.5% precision on core fields in a pre-registered held-out set, and for regulations, at 99.3% precision or better across 54,710 statutory definitions. ' +
         'Shipped a self-hosted LLM gateway, retrieval-augmented search over Indonesian court decisions, multi-agent judicial analysis, and a metered API. ' +
         'Delivered anti-money-laundering screening over 161k sanctioned entities and 470k name variants, used by a national digital identity provider and government agencies. ' +
         'Operate production infrastructure across multiple hosts with PostgreSQL, Redis, NATS, Grafana, and OpenTelemetry. ' +

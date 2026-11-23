@@ -6,6 +6,7 @@ import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
 import { fireWebhooks } from '@/lib/webhooks'
 import { extractText, type OutputData } from '@/lib/editorjs-renderer'
+import { isContentEdit } from '@/lib/post-dates'
 
 function contentToText(content: string): string {
   try {
@@ -138,23 +139,29 @@ export const updatePost = createServerFn({ method: 'POST' })
     if (existing && existing.id !== data.id) {
       throw new Error('A post with this slug already exists')
     }
+    if (!currentPost) {
+      throw new Error('Post not found')
+    }
     const publishedAt =
-      data.status === 'published' && !currentPost?.publishedAt
+      data.status === 'published' && !currentPost.publishedAt
         ? new Date()
-        : currentPost?.publishedAt
+        : currentPost.publishedAt
+    const next = {
+      title: data.title,
+      excerpt: data.excerpt || autoExcerpt(data.content),
+      content: data.content,
+    }
 
     await db
       .update(posts)
       .set({
-        title: data.title,
+        ...next,
         slug,
-        content: data.content,
         contentText: contentToText(data.content),
-        excerpt: data.excerpt || autoExcerpt(data.content),
         coverImage: data.coverImage,
         status: data.status,
         publishedAt,
-        updatedAt: new Date(),
+        ...(isContentEdit(currentPost, next) && { updatedAt: new Date() }),
       })
       .where(eq(posts.id, data.id))
 

@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, isNull, desc, asc, count, sql, sum, inArray } from 'drizzle-orm'
+import { eq, ne, and, isNull, desc, asc, count, sql, sum, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, postsToTags, tags } from '@/db/schema/posts'
 import {
@@ -12,7 +12,7 @@ import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
 import { postViews } from '@/db/schema/post-views'
 import { checkRateLimit, getClientIp } from '@/server/rate-limit'
-import { renderEditorJs, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
+import { renderEditorJsWithHeadings, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
 
@@ -122,7 +122,7 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     if (!post) return null
 
     const parsed = JSON.parse(post.content) as OutputData
-    const html = await renderEditorJs(parsed)
+    const { html, headings } = await renderEditorJsWithHeadings(parsed, { headingAnchors: true })
     const readingTime = estimateReadingTime(parsed)
 
     // Get prev/next posts relative to the current post's publishedAt
@@ -152,8 +152,47 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     ])
 
     // The page renders html; sending the source content too doubles the payload
-    const { content: _content, ...rest } = post
-    return { ...rest, html, readingTime, prev, next }
+    const { content: _content, contentText: _contentText, ...rest } = post
+    return { ...rest, html, headings, readingTime, prev, next }
+  })
+
+const RELATED_POSTS_LIMIT = 3
+
+// One query: posts sharing a tag with the given post, ranked by shared tag count, then recency
+export const getRelatedPosts = createServerFn({ method: 'GET' })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    const currentPostTagIds = db
+      .select({ tagId: postsToTags.tagId })
+      .from(postsToTags)
+      .innerJoin(posts, eq(posts.id, postsToTags.postId))
+      .where(eq(posts.slug, data.slug))
+
+    return db
+      .select({
+        id: posts.id,
+        slug: posts.slug,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        publishedAt: posts.publishedAt,
+      })
+      .from(posts)
+      .innerJoin(postsToTags, eq(postsToTags.postId, posts.id))
+      .where(
+        and(
+          eq(posts.status, 'published'),
+          isNull(posts.deletedAt),
+          ne(posts.slug, data.slug),
+          inArray(postsToTags.tagId, currentPostTagIds),
+        ),
+      )
+      .groupBy(posts.id)
+      .orderBy(
+        desc(count(postsToTags.tagId)),
+        desc(posts.publishedAt),
+        desc(posts.id),
+      )
+      .limit(RELATED_POSTS_LIMIT)
   })
 
 export const getAllTags = createServerFn({ method: 'GET' }).handler(

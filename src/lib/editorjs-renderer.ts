@@ -1,4 +1,5 @@
 import { isCodeLanguage } from '@/lib/code-languages'
+import { slugify } from '@/lib/slugify'
 
 export type OutputData = {
   time?: number
@@ -10,6 +11,18 @@ type Block = {
   id?: string
   type: string
   data: Record<string, unknown>
+}
+
+export type Heading = {
+  id: string
+  text: string
+  level: number
+}
+
+type RenderContext = {
+  headingAnchors: boolean
+  headings: Heading[]
+  usedHeadingIds: Set<string>
 }
 
 type ListItem = {
@@ -48,17 +61,53 @@ function renderListItems(items: ListItem[], style: string): string {
   }).join('')
 }
 
-function renderBlock(block: Block): string {
+const HTML_ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+  '&nbsp;': ' ',
+}
+
+function plainText(html: string): string {
+  return stripHtml(html)
+    .replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (entity) => HTML_ENTITIES[entity])
+    .trim()
+}
+
+const FALLBACK_HEADING_ID = 'section'
+
+// Slugs repeat within a post, so later duplicates get -2, -3, ...
+function uniqueHeadingId(text: string, used: Set<string>): string {
+  const base = slugify(text) || FALLBACK_HEADING_ID
+  let id = base
+  for (let n = 2; used.has(id); n++) id = `${base}-${n}`
+  used.add(id)
+  return id
+}
+
+function renderHeader(data: Record<string, unknown>, context: RenderContext): string {
+  const level = Math.min(Math.max(data.level as number, 1), 6)
+  const content = sanitizeInlineHtml(data.text as string)
+  if (!context.headingAnchors) return `<h${level}>${content}</h${level}>`
+
+  const text = plainText(content)
+  const id = uniqueHeadingId(text, context.usedHeadingIds)
+  context.headings.push({ id, text, level })
+  const anchor = `<a class="heading-anchor" href="#${id}" aria-label="Link to section: ${escapeHtml(text)}">#</a>`
+  return `<h${level} id="${id}">${content}${anchor}</h${level}>`
+}
+
+function renderBlock(block: Block, context: RenderContext): string {
   const { type, data } = block
 
   switch (type) {
     case 'paragraph':
       return `<p>${sanitizeInlineHtml(data.text as string)}</p>`
 
-    case 'header': {
-      const level = Math.min(Math.max(data.level as number, 1), 6)
-      return `<h${level}>${sanitizeInlineHtml(data.text as string)}</h${level}>`
-    }
+    case 'header':
+      return renderHeader(data, context)
 
     case 'list': {
       const tag = (data.style as string) === 'ordered' ? 'ol' : 'ul'
@@ -137,8 +186,26 @@ function renderBlock(block: Block): string {
   }
 }
 
-export async function renderEditorJs(data: OutputData): Promise<string> {
-  return data.blocks.map(renderBlock).join('\n')
+type RenderOptions = {
+  // Adds an id and a # link to each heading, for pages that link to sections
+  headingAnchors?: boolean
+}
+
+export async function renderEditorJsWithHeadings(
+  data: OutputData,
+  options: RenderOptions = {},
+): Promise<{ html: string; headings: Heading[] }> {
+  const context: RenderContext = {
+    headingAnchors: options.headingAnchors ?? false,
+    headings: [],
+    usedHeadingIds: new Set(),
+  }
+  const html = data.blocks.map((block) => renderBlock(block, context)).join('\n')
+  return { html, headings: context.headings }
+}
+
+export async function renderEditorJs(data: OutputData, options: RenderOptions = {}): Promise<string> {
+  return (await renderEditorJsWithHeadings(data, options)).html
 }
 
 export async function renderProjectDescription(description: string): Promise<string> {

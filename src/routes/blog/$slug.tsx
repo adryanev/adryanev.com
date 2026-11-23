@@ -1,10 +1,21 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { Calendar, Clock, ArrowLeft, ArrowRight, Eye } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  ArrowLeft,
+  ArrowRight,
+  Eye,
+  RefreshCw,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 import { useCodeHighlighter } from '@/hooks/useCodeHighlighter'
 import { cn } from '@/lib/utils'
-import { getPublishedPostBySlug } from '@/server/functions/public.functions'
+import {
+  getPublishedPostBySlug,
+  getRelatedPosts,
+} from '@/server/functions/public.functions'
+import { formatPostDate, shouldShowUpdated } from '@/lib/post-dates'
 import {
   seoMeta,
   canonicalLink,
@@ -15,13 +26,18 @@ import {
 } from '@/lib/seo'
 import { recordPostView } from '@/server/functions/views.functions'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
+import { TableOfContents } from '@/components/blog/TableOfContents'
+import { RelatedPosts } from '@/components/blog/RelatedPosts'
 
 import { Button, PageState } from '@/components/ui'
 export const Route = createFileRoute('/blog/$slug')({
   loader: async ({ params }) => {
-    const post = await getPublishedPostBySlug({ data: { slug: params.slug } })
+    const [post, related] = await Promise.all([
+      getPublishedPostBySlug({ data: { slug: params.slug } }),
+      getRelatedPosts({ data: { slug: params.slug } }),
+    ])
     if (!post) throw notFound()
-    return post
+    return { ...post, related }
   },
   component: BlogPostPage,
   notFoundComponent: () => (
@@ -168,10 +184,12 @@ function BlogPostPage() {
       {post.coverImage && (
         <img
           src={post.coverImage}
-          alt={post.title}
+          alt=""
+          width={1200}
+          height={630}
           loading="eager"
           fetchPriority="high"
-          className="mt-8 w-full brutal-border object-cover"
+          className="mt-8 aspect-[1200/630] w-full brutal-border object-cover"
         />
       )}
 
@@ -179,15 +197,21 @@ function BlogPostPage() {
         {post.title}
       </h1>
 
-      <div className="chapter-article__metadata mt-6 flex items-center gap-6 font-mono text-sm text-text-secondary">
+      <div className="chapter-article__metadata mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm text-text-secondary">
         {post.publishedAt && (
           <span className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-accent" />
-            {new Date(post.publishedAt).toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
+            <time dateTime={new Date(post.publishedAt).toISOString()}>
+              {formatPostDate(post.publishedAt)}
+            </time>
+          </span>
+        )}
+        {shouldShowUpdated(post.publishedAt, post.updatedAt) && (
+          <span className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 text-accent" />
+            <time dateTime={new Date(post.updatedAt).toISOString()}>
+              Updated {formatPostDate(post.updatedAt)}
+            </time>
           </span>
         )}
         <span className="flex items-center gap-2">
@@ -207,8 +231,8 @@ function BlogPostPage() {
           {post.postsToTags.map((pt) => (
             <Link
               key={pt.tag.id}
-              to="/blog"
-              search={{ page: undefined, tag: pt.tag.slug }}
+              to="/blog/tag/$tag"
+              params={{ tag: pt.tag.slug }}
               className="bg-bg-secondary px-3 py-1 font-mono text-xs uppercase tracking-widest text-text-primary border border-border hover:text-accent hover:border-accent transition-colors"
             >
               {pt.tag.name}
@@ -219,7 +243,8 @@ function BlogPostPage() {
 
       <div className="mt-10 mb-4 border-t-2 border-text-primary" />
 
-      {/* Rendered markdown content */}
+      <div className="relative">
+      <TableOfContents headings={post.headings} />
       <div
         ref={contentRef}
         className={cn(
@@ -238,9 +263,12 @@ function BlogPostPage() {
         )}
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
+      </div>
 
       {/* Newsletter */}
       <SubscribeForm className="mt-16" />
+
+      <RelatedPosts posts={post.related} />
 
       {/* Prev/Next navigation */}
       <div className="mt-12 grid grid-cols-2 gap-6 border-t-2 border-text-primary dark:border-border pt-8">

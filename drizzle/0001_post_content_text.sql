@@ -1,0 +1,1 @@
+ALTER TABLE `posts` ADD `content_text` text DEFAULT '' NOT NULL;

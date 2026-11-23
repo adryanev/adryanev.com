@@ -9,6 +9,7 @@ export const posts = sqliteTable('posts', {
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   content: text('content').notNull(),
+  contentText: text('content_text').notNull().default(''),
   excerpt: text('excerpt'),
   coverImage: text('cover_image'),
   status: text('status', { enum: contentStatuses }).notNull().default('draft'),

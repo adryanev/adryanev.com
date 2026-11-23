@@ -1,5 +1,8 @@
 export const SITE_URL = process.env.SITE_URL || 'https://adryanev.com'
 const SITE_NAME = 'Adryan Eka Vandra'
+const DEFAULT_OG_IMAGE_PATH = '/images/og-default.png'
+const DEFAULT_OG_IMAGE_ALT = 'Adryan Eka Vandra, Software Engineer'
+const DEFAULT_OG_IMAGE_SIZE = { width: 1200, height: 630 }
 const DEFAULT_DESCRIPTION =
   'Personal website of Adryan Eka Vandra — Software Engineer. Portfolio, blog, resume, and active SaaS projects.'
 
@@ -18,10 +21,34 @@ interface SeoOptions {
   noindex?: boolean
 }
 
+export function absoluteUrl(url: string): string {
+  return url.startsWith('/') && !url.startsWith('//') ? `${SITE_URL}${url}` : url
+}
+
+const IMAGE_MIME_TYPES: Record<string, string> = {
+  avif: 'image/avif',
+  gif: 'image/gif',
+  jpeg: 'image/jpeg',
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  svg: 'image/svg+xml',
+  webp: 'image/webp',
+}
+
+export function imageMimeType(url: string): string | undefined {
+  const extension = url.split(/[?#]/)[0].split('.').pop()?.toLowerCase()
+  return extension ? IMAGE_MIME_TYPES[extension] : undefined
+}
+
 export function seoMeta(opts: SeoOptions) {
   const description = opts.description ?? DEFAULT_DESCRIPTION
   const url = `${SITE_URL}${opts.path}`
   const type = opts.type ?? 'website'
+  const usesDefaultImage = !opts.image
+  const image = absoluteUrl(opts.image ?? DEFAULT_OG_IMAGE_PATH)
+  const imageAlt = usesDefaultImage
+    ? DEFAULT_OG_IMAGE_ALT
+    : (opts.imageAlt ?? opts.title)
 
   const meta: Array<Record<string, string>> = [
     { title: opts.title },
@@ -34,17 +61,20 @@ export function seoMeta(opts: SeoOptions) {
     { property: 'og:type', content: type },
     { property: 'og:locale', content: 'en_US' },
     // Twitter Card
-    { name: 'twitter:card', content: opts.image ? 'summary_large_image' : 'summary' },
+    { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: opts.title },
     { name: 'twitter:description', content: description },
+    { property: 'og:image', content: image },
+    { property: 'og:image:alt', content: imageAlt },
+    { name: 'twitter:image', content: image },
+    { name: 'twitter:image:alt', content: imageAlt },
   ]
 
-  if (opts.image) {
+  // Dimensions are only known for the bundled image
+  if (usesDefaultImage) {
     meta.push(
-      { property: 'og:image', content: opts.image },
-      { property: 'og:image:alt', content: opts.imageAlt ?? opts.title },
-      { name: 'twitter:image', content: opts.image },
-      { name: 'twitter:image:alt', content: opts.imageAlt ?? opts.title },
+      { property: 'og:image:width', content: String(DEFAULT_OG_IMAGE_SIZE.width) },
+      { property: 'og:image:height', content: String(DEFAULT_OG_IMAGE_SIZE.height) },
     )
   }
 
@@ -122,7 +152,7 @@ export function articleJsonLd(opts: {
     headline: opts.title,
     description: opts.description,
     url: opts.url,
-    ...(opts.image && { image: opts.image }),
+    image: absoluteUrl(opts.image ?? DEFAULT_OG_IMAGE_PATH),
     ...(opts.publishedTime && { datePublished: opts.publishedTime }),
     ...(opts.modifiedTime && { dateModified: opts.modifiedTime }),
     ...(opts.tags && { keywords: opts.tags.join(', ') }),

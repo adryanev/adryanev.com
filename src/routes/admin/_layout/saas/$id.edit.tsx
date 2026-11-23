@@ -41,7 +41,6 @@ function EditSaasPage() {
             logoUrl: listing.logoUrl ?? '',
             technology: listing.technology,
             status: listing.status,
-            sortOrder: listing.sortOrder,
           }}
         />
       </div>

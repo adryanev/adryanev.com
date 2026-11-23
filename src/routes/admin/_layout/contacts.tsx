@@ -10,6 +10,7 @@ import {
 } from '@/server/functions/contacts.functions'
 
 import { FormError, PageHeader, EmptyState, Button } from '@/components/ui'
+import { ConfirmDelete } from '@/components/admin/RowActions'
 
 export const Route = createFileRoute('/admin/_layout/contacts')({
   loader: () => getContacts(),
@@ -113,20 +114,19 @@ function ContactsPage() {
                     >
                       Mark {contact.isRead ? 'unread' : 'read'}
                     </Button>
-                    <Button
-                      variant="secondary"
-                      disabled={deleteMut.isPending}
-                      onClick={() => {
-                        if (
-                          confirm(
-                            'Delete this message from ' + contact.name + '?',
-                          )
-                        )
-                          deleteMut.mutate(contact.id)
-                      }}
+                    <ConfirmDelete
+                      onConfirm={() => deleteMut.mutate(contact.id)}
                     >
-                      <Trash2 size={16} /> Delete
-                    </Button>
+                      {(arm) => (
+                        <Button
+                          variant="secondary"
+                          disabled={deleteMut.isPending}
+                          onClick={arm}
+                        >
+                          <Trash2 size={16} aria-hidden="true" /> Delete
+                        </Button>
+                      )}
+                    </ConfirmDelete>
                   </div>
                 </div>
               )}

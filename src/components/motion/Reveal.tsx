@@ -41,7 +41,7 @@ export function useEntrance(
           { opacity: 0.8, translate: offsets[direction] },
           { opacity: 1, translate: '0 0' },
         ], {
-          duration: target.dataset.enter === 'bubble' ? 480 : 360,
+          duration: 360,
           delay: Math.min((delay + order++ * stagger) * 1000, 160),
           easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
           fill: 'backwards',

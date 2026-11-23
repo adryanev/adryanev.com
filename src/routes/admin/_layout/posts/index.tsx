@@ -1,19 +1,22 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Edit, Trash2, FileText } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { Plus, Pencil } from 'lucide-react'
 
 import { getPosts, deletePost } from '@/server/functions/posts.functions'
-
+import { formatPostDate } from '@/lib/post-dates'
 import {
   FormError,
   Button,
   Table,
   TableScroll,
-  Badge,
   PageHeader,
   EmptyState,
 } from '@/components/ui'
+import { ContentStatusBadge } from '@/components/admin/ContentStatusBadge'
+import { DeleteAction, RowAction, RowActions } from '@/components/admin/RowActions'
+import { rowPresence } from '@/components/admin/motion'
 
 export const Route = createFileRoute('/admin/_layout/posts/')({
   loader: () => getPosts(),
@@ -35,129 +38,89 @@ function PostListPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <FormError
-        message={
-          deleteMutation.isError
-            ? 'The item could not be removed. Please try again.'
-            : ''
-        }
-      />
+    <div>
       <PageHeader>
         <div>
-          <h1 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
-            Posts
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Manage your blog articles.
-          </p>
+          <h1>Posts</h1>
+          <p>Manage your blog articles.</p>
         </div>
         <Button asChild variant="primary">
           <Link to="/admin/posts/new">
-            <Plus className="h-4 w-4" />
-            New Post
+            <Plus size={18} aria-hidden="true" />
+            New post
           </Link>
         </Button>
       </PageHeader>
+      <FormError
+        message={
+          deleteMutation.isError
+            ? 'The post could not be removed. Try again.'
+            : ''
+        }
+      />
 
       {posts.length === 0 ? (
-        <EmptyState className="text-center">
-          <FileText className="mx-auto h-8 w-8 text-[var(--text-secondary)] mb-4" />
-          <p className="font-semibold text-[var(--text-primary)] uppercase tracking-wider">
-            No posts found
+        <EmptyState>
+          <h2>No posts yet</h2>
+          <p>
+            <Link to="/admin/posts/new" className="underline underline-offset-4">
+              Create your first post
+            </Link>
           </p>
-          <Link
-            to="/admin/posts/new"
-            className="mt-4 inline-block text-sm text-[var(--admin-link)] hover:underline"
-          >
-            Create your first post
-          </Link>
         </EmptyState>
       ) : (
-        <TableScroll
-          role="region"
-          aria-label="Posts table, scroll for all columns"
-          tabIndex={0}
-        >
+        <TableScroll aria-label="Posts table, scroll for all columns">
           <Table>
             <thead>
-              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
-                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs">
-                  Title
-                </th>
-                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs ">
-                  Status
-                </th>
-                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs ">
-                  Date
-                </th>
-                <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[var(--text-secondary)] text-xs text-right">
-                  Actions
-                </th>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-color)]">
-              {posts.map((post) => (
-                <tr
-                  key={post.id}
-                  className="hover:bg-[var(--bg-primary)] transition-colors"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      to="/admin/posts/$id/edit"
-                      params={{ id: String(post.id) }}
-                      className="font-medium text-[var(--text-primary)] hover:text-[var(--admin-link)] transition-colors"
-                    >
-                      {post.title}
-                    </Link>
-                    <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                      /{post.slug}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 ">
-                    <Badge
-                      tone={post.status === 'published' ? 'success' : 'warning'}
-                    >
-                      {post.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-[var(--text-secondary)] ">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button asChild variant="ghost" size="icon">
-                        <Link
-                          to="/admin/posts/$id/edit"
-                          params={{ id: String(post.id) }}
-                          title="Edit"
-                          aria-label={`Edit ${post.title}`}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="icon"
-                        disabled={deleteMutation.isPending}
-                        onClick={() => {
-                          if (
-                            confirm(
-                              'Are you sure you want to delete this post?',
-                            )
-                          ) {
-                            deleteMutation.mutate(post.id)
-                          }
-                        }}
-                        title="Delete"
-                        aria-label={`Delete ${post.title}`}
+            <tbody>
+              <AnimatePresence initial={false}>
+                {posts.map((post) => (
+                  <motion.tr key={post.id} {...rowPresence}>
+                    <td>
+                      <Link
+                        to="/admin/posts/$id/edit"
+                        params={{ id: String(post.id) }}
+                        className="font-semibold hover:underline underline-offset-4"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {post.title}
+                      </Link>
+                      <div className="mt-1 text-sm text-text-secondary">
+                        /{post.slug}
+                      </div>
+                    </td>
+                    <td>
+                      <ContentStatusBadge status={post.status} />
+                    </td>
+                    <td className="whitespace-nowrap">
+                      {formatPostDate(post.createdAt)}
+                    </td>
+                    <td>
+                      <RowActions>
+                        <RowAction asChild label={'Edit ' + post.title}>
+                          <Link
+                            to="/admin/posts/$id/edit"
+                            params={{ id: String(post.id) }}
+                          >
+                            <Pencil size={16} aria-hidden="true" />
+                          </Link>
+                        </RowAction>
+                        <DeleteAction
+                          label={'Delete ' + post.title}
+                          pending={deleteMutation.isPending}
+                          onConfirm={() => deleteMutation.mutate(post.id)}
+                        />
+                      </RowActions>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             </tbody>
           </Table>
         </TableScroll>

@@ -23,6 +23,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { ArrowUpRight } from 'lucide-react'
 import '@/components/admin/admin.css'
 import { Button, FieldError } from '@/components/ui'
+import { AdminMotion } from '@/components/admin/motion'
 
 export const Route = createFileRoute('/admin/_layout')({
   beforeLoad: async () => {
@@ -122,7 +123,9 @@ function AdminLayout() {
           </Link>
         </div>
         <div className="admin-content">
-          <Outlet />
+          <AdminMotion>
+            <Outlet />
+          </AdminMotion>
         </div>
       </main>
     </div>

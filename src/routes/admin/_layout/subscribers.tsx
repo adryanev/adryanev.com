@@ -1,22 +1,14 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
-import {
-  Users,
-  Trash2,
-  CheckCircle,
-  Clock,
-  UserMinus,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'motion/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   getSubscribers,
   getSubscriberStats,
   deleteSubscriber,
 } from '@/server/functions/subscribers.functions'
-
+import { formatPostDate } from '@/lib/post-dates'
 import {
   FormError,
   PageHeader,
@@ -24,7 +16,11 @@ import {
   Panel,
   EmptyState,
   Badge,
+  Table,
+  TableScroll,
 } from '@/components/ui'
+import { DeleteAction, RowActions } from '@/components/admin/RowActions'
+import { rowPresence } from '@/components/admin/motion'
 
 export const Route = createFileRoute('/admin/_layout/subscribers')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -41,25 +37,10 @@ export const Route = createFileRoute('/admin/_layout/subscribers')({
   component: SubscribersPage,
 })
 
-const statusConfig = {
-  confirmed: {
-    label: 'Confirmed',
-    icon: CheckCircle,
-    color: 'text-[var(--color-success)]',
-    tone: 'success',
-  },
-  pending: {
-    label: 'Pending',
-    icon: Clock,
-    color: 'text-[var(--color-warning)]',
-    tone: 'warning',
-  },
-  unsubscribed: {
-    label: 'Unsubscribed',
-    icon: UserMinus,
-    color: 'text-[var(--text-secondary)]',
-    tone: 'neutral',
-  },
+const statusBadges = {
+  confirmed: { label: 'Confirmed', tone: 'success' },
+  pending: { label: 'Pending', tone: 'warning' },
+  unsubscribed: { label: 'Unsubscribed', tone: 'neutral' },
 } as const
 
 function SubscribersPage() {
@@ -74,136 +55,121 @@ function SubscribersPage() {
     onSuccess: () => router.invalidate(),
   })
 
+  const statCards = [
+    { label: 'Confirmed', value: stats.confirmed },
+    { label: 'Pending', value: stats.pending },
+    { label: 'Total', value: stats.total },
+  ]
+
   return (
     <div>
+      <PageHeader>
+        <div>
+          <h1>Newsletter subscribers</h1>
+          <p>
+            {stats.confirmed} confirmed, {stats.pending} pending, {stats.total}{' '}
+            total.
+          </p>
+        </div>
+      </PageHeader>
       <FormError
         message={
           deleteMut.isError
-            ? 'The item could not be removed. Please try again.'
+            ? 'The subscriber could not be removed. Try again.'
             : ''
         }
       />
-      <PageHeader className="border-b border-[var(--border-color)] pb-4 mb-6">
-        <h1 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
-          <Users className="h-6 w-6" />
-          Newsletter Subscribers
-        </h1>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          {stats.confirmed} confirmed, {stats.pending} pending, {stats.total}{' '}
-          total
-        </p>
-      </PageHeader>
 
-      {/* Stats cards */}
       <div className="grid gap-4 sm:grid-cols-3 mb-8">
-        <Panel asChild>
-          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Confirmed
+        {statCards.map((card) => (
+          <Panel key={card.label}>
+            <span className="text-sm font-semibold text-text-secondary">
+              {card.label}
             </span>
-            <p className="mt-2 text-3xl font-bold text-[var(--color-success)]">
-              {stats.confirmed}
-            </p>
-          </div>
-        </Panel>
-        <Panel asChild>
-          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Pending
-            </span>
-            <p className="mt-2 text-3xl font-bold text-[var(--color-warning)]">
-              {stats.pending}
-            </p>
-          </div>
-        </Panel>
-        <Panel asChild>
-          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Total
-            </span>
-            <p className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
-              {stats.total}
-            </p>
-          </div>
-        </Panel>
+            <p className="mt-2 text-3xl font-bold">{card.value}</p>
+          </Panel>
+        ))}
       </div>
 
       {subscribers.items.length === 0 ? (
-        <EmptyState>No subscribers yet.</EmptyState>
+        <EmptyState>
+          <h2>No subscribers yet</h2>
+          <p>People who sign up for the newsletter appear here.</p>
+        </EmptyState>
       ) : (
         <>
-          <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
-            {subscribers.items.map((sub) => {
-              const cfg = statusConfig[sub.status]
-              const StatusIcon = cfg.icon
-              return (
-                <div
-                  key={sub.id}
-                  className="flex items-center justify-between px-5 py-4"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <StatusIcon className={cn('h-4 w-4 shrink-0', cfg.color)} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-[var(--text-primary)] break-all">
-                        {sub.email}
+          <TableScroll aria-label="Subscribers table, scroll for all columns">
+            <Table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Subscribed</th>
+                  <th>Confirmed</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence initial={false}>
+                  {subscribers.items.map((sub) => (
+                    <motion.tr key={sub.id} {...rowPresence}>
+                      <td>
+                        <span className="font-semibold break-all">
+                          {sub.email}
+                        </span>
                         {sub.name && (
-                          <span className="ml-2 text-[var(--text-secondary)]">
-                            ({sub.name})
-                          </span>
+                          <div className="mt-1 text-sm text-text-secondary">
+                            {sub.name}
+                          </div>
                         )}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        <Badge tone={cfg.tone}>{cfg.label}</Badge>
-                        {' · '}
-                        {new Date(sub.createdAt).toLocaleDateString()}
-                        {sub.confirmedAt && (
-                          <>
-                            {' '}
-                            · confirmed{' '}
-                            {new Date(sub.confirmedAt).toLocaleDateString()}
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="danger"
-                    size="icon"
-                    disabled={deleteMut.isPending}
-                    onClick={() => {
-                      if (confirm(`Remove ${sub.email}?`))
-                        deleteMut.mutate(sub.id)
-                    }}
-                    className="shrink-0 ml-4"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> Remove
-                  </Button>
-                </div>
-              )
-            })}
-          </div>
+                      </td>
+                      <td>
+                        <Badge tone={statusBadges[sub.status].tone}>
+                          {statusBadges[sub.status].label}
+                        </Badge>
+                      </td>
+                      <td className="whitespace-nowrap">
+                        {formatPostDate(sub.createdAt)}
+                      </td>
+                      <td className="whitespace-nowrap">
+                        {sub.confirmedAt ? formatPostDate(sub.confirmedAt) : '—'}
+                      </td>
+                      <td>
+                        <RowActions>
+                          <DeleteAction
+                            label={'Remove ' + sub.email}
+                            pending={deleteMut.isPending}
+                            onConfirm={() => deleteMut.mutate(sub.id)}
+                          />
+                        </RowActions>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </Table>
+          </TableScroll>
 
-          {/* Pagination */}
           {subscribers.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
-              <p className="text-xs text-[var(--text-secondary)]">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-text-secondary">
                 Page {subscribers.page} of {subscribers.totalPages} (
                 {subscribers.total} total)
               </p>
-              <div className="flex items-center gap-2">
+              <div className="page-actions">
                 <Button
                   variant="secondary"
                   disabled={page <= 1}
                   onClick={() => navigate({ search: { page: page - 1 } })}
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                  <ChevronLeft size={16} aria-hidden="true" /> Previous
                 </Button>
                 <Button
                   variant="secondary"
                   disabled={page >= subscribers.totalPages}
                   onClick={() => navigate({ search: { page: page + 1 } })}
                 >
-                  Next <ChevronRight className="h-3.5 w-3.5" />
+                  Next <ChevronRight size={16} aria-hidden="true" />
                 </Button>
               </div>
             </div>

@@ -8,6 +8,8 @@ import {
 } from '@/db/schema/portfolio'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
+import { parseReorderInput } from '@/lib/reorder'
+import { nextSortOrder, writeSortOrder } from '@/server/sort-order'
 
 // Categories
 export const getCategories = createServerFn({ method: 'GET' }).handler(
@@ -40,13 +42,16 @@ export const createCategory = createServerFn({ method: 'POST' })
     })
     if (existing) throw new Error('Category with this slug already exists')
 
-    await db.insert(portfolioCategories).values({
-      name: data.name,
-      slug,
-      description: data.description,
-      sortOrder: data.sortOrder ?? 0,
-    })
-    return { success: true }
+    const [category] = await db
+      .insert(portfolioCategories)
+      .values({
+        name: data.name,
+        slug,
+        description: data.description,
+        sortOrder: data.sortOrder ?? nextSortOrder(portfolioCategories),
+      })
+      .returning({ id: portfolioCategories.id })
+    return { success: true, id: category.id }
   })
 
 export const updateCategory = createServerFn({ method: 'POST' })
@@ -64,10 +69,22 @@ export const updateCategory = createServerFn({ method: 'POST' })
       .set({
         name: data.name,
         slug: data.slug || slugify(data.name),
-        description: data.description,
+        description: data.description ?? null,
         sortOrder: data.sortOrder,
       })
       .where(eq(portfolioCategories.id, data.id))
+    return { success: true }
+  })
+
+export const reorderCategories = createServerFn({ method: 'POST' })
+  .inputValidator(parseReorderInput)
+  .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
+    await writeSortOrder(portfolioCategories, data.ids)
     return { success: true }
   })
 
@@ -86,6 +103,20 @@ export const deleteCategory = createServerFn({ method: 'POST' })
   })
 
 // Projects
+// Takes the ids of one category's projects; sortOrder ranks projects within
+// their category on the public pages
+export const reorderProjects = createServerFn({ method: 'POST' })
+  .inputValidator(parseReorderInput)
+  .handler(async ({ data }) => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
+    await writeSortOrder(portfolioProjects, data.ids)
+    return { success: true }
+  })
+
 export const getProjects = createServerFn({ method: 'GET' }).handler(
   async () => {
     const user = await getCurrentUser()
@@ -164,7 +195,12 @@ export const createProject = createServerFn({ method: 'POST' })
         githubUrl: data.githubUrl,
         externalUrl: data.externalUrl,
         status: data.status,
-        sortOrder: data.sortOrder ?? 0,
+        sortOrder:
+          data.sortOrder ??
+          nextSortOrder(
+            portfolioProjects,
+            eq(portfolioProjects.categoryId, data.categoryId),
+          ),
       })
       .returning()
 

@@ -43,11 +43,18 @@
 .project-dossier__technology li { padding: 5px 9px; background: var(--bg-secondary); border: 1px solid var(--text-primary); font: var(--text-xs)/1.6 var(--font-mono); overflow-wrap: anywhere; max-width: 100%; }
 .project-dossier .project-dossier__empty { margin-top: var(--space-6); padding-bottom: 28px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: var(--text-lg); line-height: 1.6; }
 .project-dossier__gallery { margin-top: 42px; padding-top: 30px; border-top: 2px solid var(--text-primary); }
-.project-dossier__gallery > div { display: grid; gap: 28px; margin-top: var(--space-6); }
+.project-dossier__gallery-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.project-dossier__gallery-controls { display: flex; align-items: center; gap: 10px; }
+.project-dossier .project-dossier__gallery-controls p { min-width: 5ch; margin-right: 6px; color: var(--text-secondary); font: var(--text-sm)/1.6 var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.project-dossier__gallery-controls svg { width: 20px; height: 20px; }
+.project-dossier__gallery-track { --gallery-frame-height: clamp(260px, 60vh, 560px); display: flex; margin: var(--space-6) 0 0; padding: 0; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+.project-dossier__gallery-track::-webkit-scrollbar { display: none; }
+.project-dossier__gallery-track:focus-visible { outline: var(--focus-width) solid var(--color-link); outline-offset: var(--focus-offset); }
+.project-dossier__gallery-track > li { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
 .project-dossier__image > a { display: block; }
-.project-dossier__image img { display: block; width: 100%; height: auto; border: 1px solid var(--text-primary); background: var(--bg-secondary); }
+.project-dossier__image img { display: block; width: 100%; height: var(--gallery-frame-height); object-fit: contain; border: 1px solid var(--text-primary); background: var(--bg-secondary); }
 .project-dossier__image figcaption { margin-top: 10px; color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.6; overflow-wrap: anywhere; }
-.project-dossier__image-error { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); min-height: 220px; padding: 28px; background: var(--bg-secondary); border: 1px solid var(--text-primary); text-align: center; }
+.project-dossier__image-error { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); height: var(--gallery-frame-height); padding: 28px; background: var(--bg-secondary); border: 1px solid var(--text-primary); text-align: center; }
 .project-dossier__image-error > svg { width: 28px; height: 28px; color: var(--text-secondary); }
 .project-dossier__image-error p { font-size: var(--text-2xl); font-weight: var(--weight-bold); }
 .project-dossier__image-error span { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); text-decoration: underline; text-underline-offset: 5px; }
@@ -82,4 +89,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  }
+  .project-dossier__gallery-track { scroll-behavior: auto; }
+}

@@ -6,22 +6,8 @@ import { postViews } from '@/db/schema/post-views'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
 import { fireWebhooks } from '@/lib/webhooks'
-import { extractText, type OutputData } from '@/lib/editorjs-renderer'
+import { postContentText, resolvePostExcerpt } from '@/lib/post-excerpt'
 import { isContentEdit } from '@/lib/post-dates'
-
-function contentToText(content: string): string {
-  try {
-    const data = JSON.parse(content) as OutputData
-    if (!data.blocks || !Array.isArray(data.blocks)) return ''
-    return extractText(data)
-  } catch {
-    return ''
-  }
-}
-
-function autoExcerpt(content: string): string {
-  return contentToText(content).slice(0, 160)
-}
 
 export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
   const user = await getCurrentUser()
@@ -98,8 +84,8 @@ export const createPost = createServerFn({ method: 'POST' })
         title: data.title,
         slug,
         content: data.content,
-        contentText: contentToText(data.content),
-        excerpt: data.excerpt || autoExcerpt(data.content),
+        contentText: postContentText(data.content),
+        excerpt: resolvePostExcerpt(data.excerpt, data.content),
         coverImage: data.coverImage,
         status: data.status,
         publishedAt,
@@ -159,7 +145,7 @@ export const updatePost = createServerFn({ method: 'POST' })
         : currentPost.publishedAt
     const next = {
       title: data.title,
-      excerpt: data.excerpt || autoExcerpt(data.content),
+      excerpt: resolvePostExcerpt(data.excerpt, data.content),
       content: data.content,
     }
 
@@ -168,7 +154,7 @@ export const updatePost = createServerFn({ method: 'POST' })
       .set({
         ...next,
         slug,
-        contentText: contentToText(data.content),
+        contentText: postContentText(data.content),
         coverImage: data.coverImage,
         status: data.status,
         publishedAt,

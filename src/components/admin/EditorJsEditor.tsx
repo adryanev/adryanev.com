@@ -1,4 +1,11 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import type {
   OutputData,
   EditorConfig,
@@ -8,6 +15,7 @@ import { createClientOnlyFn, useServerFn } from '@tanstack/react-start'
 import { upload } from '@/server/functions/upload.functions'
 import { FileText } from 'lucide-react'
 import { markdownToEditorJs } from '@/lib/markdown-to-editorjs'
+import { cn } from '@/lib/utils'
 
 import { Feedback, Button, Textarea } from '@/components/ui'
 
@@ -32,19 +40,31 @@ const loadEditorModules = createClientOnlyFn(() =>
   ]),
 )
 
+const SAVE_DEBOUNCE_MS = 300
+
+type EditorInstance = InstanceType<typeof import('@editorjs/editorjs').default>
+
 interface EditorJsEditorProps {
   value: OutputData | null
   onChange: (data: OutputData) => void
+  className?: string
 }
 
-export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
-  const editorRef = useRef<InstanceType<
-    typeof import('@editorjs/editorjs').default
-  > | null>(null)
+export type EditorJsEditorHandle = {
+  // Reports the editor's content now instead of after the debounce, and
+  // resolves with it; null while the editor is still loading
+  flush: () => Promise<OutputData | null>
+}
+
+export const EditorJsEditor = forwardRef<
+  EditorJsEditorHandle,
+  EditorJsEditorProps
+>(function EditorJsEditor({ value, onChange, className }, ref) {
+  const editorRef = useRef<EditorInstance | null>(null)
   const holderRef = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
-  const initializedRef = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const saveSequenceRef = useRef(0)
   const [showImport, setShowImport] = useState(false)
   const [markdownInput, setMarkdownInput] = useState('')
   const [editorError, setEditorError] = useState('')
@@ -72,13 +92,30 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
     [uploadFn],
   )
 
-  useEffect(() => {
-    if (initializedRef.current || !holderRef.current) return
-    initializedRef.current = true
+  // save() is async, so a slow earlier save must not overwrite a later one
+  const reportContent = useCallback(async (editor: EditorInstance) => {
+    const sequence = ++saveSequenceRef.current
+    const data = await editor.save()
+    if (sequence === saveSequenceRef.current) onChangeRef.current(data)
+    return data
+  }, [])
 
-    let editor: InstanceType<
-      typeof import('@editorjs/editorjs').default
-    > | null = null
+  useImperativeHandle(
+    ref,
+    () => ({
+      async flush() {
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        debounceRef.current = null
+        const editor = editorRef.current
+        return editor ? reportContent(editor) : null
+      },
+    }),
+    [reportContent],
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    let editor: EditorInstance | null = null
 
     async function init() {
       const [
@@ -98,9 +135,10 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
         { default: Underline },
         { default: Raw },
       ] = await loadEditorModules()
+      if (cancelled || !holderRef.current) return
 
       const config: EditorConfig = {
-        holder: holderRef.current!,
+        holder: holderRef.current,
         data: value ?? undefined,
         placeholder: 'Start writing...',
         tools: {
@@ -165,35 +203,40 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
             config: { placeholder: 'Enter raw HTML...' },
           },
         },
-        onChange: async (api) => {
+        onChange: () => {
           if (debounceRef.current) clearTimeout(debounceRef.current)
-          debounceRef.current = setTimeout(async () => {
-            const data = await api.saver.save()
-            onChangeRef.current(data)
-          }, 300)
+          debounceRef.current = setTimeout(() => {
+            debounceRef.current = null
+            if (editor) void reportContent(editor)
+          }, SAVE_DEBOUNCE_MS)
         },
       }
 
-      editor = new EditorJS(config)
-      await editor.isReady
-      editorRef.current = editor
+      const created = new EditorJS(config)
+      editor = created
+      await created.isReady
+      if (cancelled) return
+      editorRef.current = created
       setEditorReady(true)
     }
 
     init().catch(() => {
-      initializedRef.current = false
+      if (cancelled) return
       setEditorError(
         'The editor could not load. Reload this page before editing or saving content.',
       )
     })
 
     return () => {
+      cancelled = true
       if (debounceRef.current) clearTimeout(debounceRef.current)
-      if (editor) {
-        editor.destroy()
-        editorRef.current = null
-      }
+      debounceRef.current = null
+      editorRef.current = null
+      const created = editor
+      if (created) created.isReady.then(() => created.destroy()).catch(() => {})
     }
+    // The editor reads its first value once; a later value is rendered by
+    // remounting it with a new key
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -208,6 +251,7 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
     editorRef.current
       .render(data)
       .then(() => {
+        saveSequenceRef.current++
         onChangeRef.current(data)
         setMarkdownInput('')
         setShowImport(false)
@@ -284,8 +328,12 @@ export function EditorJsEditor({ value, onChange }: EditorJsEditorProps) {
 
       <div
         ref={holderRef}
-        className="editorjs-container min-h-[300px] border border-[var(--border-color)] bg-[var(--bg-primary)] rounded-md p-4"
+        className={cn(
+          'editorjs-container',
+          className ??
+            'min-h-[300px] border border-[var(--border-color)] bg-[var(--bg-primary)] rounded-md p-4',
+        )}
       />
     </div>
   )
-}
+})

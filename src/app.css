@@ -442,6 +442,10 @@
   color: var(--text-primary) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
+/* EditorJS keeps the closed toolbar in the page; empty, it is a stray box */
+.ce-inline-toolbar:empty {
+  display: none;
+}
 .ce-inline-tool {
   color: var(--text-primary) !important;
 }

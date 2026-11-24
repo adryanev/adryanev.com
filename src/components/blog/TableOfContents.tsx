@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import type { Heading } from '@/lib/editorjs-renderer'
 
 const MIN_HEADINGS = 3
@@ -56,24 +57,34 @@ function TocLinks({ headings, activeId }: { headings: Heading[]; activeId: strin
   )
 }
 
-export function TableOfContents({ headings }: { headings: Heading[] }) {
+export function TableOfContentsLayout({
+  headings,
+  children,
+}: {
+  headings: Heading[]
+  children: ReactNode
+}) {
   const entries = useMemo(() => selectTocHeadings(headings), [headings])
   const activeId = useActiveHeadingId(entries)
-
-  if (entries.length === 0) return null
+  const hasContents = entries.length > 0
 
   return (
-    <>
-      <details className="post-toc post-toc--collapsible">
-        <summary>On this page</summary>
-        <TocLinks headings={entries} activeId={activeId} />
-      </details>
-      <nav className="post-toc post-toc--aside" aria-label="On this page">
-        <div className="post-toc__sticky">
+    <div className="post-split" data-contents={hasContents ? 'gutter' : undefined}>
+      <div className="post-split__body">
+        {hasContents && (
+          <details className="post-toc--collapsible">
+            <summary>On this page</summary>
+            <TocLinks headings={entries} activeId={activeId} />
+          </details>
+        )}
+        {children}
+      </div>
+      {hasContents && (
+        <nav className="post-toc--gutter" aria-label="On this page">
           <p className="post-toc__title">On this page</p>
           <TocLinks headings={entries} activeId={activeId} />
-        </div>
-      </nav>
-    </>
+        </nav>
+      )}
+    </div>
   )
 }

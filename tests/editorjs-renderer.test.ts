@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { renderEditorJs, renderEditorJsWithHeadings } from '../src/lib/editorjs-renderer.ts'
+import { renderEditorJs, renderEditorJsWithHeadings, renderPostBody } from '../src/lib/editorjs-renderer.ts'
 
 const codeBlock = (code: string, language?: string) => ({
   blocks: [{ type: 'code', data: { code, language } }],
@@ -84,4 +84,13 @@ test('heading text cannot break out of the anchor label', async () => {
 
   assert.doesNotMatch(html, /<script/)
   assert.match(html, /aria-label="Link to section: Say &quot;hi&quot; x"/)
+})
+
+test('a post body links every heading its contents list names', () => {
+  const { html, headings } = renderPostBody({
+    blocks: [header('Setup'), header('Setup', 3), header('Deploy')],
+  })
+
+  assert.deepEqual(headings.map((h) => h.id), ['setup', 'setup-2', 'deploy'])
+  for (const { id } of headings) assert.match(html, new RegExp(`<h\\d id="${id}">`))
 })

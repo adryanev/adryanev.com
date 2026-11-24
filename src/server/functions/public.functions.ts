@@ -12,7 +12,7 @@ import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
 import { postViews } from '@/db/schema/post-views'
 import { checkRateLimit, getClientIp } from '@/server/rate-limit'
-import { renderEditorJsWithHeadings, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
+import { renderPostBody, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
 
@@ -121,9 +121,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
     })
     if (!post) return null
 
-    const parsed = JSON.parse(post.content) as OutputData
-    const { html, headings } = await renderEditorJsWithHeadings(parsed, { headingAnchors: true })
-    const readingTime = estimateReadingTime(parsed)
+    const content = JSON.parse(post.content) as OutputData
+    const { headings } = renderPostBody(content)
+    const readingTime = estimateReadingTime(content)
 
     // Get prev/next posts relative to the current post's publishedAt
     const [prev, next] = await Promise.all([
@@ -151,9 +151,9 @@ export const getPublishedPostBySlug = createServerFn({ method: 'GET' })
         : Promise.resolve(undefined),
     ])
 
-    // The page renders html; sending the source content too doubles the payload
+    // PostBody renders the parsed content; the raw string and search text would only add payload
     const { content: _content, contentText: _contentText, ...rest } = post
-    return { ...rest, html, headings, readingTime, prev, next }
+    return { ...rest, content, headings, readingTime, prev, next }
   })
 
 const RELATED_POSTS_LIMIT = 3

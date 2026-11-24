@@ -1,16 +1,6 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import {
-  Calendar,
-  Clock,
-  ArrowLeft,
-  ArrowRight,
-  Eye,
-  RefreshCw,
-} from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
-import { useCodeHighlighter } from '@/hooks/useCodeHighlighter'
-import { cn } from '@/lib/utils'
+import { ArrowLeft } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import {
   getPublishedPostBySlug,
   getRelatedPosts,
@@ -26,8 +16,10 @@ import {
 } from '@/lib/seo'
 import { recordPostView } from '@/server/functions/views.functions'
 import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
-import { TableOfContents } from '@/components/blog/TableOfContents'
+import { TableOfContentsLayout } from '@/components/blog/TableOfContents'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
+import { PostBody } from '@/components/blog/PostBody'
+import '@/components/blog/article.css'
 
 import { Button, PageState } from '@/components/ui'
 export const Route = createFileRoute('/blog/$slug')({
@@ -106,15 +98,13 @@ export const Route = createFileRoute('/blog/$slug')({
   },
 })
 
-function BlogPostPage() {
-  const post = Route.useLoaderData()
-  const contentRef = useRef<HTMLDivElement>(null)
+function useRecordedViewCount(postId: number): number | null {
   const [viewCount, setViewCount] = useState<number | null>(null)
 
-  // Record the view; the response carries the updated total
+  // The response carries the updated total
   useEffect(() => {
     let cancelled = false
-    recordPostView({ data: { postId: post.id } })
+    recordPostView({ data: { postId } })
       .then((result) => {
         if (!cancelled) setViewCount(result.views)
       })
@@ -122,64 +112,75 @@ function BlogPostPage() {
     return () => {
       cancelled = true
     }
-  }, [post.id])
+  }, [postId])
 
-  // Inject copy buttons into code blocks
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
+  return viewCount
+}
 
-    const pres = el.querySelectorAll<HTMLPreElement>('pre[data-code-language]')
-    const buttons: HTMLButtonElement[] = []
-
-    pres.forEach((pre) => {
-      const btn = document.createElement('button')
-      btn.className = 'code-copy-btn'
-      btn.textContent = 'Copy'
-      btn.addEventListener('click', () => {
-        const code = pre.querySelector('code')
-        if (!code) return
-        const text = code.innerText
-        navigator.clipboard
-          .writeText(text)
-          .then(() => {
-            btn.textContent = 'Copied!'
-            btn.dataset.copied = 'true'
-            setTimeout(() => {
-              btn.textContent = 'Copy'
-              delete btn.dataset.copied
-            }, 2000)
-          })
-          .catch(() => {
-            btn.textContent = 'Select code to copy'
-            btn.setAttribute(
-              'aria-label',
-              'Clipboard unavailable. Select the code and copy it manually.',
-            )
-          })
-      })
-      pre.appendChild(btn)
-      buttons.push(btn)
-    })
-
-    return () => {
-      buttons.forEach((b) => b.remove())
-    }
-  }, [post.html])
-
-  // Client-side mermaid rendering and code highlighting
-  useMermaidRenderer(contentRef, post.html, true)
-  useCodeHighlighter(contentRef, post.html)
+function BlogPostPage() {
+  const post = Route.useLoaderData()
+  const viewCount = useRecordedViewCount(post.id)
 
   return (
-    <article className="chapter-page chapter-article mx-auto max-w-3xl px-6 py-12 md:py-24">
+    <article className="chapter-page post-article">
       <Link
         to="/blog"
         search={{ page: undefined, tag: undefined }}
-        className="inline-flex items-center gap-2 font-mono text-sm font-bold text-text-secondary hover:text-accent transition-colors"
+        className="post-article__back"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to blog
+        <ArrowLeft aria-hidden="true" /> Back to writing
       </Link>
+
+      <header className="post-article__head">
+        <h1>{post.title}</h1>
+        {post.excerpt && <p className="post-article__stand">{post.excerpt}</p>}
+      </header>
+
+      <div className="post-article__facts">
+        <dl>
+          {post.publishedAt && (
+            <div>
+              <dt>Published</dt>
+              <dd>
+                <time dateTime={new Date(post.publishedAt).toISOString()}>
+                  {formatPostDate(post.publishedAt)}
+                </time>
+              </dd>
+            </div>
+          )}
+          {shouldShowUpdated(post.publishedAt, post.updatedAt) && (
+            <div>
+              <dt>Updated</dt>
+              <dd>
+                <time dateTime={new Date(post.updatedAt).toISOString()}>
+                  {formatPostDate(post.updatedAt)}
+                </time>
+              </dd>
+            </div>
+          )}
+          <div>
+            <dt>Reading</dt>
+            <dd>{post.readingTime} min</dd>
+          </div>
+          {viewCount !== null && (
+            <div>
+              <dt>Views</dt>
+              <dd className="tabular-nums">{viewCount.toLocaleString()}</dd>
+            </div>
+          )}
+        </dl>
+        {post.postsToTags.length > 0 && (
+          <ul className="post-article__tags" aria-label="Tags">
+            {post.postsToTags.map((pt) => (
+              <li key={pt.tag.id}>
+                <Link to="/blog/tag/$tag" params={{ tag: pt.tag.slug }}>
+                  {pt.tag.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {post.coverImage && (
         <img
@@ -189,112 +190,36 @@ function BlogPostPage() {
           height={630}
           loading="eager"
           fetchPriority="high"
-          className="mt-8 aspect-[1200/630] w-full brutal-border object-cover"
+          className="post-article__cover"
         />
       )}
 
-      <h1 className="chapter-article__title mt-8 font-serif text-4xl font-bold leading-tight text-text-primary md:text-6xl">
-        {post.title}
-      </h1>
+      <TableOfContentsLayout headings={post.headings}>
+        <PostBody content={post.content} />
+      </TableOfContentsLayout>
 
-      <div className="chapter-article__metadata mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm text-text-secondary">
-        {post.publishedAt && (
-          <span className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-accent" />
-            <time dateTime={new Date(post.publishedAt).toISOString()}>
-              {formatPostDate(post.publishedAt)}
-            </time>
-          </span>
-        )}
-        {shouldShowUpdated(post.publishedAt, post.updatedAt) && (
-          <span className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 text-accent" />
-            <time dateTime={new Date(post.updatedAt).toISOString()}>
-              Updated {formatPostDate(post.updatedAt)}
-            </time>
-          </span>
-        )}
-        <span className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-accent" />
-          {post.readingTime} min read
-        </span>
-        {viewCount !== null && (
-          <span className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-accent" />
-            {viewCount.toLocaleString()} {viewCount === 1 ? 'view' : 'views'}
-          </span>
-        )}
-      </div>
-
-      {post.postsToTags.length > 0 && (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {post.postsToTags.map((pt) => (
-            <Link
-              key={pt.tag.id}
-              to="/blog/tag/$tag"
-              params={{ tag: pt.tag.slug }}
-              className="bg-bg-secondary px-3 py-1 font-mono text-xs uppercase tracking-widest text-text-primary border border-border hover:text-accent hover:border-accent transition-colors"
-            >
-              {pt.tag.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-10 mb-4 border-t-2 border-text-primary" />
-
-      <div className="relative">
-      <TableOfContents headings={post.headings} />
-      <div
-        ref={contentRef}
-        className={cn(
-          'chapter-prose prose dark:prose-invert max-w-none',
-          'prose-headings:font-serif prose-headings:font-bold prose-headings:text-text-primary',
-          'prose-p:font-sans prose-p:text-text-secondary prose-p:leading-relaxed',
-          'prose-a:text-accent prose-a:underline prose-a:decoration-accent/40 prose-a:underline-offset-2 hover:prose-a:decoration-accent',
-          'prose-strong:text-text-primary prose-strong:font-bold',
-          'prose-blockquote:border-accent prose-blockquote:text-text-secondary prose-blockquote:font-serif prose-blockquote:italic',
-          'prose-code:rounded prose-code:bg-bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:text-accent prose-code:before:content-none prose-code:after:content-none',
-          'prose-pre:brutal-border prose-pre:rounded-none prose-pre:overflow-x-auto',
-          'prose-img:brutal-border prose-img:rounded-none',
-          'prose-hr:border-border',
-          'prose-li:text-text-secondary prose-li:font-sans',
-          'prose-li:marker:text-accent',
-        )}
-        dangerouslySetInnerHTML={{ __html: post.html }}
-      />
-      </div>
-
-      {/* Newsletter */}
-      <SubscribeForm className="mt-16" />
-
-      <RelatedPosts posts={post.related} />
-
-      {/* Prev/Next navigation */}
-      <div className="mt-12 grid grid-cols-2 gap-6 border-t-2 border-text-primary dark:border-border pt-8">
-        {post.prev ? (
-          <Link
-            to="/blog/$slug"
-            params={{ slug: post.prev.slug }}
-            className="group flex items-center gap-3 font-sans text-sm text-text-secondary hover:text-accent transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1" />
-            <span className="line-clamp-2">{post.prev.title}</span>
-          </Link>
-        ) : (
-          <div />
-        )}
-        {post.next ? (
-          <Link
-            to="/blog/$slug"
-            params={{ slug: post.next.slug }}
-            className="group flex items-center justify-end gap-3 text-right font-sans text-sm text-text-secondary hover:text-accent transition-colors"
-          >
-            <span className="line-clamp-2">{post.next.title}</span>
-            <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
-          </Link>
-        ) : (
-          <div />
+      <div className="post-article__end">
+        <SubscribeForm />
+        <RelatedPosts posts={post.related} />
+        {(post.prev || post.next) && (
+          <nav className="post-article__pager" aria-label="More articles">
+            {post.prev && (
+              <Link to="/blog/$slug" params={{ slug: post.prev.slug }}>
+                <small>Older</small>
+                <b>{post.prev.title}</b>
+              </Link>
+            )}
+            {post.next && (
+              <Link
+                to="/blog/$slug"
+                params={{ slug: post.next.slug }}
+                className="post-article__pager-next"
+              >
+                <small>Newer</small>
+                <b>{post.next.title}</b>
+              </Link>
+            )}
+          </nav>
         )}
       </div>
     </article>

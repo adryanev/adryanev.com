@@ -7,10 +7,12 @@ export type OutputData = {
   version?: string
 }
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
+
 type Block = {
   id?: string
   type: string
-  data: Record<string, unknown>
+  data: Record<string, JsonValue>
 }
 
 export type Heading = {
@@ -191,10 +193,10 @@ type RenderOptions = {
   headingAnchors?: boolean
 }
 
-export async function renderEditorJsWithHeadings(
+export function renderEditorJsWithHeadings(
   data: OutputData,
   options: RenderOptions = {},
-): Promise<{ html: string; headings: Heading[] }> {
+): { html: string; headings: Heading[] } {
   const context: RenderContext = {
     headingAnchors: options.headingAnchors ?? false,
     headings: [],
@@ -204,8 +206,13 @@ export async function renderEditorJsWithHeadings(
   return { html, headings: context.headings }
 }
 
-export async function renderEditorJs(data: OutputData, options: RenderOptions = {}): Promise<string> {
-  return (await renderEditorJsWithHeadings(data, options)).html
+export function renderEditorJs(data: OutputData, options: RenderOptions = {}): string {
+  return renderEditorJsWithHeadings(data, options).html
+}
+
+// A post's body and its contents list both come from here, so heading ids match
+export function renderPostBody(data: OutputData): { html: string; headings: Heading[] } {
+  return renderEditorJsWithHeadings(data, { headingAnchors: true })
 }
 
 export async function renderProjectDescription(description: string): Promise<string> {

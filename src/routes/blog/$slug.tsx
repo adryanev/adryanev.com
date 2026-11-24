@@ -5,7 +5,6 @@ import {
   getPublishedPostBySlug,
   getRelatedPosts,
 } from '@/server/functions/public.functions'
-import { formatPostDate, shouldShowUpdated } from '@/lib/post-dates'
 import {
   seoMeta,
   canonicalLink,
@@ -19,6 +18,7 @@ import { SubscribeForm } from '@/components/newsletter/SubscribeForm'
 import { TableOfContentsLayout } from '@/components/blog/TableOfContents'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
 import { PostBody } from '@/components/blog/PostBody'
+import { PostArticleIntro } from '@/components/blog/PostArticleIntro'
 import '@/components/blog/article.css'
 
 import { Button, PageState } from '@/components/ui'
@@ -131,68 +131,16 @@ function BlogPostPage() {
         <ArrowLeft aria-hidden="true" /> Back to writing
       </Link>
 
-      <header className="post-article__head">
-        <h1>{post.title}</h1>
-        {post.excerpt && <p className="post-article__stand">{post.excerpt}</p>}
-      </header>
-
-      <div className="post-article__facts">
-        <dl>
-          {post.publishedAt && (
-            <div>
-              <dt>Published</dt>
-              <dd>
-                <time dateTime={new Date(post.publishedAt).toISOString()}>
-                  {formatPostDate(post.publishedAt)}
-                </time>
-              </dd>
-            </div>
-          )}
-          {shouldShowUpdated(post.publishedAt, post.updatedAt) && (
-            <div>
-              <dt>Updated</dt>
-              <dd>
-                <time dateTime={new Date(post.updatedAt).toISOString()}>
-                  {formatPostDate(post.updatedAt)}
-                </time>
-              </dd>
-            </div>
-          )}
-          <div>
-            <dt>Reading</dt>
-            <dd>{post.readingTime} min</dd>
-          </div>
-          {viewCount !== null && (
-            <div>
-              <dt>Views</dt>
-              <dd className="tabular-nums">{viewCount.toLocaleString()}</dd>
-            </div>
-          )}
-        </dl>
-        {post.postsToTags.length > 0 && (
-          <ul className="post-article__tags" aria-label="Tags">
-            {post.postsToTags.map((pt) => (
-              <li key={pt.tag.id}>
-                <Link to="/blog/tag/$tag" params={{ tag: pt.tag.slug }}>
-                  {pt.tag.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {post.coverImage && (
-        <img
-          src={post.coverImage}
-          alt=""
-          width={1200}
-          height={630}
-          loading="eager"
-          fetchPriority="high"
-          className="post-article__cover"
-        />
-      )}
+      <PostArticleIntro
+        title={post.title}
+        excerpt={post.excerpt}
+        publishedAt={post.publishedAt}
+        updatedAt={post.updatedAt}
+        readingTime={post.readingTime}
+        viewCount={viewCount}
+        tags={post.postsToTags.map((pt) => pt.tag)}
+        coverImage={post.coverImage}
+      />
 
       <TableOfContentsLayout headings={post.headings}>
         <PostBody content={post.content} />

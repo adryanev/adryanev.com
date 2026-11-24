@@ -69,18 +69,21 @@ import { editorContent, editorContentSignature } from '@/lib/editor-content'
 export function ProjectForm({
   initial,
   categories,
+  defaultCategoryId,
 }: {
   initial?: ProjectData
   categories: { id: number; name: string }[]
+  defaultCategoryId?: number
 }) {
   const navigate = useNavigate()
   const isEditing = !!initial?.id
 
   const [title, setTitle] = useState(initial?.title ?? '')
   const [slug, setSlug] = useState(initial?.slug ?? '')
-  const [categoryId, setCategoryId] = useState(
-    initial?.categoryId ?? categories[0]?.id ?? 0,
-  )
+  const startingCategoryId = useRef(
+    initial?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? 0,
+  ).current
+  const [categoryId, setCategoryId] = useState(startingCategoryId)
   const [description, setDescription] = useState(() =>
     initial?.description
       ? JSON.stringify(editorContent(initial.description))
@@ -113,7 +116,7 @@ export function ProjectForm({
     slug !== (initialRef.current?.slug ?? '') ||
     editorContentSignature(description) !==
       editorContentSignature(initialRef.current?.description ?? '') ||
-    categoryId !== (initialRef.current?.categoryId ?? categories[0]?.id ?? 0) ||
+    categoryId !== startingCategoryId ||
     role !== (initialRef.current?.role ?? '') ||
     workplace !== (initialRef.current?.workplace ?? '') ||
     status !== (initialRef.current?.status ?? 'draft') ||

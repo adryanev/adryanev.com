@@ -1,0 +1,140 @@
+.post-body {
+  --post-code-surface: var(--brand-ink);
+  --post-code-text: var(--brand-paper);
+  --post-code-muted: color-mix(in srgb, var(--brand-paper) 50%, var(--brand-ink));
+  --post-code-control: color-mix(in srgb, var(--brand-paper) 10%, var(--brand-ink));
+  --post-code-control-hover: color-mix(in srgb, var(--brand-paper) 18%, var(--brand-ink));
+  --post-code-control-outline: color-mix(in srgb, var(--brand-paper) 24%, var(--brand-ink));
+  max-width: 68ch;
+  min-width: 0;
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.post-body > * + * { margin-top: 1.15em; }
+.post-body :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: var(--weight-heading);
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  text-wrap: balance;
+  scroll-margin-top: var(--space-6);
+}
+.post-body h1 { font-size: clamp(1.8rem, 3vw, 2.3rem); margin-top: 2.1em; }
+.post-body h2 { font-size: clamp(1.55rem, 2.6vw, 2rem); margin-top: 2.1em; }
+.post-body h3 { font-size: clamp(1.25rem, 2vw, 1.45rem); margin-top: 1.8em; }
+.post-body :is(h4, h5, h6) { font-size: var(--text-xl); margin-top: 1.6em; }
+.post-body > :first-child { margin-top: 0; }
+.post-body :is(h1, h2, h3, h4, h5, h6) + * { margin-top: .7em; }
+.post-body :is(h1, h2, h3, h4, h5, h6) > a.heading-anchor {
+  margin-left: .4em;
+  color: var(--color-link);
+  font-family: var(--font-code);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  opacity: 0;
+}
+.post-body :is(h1, h2, h3, h4, h5, h6):hover > a.heading-anchor,
+.post-body a.heading-anchor:focus-visible { opacity: 1; }
+@media (hover: none) { .post-body :is(h1, h2, h3, h4, h5, h6) > a.heading-anchor { opacity: .5; } }
+
+.post-body a:not(.heading-anchor) {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.post-body :is(b, strong) { font-weight: var(--weight-bold); }
+.post-body mark { background: var(--brand-yellow); color: var(--brand-ink); padding: 0 .15em; }
+.post-body :is(ul, ol) { padding-left: 1.4em; }
+.post-body ul { list-style: disc; }
+.post-body ol { list-style: decimal; }
+.post-body li :is(ul, ol) { margin-top: .45em; }
+.post-body li + li { margin-top: .45em; }
+.post-body li::marker { color: var(--brand-red); font-family: var(--font-code); font-size: .9em; }
+.post-body blockquote {
+  border-left: var(--border-display) solid var(--brand-red);
+  padding-left: var(--space-5);
+  font-weight: var(--weight-semibold);
+}
+.post-body blockquote cite {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--foreground-muted);
+  font: var(--weight-medium) var(--text-sm) var(--font-code);
+  font-style: normal;
+}
+.post-body hr { border: 0; border-top: var(--border-strong) solid var(--color-outline); margin-block: 2.4em; }
+.post-body figure img { width: 100%; height: auto; border: var(--border-strong) solid var(--foreground); }
+.post-body figcaption { margin-top: var(--space-2); color: var(--foreground-muted); font: var(--text-sm) var(--font-code); }
+.post-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: var(--text-base); }
+.post-body :is(th, td) { padding: var(--space-2) var(--space-3); border: var(--border-hairline) solid var(--color-outline); text-align: left; vertical-align: top; }
+.post-body th { font-weight: var(--weight-bold); background: var(--surface-paper); }
+
+.post-body :not(pre) > code {
+  font-family: var(--font-code);
+  font-size: .86em;
+  padding: 2px 6px;
+  background: var(--surface-paper);
+  border: var(--border-hairline) solid var(--color-outline);
+}
+.post-body pre,
+.post-body pre.shiki {
+  position: relative;
+  overflow: hidden;
+  overflow-wrap: normal;
+  color: var(--post-code-text);
+  background: var(--post-code-surface) !important;
+  border: var(--border-strong) solid var(--foreground);
+  font: var(--weight-body) .86rem/1.65 var(--font-code);
+}
+.post-body pre code { display: block; padding: 20px 22px; overflow-x: auto; tab-size: 2; }
+.post-body pre[data-code-language]::before {
+  content: attr(data-code-language);
+  position: absolute;
+  top: 9px;
+  right: 76px;
+  color: var(--post-code-muted);
+  font-size: .68rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+/* The block stays dark in both themes, so Shiki's dark palette applies in light mode too */
+.post-body pre.shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: transparent !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+.post-body__copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--post-code-text);
+  background: var(--post-code-control);
+  border: var(--border-hairline) solid var(--post-code-control-outline);
+  font: var(--weight-medium) .72rem var(--font-code);
+  cursor: pointer;
+  transition: background-color var(--duration-feedback) ease, transform var(--duration-feedback) ease;
+}
+.post-body__copy:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .post-body__copy:hover { background: var(--post-code-control-hover); } }
+@media (prefers-reduced-motion: reduce) { .post-body__copy { transition: none; } }
+.post-body .mermaid-source {
+  white-space: pre-wrap;
+  color: var(--foreground-muted);
+  font: var(--text-sm) / 1.6 var(--font-code);
+}
+.post-body .mermaid-diagram { margin-block: 2em; }
+
+@media (max-width: 720px) {
+  .post-body { font-size: 1.06rem; }
+  .post-body pre { margin-inline: -12px; }
+  .post-body pre[data-code-language]::before { display: none; }
+  /* Narrow blocks fill their first line, so it starts below the Copy button */
+  .post-body pre code { padding-top: 42px; }
+}

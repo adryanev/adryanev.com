@@ -1,0 +1,54 @@
+/* Studio tokens: the public palette at tool density. Neutral surfaces, the
+   accent only for the primary action and the current location. Values equal
+   to a public token alias it; the rest are admin-only. */
+.admin-workspace {
+  --bg: #f6f3ea;
+  --panel: #fffdf6;
+  --sunk: #efeadb;
+  --fg: var(--brand-ink);
+  --muted: #5a646a;
+  --faint: #8a9196;
+  --line: rgb(20 32 39 / 12%);
+  --line-2: rgb(20 32 39 / 22%);
+  --hover: rgb(20 32 39 / 5%);
+  --link: var(--color-link);
+  --ok: var(--color-success);
+  --ok-bg: var(--color-success-surface);
+  --warn: var(--color-warning);
+  --warn-bg: var(--color-warning-surface);
+  --info: var(--color-info);
+  --info-bg: var(--color-info-surface);
+}
+.dark .admin-workspace {
+  --bg: #0f1617;
+  --panel: #151e1f;
+  --sunk: #0b1112;
+  --fg: #e8ecdc;
+  --muted: #a4b0aa;
+  --faint: #6f7c78;
+  --line: rgb(232 236 220 / 8%);
+  --line-2: rgb(232 236 220 / 16%);
+  --hover: rgb(232 236 220 / 4%);
+  --ok-bg: rgb(162 214 173 / 12%);
+  --warn-bg: rgb(229 204 129 / 12%);
+  --info-bg: rgb(160 220 226 / 10%);
+  --color-success-surface: var(--ok-bg);
+  --color-warning-surface: var(--warn-bg);
+  --color-info-surface: var(--info-bg);
+}
+
+/* The shared controls read the public semantic tokens, so the studio points
+   them at its own surfaces. The compatibility names resolve on :root, so they
+   are restated here to pick up the studio values. */
+.admin-workspace {
+  --surface-canvas: var(--bg);
+  --surface-paper: var(--panel);
+  --foreground: var(--fg);
+  --foreground-muted: var(--muted);
+  --color-outline: var(--line-2);
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--panel);
+  --text-primary: var(--fg);
+  --text-secondary: var(--muted);
+  --border-color: var(--line-2);
+}

@@ -11,32 +11,22 @@ export function RelatedPosts({ posts }: { posts: RelatedPost[] }) {
   return (
     <section className="related-posts" aria-labelledby="related-posts-heading">
       <h2 id="related-posts-heading">Related articles</h2>
-      <div className="related-posts__list">
-        {posts.map((post) => (
-          <article className="writing-entry" key={post.id}>
-            {post.publishedAt && (
-              <div className="writing-entry__meta">
-                <time dateTime={new Date(post.publishedAt).toISOString()}>
-                  {formatPostDate(post.publishedAt)}
-                </time>
-              </div>
-            )}
-            <h3>
-              <Link to="/blog/$slug" params={{ slug: post.slug }}>
-                {post.title}
-              </Link>
-            </h3>
-            {post.excerpt && <p>{post.excerpt}</p>}
-            <Link
-              className="writing-entry__link"
-              to="/blog/$slug"
-              params={{ slug: post.slug }}
-            >
-              Read article <ArrowRight size={18} aria-hidden="true" />
+      {posts.map((post) => (
+        <article className="related-posts__entry" key={post.id}>
+          {post.publishedAt && (
+            <time dateTime={new Date(post.publishedAt).toISOString()}>
+              {formatPostDate(post.publishedAt)}
+            </time>
+          )}
+          <h3>
+            <Link to="/blog/$slug" params={{ slug: post.slug }}>
+              {post.title}
             </Link>
-          </article>
-        ))}
-      </div>
+          </h3>
+          <ArrowRight className="related-posts__arrow" size={18} aria-hidden="true" />
+          {post.excerpt && <p>{post.excerpt}</p>}
+        </article>
+      ))}
     </section>
   )
 }

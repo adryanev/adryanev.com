@@ -114,39 +114,6 @@
   user-select: none;
 }
 
-/* Copy button injected by JS */
-.code-copy-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.625rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
-}
-.prose pre.shiki:hover .code-copy-btn {
-  opacity: 1;
-}
-.code-copy-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.code-copy-btn[data-copied='true'] {
-  color: var(--accent);
-  opacity: 1;
-}
-
 /* Inline code inside <pre> should not get prose-code styling */
 .prose pre code {
   background: transparent !important;

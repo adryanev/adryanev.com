@@ -22,6 +22,13 @@
       "when": 1795413559851,
       "tag": "0002_posts_fts",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1795505607928,
+      "tag": "0003_project_metrics",
+      "breakpoints": true
     }
   ]
 }

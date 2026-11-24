@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react'
+import { useId, useState, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation } from '@tanstack/react-query'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { SlugInput } from './SlugInput'
 import { ImageUploader } from './ImageUploader'
 import {
+  Button,
   Field as FormField,
   Input as FormInput,
   Select as FormSelect,
@@ -25,6 +26,13 @@ import {
   createProject,
   updateProject,
 } from '@/server/functions/portfolio.functions'
+import {
+  MAX_PROJECT_METRICS,
+  METRIC_LABEL_MAX_LENGTH,
+  METRIC_VALUE_MAX_LENGTH,
+  METRICS_NOTE_MAX_LENGTH,
+  type ProjectMetric,
+} from '@/lib/project-metrics'
 
 type ProjectData = {
   id?: number
@@ -40,7 +48,12 @@ type ProjectData = {
   externalUrl: string
   status: 'draft' | 'published'
   images: { url: string; alt?: string }[]
+  metrics: ProjectMetric[]
+  metricsNote: string
 }
+
+const isBlankMetric = (metric: ProjectMetric) =>
+  !metric.value.trim() && !metric.label.trim()
 
 const STATUS_OPTIONS = [
   { value: 'draft' as const, label: 'Draft' },
@@ -90,6 +103,11 @@ export function ProjectForm({
   const [images, setImages] = useState<{ url: string; alt?: string }[]>(
     initial?.images ?? [],
   )
+  const metricsId = useId()
+  const [metrics, setMetrics] = useState<ProjectMetric[]>(
+    initial?.metrics ?? [],
+  )
+  const [metricsNote, setMetricsNote] = useState(initial?.metricsNote ?? '')
   const [error, setError] = useState('')
   const initialRef = useRef(initial)
 
@@ -107,7 +125,10 @@ export function ProjectForm({
     year !== (initialRef.current?.year ?? new Date().getFullYear()) ||
     githubUrl !== (initialRef.current?.githubUrl ?? '') ||
     externalUrl !== (initialRef.current?.externalUrl ?? '') ||
-    JSON.stringify(images) !== JSON.stringify(initialRef.current?.images ?? [])
+    JSON.stringify(images) !== JSON.stringify(initialRef.current?.images ?? []) ||
+    JSON.stringify(metrics) !==
+      JSON.stringify(initialRef.current?.metrics ?? []) ||
+    metricsNote !== (initialRef.current?.metricsNote ?? '')
 
   const allowNavigation = useUnsavedChanges(dirty)
   const createFn = useServerFn(createProject)
@@ -128,6 +149,8 @@ export function ProjectForm({
         externalUrl: externalUrl || undefined,
         status,
         images,
+        metrics: metrics.filter((metric) => !isBlankMetric(metric)),
+        metricsNote: metricsNote || null,
       }
       if (isEditing) return updateFn({ data: { ...data, id: initial!.id! } })
       return createFn({ data })
@@ -237,6 +260,75 @@ export function ProjectForm({
           <TagInput.List />
           <TagInput.Input placeholder="Type and press Enter" />
         </TagInput.Root>
+      </FormField>
+
+      <FormField
+        label="Metrics"
+        optional
+        hint="Measured outcomes shown on the home page and case study, e.g. 30× / monthly sales value."
+      >
+        <ul className="space-y-3">
+          {metrics.map((metric, index) => {
+            const position = index + 1
+            const updateMetric = (change: Partial<ProjectMetric>) =>
+              setMetrics(
+                metrics.map((item, i) =>
+                  i === index ? { ...item, ...change } : item,
+                ),
+              )
+            return (
+              <li key={index} className="flex items-start gap-3">
+                <FormInput
+                  type="text"
+                  className="w-32 shrink-0"
+                  id={`${metricsId}-value-${index}`}
+                  aria-label={`Value for metric ${position}`}
+                  value={metric.value}
+                  maxLength={METRIC_VALUE_MAX_LENGTH}
+                  onChange={(e) => updateMetric({ value: e.target.value })}
+                  placeholder="30×"
+                />
+                <FormInput
+                  type="text"
+                  id={`${metricsId}-label-${index}`}
+                  aria-label={`Label for metric ${position}`}
+                  value={metric.label}
+                  maxLength={METRIC_LABEL_MAX_LENGTH}
+                  onChange={(e) => updateMetric({ label: e.target.value })}
+                  placeholder="monthly sales value"
+                />
+                <RowAction
+                  type="button"
+                  label={`Remove metric ${position}`}
+                  onClick={() =>
+                    setMetrics(metrics.filter((_, i) => i !== index))
+                  }
+                >
+                  <X size={16} aria-hidden="true" />
+                </RowAction>
+              </li>
+            )
+          })}
+        </ul>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="mt-3"
+          disabled={metrics.length >= MAX_PROJECT_METRICS}
+          onClick={() => setMetrics([...metrics, { value: '', label: '' }])}
+        >
+          <Plus size={16} aria-hidden="true" /> Add metric
+        </Button>
+      </FormField>
+
+      <FormField label="Metrics note" optional>
+        <FormInput
+          type="text"
+          value={metricsNote}
+          maxLength={METRICS_NOTE_MAX_LENGTH}
+          onChange={(e) => setMetricsNote(e.target.value)}
+          placeholder="Context for the figures, e.g. what stayed constant"
+        />
       </FormField>
 
       <div className="grid gap-6 md:grid-cols-2">

@@ -60,6 +60,8 @@ function EditProjectPage() {
               url: img.url,
               alt: img.alt ?? undefined,
             })),
+            metrics: project.metrics,
+            metricsNote: project.metricsNote ?? '',
           }}
         />
       </div>

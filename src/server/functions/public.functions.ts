@@ -12,7 +12,7 @@ import { saasListings } from '@/db/schema/saas'
 import { contacts } from '@/db/schema/contacts'
 import { postViews } from '@/db/schema/post-views'
 import { checkRateLimit, getClientIp } from '@/server/rate-limit'
-import { renderPostBody, renderProjectDescription, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
+import { renderPostBody, renderProjectStory, projectSummary, estimateReadingTime, type OutputData } from '@/lib/editorjs-renderer'
 
 // ── Blog ──────────────────────────────────────────────
 
@@ -292,22 +292,32 @@ export const getPublicProject = createServerFn({ method: 'GET' })
     })
     if (!category) return null
 
-    const project = await db.query.portfolioProjects.findFirst({
-      where: and(
-        eq(portfolioProjects.slug, data.projectSlug),
-        eq(portfolioProjects.categoryId, category.id),
-        eq(portfolioProjects.status, 'published'),
-        isNull(portfolioProjects.deletedAt),
-      ),
-      with: {
-        category: true,
-        images: { orderBy: [asc(projectImages.sortOrder), asc(projectImages.id)] },
-      },
-    })
+    const publishedInCategory = and(
+      eq(portfolioProjects.categoryId, category.id),
+      eq(portfolioProjects.status, 'published'),
+      isNull(portfolioProjects.deletedAt),
+    )
+    const [project, categoryProjects] = await Promise.all([
+      db.query.portfolioProjects.findFirst({
+        where: and(eq(portfolioProjects.slug, data.projectSlug), publishedInCategory),
+        with: {
+          category: true,
+          images: { orderBy: [asc(projectImages.sortOrder), asc(projectImages.id)] },
+        },
+      }),
+      // A category holds a few dozen projects at most
+      db.query.portfolioProjects.findMany({
+        where: publishedInCategory,
+        orderBy: [asc(portfolioProjects.sortOrder), asc(portfolioProjects.id)],
+        columns: { slug: true, title: true, role: true, year: true },
+      }),
+    ])
     if (!project) return null
 
-    const descriptionHtml = await renderProjectDescription(project.description)
-    return { ...project, descriptionHtml }
+    const position = categoryProjects.findIndex((p) => p.slug === project.slug)
+    const nextProject = categoryProjects[position + 1] ?? null
+    const { ledeHtml, bodyHtml } = await renderProjectStory(project.description)
+    return { ...project, ledeHtml, descriptionHtml: bodyHtml, nextProject }
   })
 
 // ── Resume ──────────────────────────────────────────
@@ -401,23 +411,37 @@ export const getHomePageData = createServerFn({ method: 'GET' }).handler(
         where: and(eq(posts.status, 'published'), isNull(posts.deletedAt)),
         orderBy: desc(posts.publishedAt),
         limit: 2,
-        columns: { id: true, slug: true, title: true, publishedAt: true },
+        columns: { id: true, slug: true, title: true, excerpt: true, publishedAt: true },
       }),
       db.query.portfolioProjects.findMany({
         where: and(
           eq(portfolioProjects.status, 'published'),
           isNull(portfolioProjects.deletedAt),
         ),
-        orderBy: asc(portfolioProjects.sortOrder),
+        orderBy: [asc(portfolioProjects.sortOrder), asc(portfolioProjects.id)],
         limit: 3,
         columns: {
-          id: true, title: true, slug: true, role: true,
-          workplace: true, year: true, technology: true,
+          id: true, title: true, slug: true, role: true, workplace: true,
+          year: true, description: true, metrics: true,
         },
-        with: { category: { columns: { slug: true, name: true } } },
+        with: {
+          category: { columns: { slug: true, name: true } },
+          // The lead project shows three screens, the others one
+          images: {
+            orderBy: [asc(projectImages.sortOrder), asc(projectImages.id)],
+            limit: 3,
+            columns: { id: true, url: true, alt: true },
+          },
+        },
       }),
     ])
 
-    return { latestPosts, featuredProjects }
+    return {
+      latestPosts,
+      featuredProjects: featuredProjects.map(({ description, ...project }) => ({
+        ...project,
+        summary: projectSummary(description),
+      })),
+    }
   },
 )

@@ -16,6 +16,7 @@
   --foreground-muted: #445057;
   --color-link: #9c2b1c;
   --color-outline: rgb(20 32 39 / 22%);
+  --color-outline-strong: var(--foreground);
   --color-success: #276239;
   --color-success-surface: #e0eddf;
   --color-warning: #795515;
@@ -109,6 +110,7 @@
   --foreground-muted: #b7c6bd;
   --color-link: #ff9b7c;
   --color-outline: rgb(237 241 220 / 22%);
+  --color-outline-strong: rgb(237 241 220 / 70%);
   --color-success: #a2d6ad;
   --color-success-surface: #203a2b;
   --color-warning: #e5cc81;

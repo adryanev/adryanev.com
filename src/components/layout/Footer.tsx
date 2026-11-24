@@ -42,21 +42,21 @@ export function Footer() {
               {label}
             </a>
           ))}
-        </nav>
-        <div className="site-tools" aria-label="Website tools">
           <Button
-            variant="secondary"
+            variant="plain"
+            className="site-footer__tool"
             onClick={() => window.dispatchEvent(new Event('site:search'))}
           >
             Search <span aria-hidden="true">⌘K</span>
           </Button>
           <Button
-            variant="secondary"
+            variant="plain"
+            className="site-footer__tool"
             onClick={() => window.dispatchEvent(new Event('site:terminal'))}
           >
-            Open terminal
+            Terminal
           </Button>
-        </div>
+        </nav>
       </div>
     </footer>
   )

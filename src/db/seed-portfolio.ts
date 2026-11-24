@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { sql } from 'drizzle-orm'
 import { insertEach, openSeedDb } from './seed-db'
 import { portfolioCategories, portfolioProjects, projectImages } from './schema/portfolio'
+import { PORTFOLIO_METRICS } from './portfolio-metrics'
 
 // Screenshots live in assets/portfolio/<project slug>/<n>.webp and reach R2
 // under the same key through `pnpm media:upload-portfolio`
@@ -689,7 +690,17 @@ async function seedPortfolio() {
     },
   ]
 
-  await insertEach(db, portfolioProjects, projects)
+  const projectSlugs = new Set(projects.map((project) => project.slug))
+  const unknownMetricSlugs = Object.keys(PORTFOLIO_METRICS).filter((slug) => !projectSlugs.has(slug))
+  if (unknownMetricSlugs.length > 0) {
+    throw new Error(`portfolio-metrics.ts has metrics for unknown projects: ${unknownMetricSlugs.join(', ')}`)
+  }
+
+  await insertEach(
+    db,
+    portfolioProjects,
+    projects.map((project) => ({ ...project, ...PORTFOLIO_METRICS[project.slug] })),
+  )
 
   const storedProjects = await db
     .select({ id: portfolioProjects.id, slug: portfolioProjects.slug, title: portfolioProjects.title })

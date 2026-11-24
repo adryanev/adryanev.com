@@ -16,8 +16,7 @@ import {
 import { RowAction } from './RowActions'
 import { SortableList } from './SortableList'
 
-import { EditorJsEditor } from './EditorJsEditor'
-import type { OutputData } from '@editorjs/editorjs'
+import { EditorJsEditor, type EditorJsEditorHandle } from './EditorJsEditor'
 
 import { FormActions } from './form/FormActions'
 import { TagInput } from './form/TagInput'
@@ -110,6 +109,7 @@ export function ProjectForm({
   const [metricsNote, setMetricsNote] = useState(initial?.metricsNote ?? '')
   const [error, setError] = useState('')
   const initialRef = useRef(initial)
+  const editorRef = useRef<EditorJsEditorHandle>(null)
 
   const dirty =
     title !== (initialRef.current?.title ?? '') ||
@@ -135,12 +135,12 @@ export function ProjectForm({
   const updateFn = useServerFn(updateProject)
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (latestDescription: string) => {
       const data = {
         title,
         slug: slug || undefined,
         categoryId,
-        description,
+        description: latestDescription,
         year,
         role,
         workplace,
@@ -163,7 +163,8 @@ export function ProjectForm({
       setError(err instanceof Error ? err.message : 'Failed to save project'),
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Keystrokes still inside the editor's debounce are part of the save
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (saveMutation.isPending) return
     setError('')
@@ -171,21 +172,13 @@ export function ProjectForm({
       setError('Title is required')
       return
     }
-    if (!description.trim()) {
+    const flushed = await editorRef.current?.flush()
+    const latestDescription = flushed ? JSON.stringify(flushed) : description
+    if (!editorContent(latestDescription)?.blocks.length) {
       setError('Description is required')
       return
     }
-    try {
-      const parsed = JSON.parse(description) as OutputData
-      if (!parsed.blocks || parsed.blocks.length === 0) {
-        setError('Description is required')
-        return
-      }
-    } catch {
-      setError('Description is required')
-      return
-    }
-    saveMutation.mutate()
+    saveMutation.mutate(latestDescription)
   }
 
   return (
@@ -250,6 +243,7 @@ export function ProjectForm({
 
       <FormField label="Description">
         <EditorJsEditor
+          ref={editorRef}
           value={editorContent(description)}
           onChange={(data) => setDescription(JSON.stringify(data))}
         />

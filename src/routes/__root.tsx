@@ -9,6 +9,7 @@ import { lazy, Suspense } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { themeInitScript } from '@/lib/theme'
 import { websiteJsonLd, personJsonLd, jsonLdScript } from '@/lib/seo'
 import '../app.css'
 
@@ -81,7 +82,7 @@ export const Route = createRootRoute({
     ],
     scripts: [
       {
-        children: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+        children: themeInitScript,
       },
       jsonLdScript([websiteJsonLd(), personJsonLd()]),
       ...(process.env.UMAMI_URL && process.env.UMAMI_WEBSITE_ID

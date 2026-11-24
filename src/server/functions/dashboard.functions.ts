@@ -7,6 +7,10 @@ import { contacts } from '@/db/schema/contacts'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 
 import { saasListings } from '@/db/schema/saas'
+import { resumeEntries } from '@/db/schema/resume'
+import { subscribers } from '@/db/schema/subscribers'
+import { webhooks } from '@/db/schema/webhooks'
+
 export const getDashboardStats = createServerFn({ method: 'GET' }).handler(
   async () => {
     const user = await getCurrentUser()
@@ -30,6 +34,45 @@ export const getDashboardStats = createServerFn({ method: 'GET' }).handler(
       unreadContacts: unreadContacts[0]?.count ?? 0,
       draftPosts: draftPosts[0]?.count ?? 0,
       latestDraft: drafts[0] ?? null,
+    }
+  },
+)
+
+// One D1 round trip for every count the admin navigation shows
+export const getAdminNavCounts = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await getCurrentUser()
+    if (!user) throw new Error('Unauthorized')
+
+    const [
+      postRows,
+      projectRows,
+      productRows,
+      resumeRows,
+      messageRows,
+      unreadRows,
+      subscriberRows,
+      webhookRows,
+    ] = await db.batch([
+      db.select({ count: count() }).from(posts).where(isNull(posts.deletedAt)),
+      db.select({ count: count() }).from(portfolioProjects).where(isNull(portfolioProjects.deletedAt)),
+      db.select({ count: count() }).from(saasListings).where(isNull(saasListings.deletedAt)),
+      db.select({ count: count() }).from(resumeEntries),
+      db.select({ count: count() }).from(contacts),
+      db.select({ count: count() }).from(contacts).where(eq(contacts.isRead, false)),
+      db.select({ count: count() }).from(subscribers),
+      db.select({ count: count() }).from(webhooks),
+    ])
+
+    return {
+      posts: postRows[0]?.count ?? 0,
+      projects: projectRows[0]?.count ?? 0,
+      products: productRows[0]?.count ?? 0,
+      resume: resumeRows[0]?.count ?? 0,
+      messages: messageRows[0]?.count ?? 0,
+      unreadMessages: unreadRows[0]?.count ?? 0,
+      subscribers: subscriberRows[0]?.count ?? 0,
+      webhooks: webhookRows[0]?.count ?? 0,
     }
   },
 )

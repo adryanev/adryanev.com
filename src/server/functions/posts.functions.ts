@@ -1,7 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, isNull, and, desc, inArray } from 'drizzle-orm'
+import { eq, isNull, and, desc, inArray, sum } from 'drizzle-orm'
 import { db } from '@/db'
 import { posts, tags, postsToTags } from '@/db/schema/posts'
+import { postViews } from '@/db/schema/post-views'
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
 import { fireWebhooks } from '@/lib/webhooks'
@@ -28,11 +29,21 @@ export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
     throw new Error('Unauthorized')
   }
 
-  return db.query.posts.findMany({
-    where: isNull(posts.deletedAt),
-    orderBy: desc(posts.createdAt),
-    with: { postsToTags: { with: { tag: true } } },
-  })
+  const [rows, viewTotals] = await Promise.all([
+    db.query.posts.findMany({
+      where: isNull(posts.deletedAt),
+      orderBy: desc(posts.createdAt),
+      with: { postsToTags: { with: { tag: true } } },
+    }),
+    db
+      .select({ postId: postViews.postId, views: sum(postViews.viewCount) })
+      .from(postViews)
+      .groupBy(postViews.postId),
+  ])
+  const viewsByPost = new Map(
+    viewTotals.map((row) => [row.postId, Number(row.views ?? 0)]),
+  )
+  return rows.map((post) => ({ ...post, views: viewsByPost.get(post.id) ?? 0 }))
 })
 
 export const getPostById = createServerFn({ method: 'GET' })

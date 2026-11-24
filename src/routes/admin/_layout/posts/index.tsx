@@ -1,32 +1,36 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'motion/react'
-import { Plus, Pencil } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Plus, Pencil, ExternalLink, FileText } from 'lucide-react'
 
 import { getPosts, deletePost } from '@/server/functions/posts.functions'
 import { formatPostDate } from '@/lib/post-dates'
-import {
-  FormError,
-  Button,
-  Table,
-  TableScroll,
-  PageHeader,
-  EmptyState,
-} from '@/components/ui'
+import { groupPostsByMonth } from '@/lib/admin-groups'
+import { FormError, Button } from '@/components/ui'
 import { ContentStatusBadge } from '@/components/admin/ContentStatusBadge'
 import { DeleteAction, RowAction, RowActions } from '@/components/admin/RowActions'
-import { rowPresence } from '@/components/admin/motion'
+import {
+  AdminBar,
+  GroupHeaderRow,
+  ListEmpty,
+  ListFoot,
+  useCollapsedGroups,
+} from '@/components/admin/AdminList'
 
 export const Route = createFileRoute('/admin/_layout/posts/')({
   loader: () => getPosts(),
   component: PostListPage,
 })
 
+const COLUMNS = 5
+
 function PostListPage() {
   const posts = Route.useLoaderData()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const [filter, setFilter] = useState('')
+  const groups = useCollapsedGroups()
 
   const deleteFn = useServerFn(deletePost)
   const deleteMutation = useMutation({
@@ -37,20 +41,37 @@ function PostListPage() {
     },
   })
 
+  const query = filter.trim().toLowerCase()
+  const visibleGroups = useMemo(
+    () =>
+      groupPostsByMonth(
+        posts.filter((post) => post.title.toLowerCase().includes(query)),
+      ),
+    [posts, query],
+  )
+
+  const newPost = (
+    <Button asChild variant="primary" size="sm">
+      <Link to="/admin/posts/new">
+        <Plus size={16} aria-hidden="true" />
+        New post
+      </Link>
+    </Button>
+  )
+
   return (
-    <div>
-      <PageHeader>
-        <div>
-          <h1>Posts</h1>
-          <p>Manage your blog articles.</p>
-        </div>
-        <Button asChild variant="primary">
-          <Link to="/admin/posts/new">
-            <Plus size={18} aria-hidden="true" />
-            New post
-          </Link>
-        </Button>
-      </PageHeader>
+    <section className="admin-screen">
+      <AdminBar
+        title="Posts"
+        count={posts.length}
+        filter={
+          posts.length > 0
+            ? { value: filter, onChange: setFilter, label: 'Filter posts by title' }
+            : undefined
+        }
+      >
+        {newPost}
+      </AdminBar>
       <FormError
         message={
           deleteMutation.isError
@@ -60,71 +81,91 @@ function PostListPage() {
       />
 
       {posts.length === 0 ? (
-        <EmptyState>
-          <h2>No posts yet</h2>
-          <p>
-            <Link to="/admin/posts/new" className="underline underline-offset-4">
-              Create your first post
-            </Link>
-          </p>
-        </EmptyState>
+        <ListEmpty icon={FileText} title="No posts yet" actions={newPost}>
+          Your first published post shows up in the home page's writing list
+          and the blog.
+        </ListEmpty>
+      ) : visibleGroups.length === 0 ? (
+        <p className="admin-no-match">No posts match “{filter.trim()}”.</p>
       ) : (
-        <TableScroll aria-label="Posts table, scroll for all columns">
-          <Table>
+        <div className="admin-table-scroll">
+          <table className="admin-table">
             <thead>
               <tr>
                 <th>Title</th>
                 <th>Status</th>
-                <th>Created</th>
-                <th className="text-right">Actions</th>
+                <th data-optional>Published</th>
+                <th className="is-num" data-optional>Views</th>
+                <th>
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
-            <tbody>
-              <AnimatePresence initial={false}>
-                {posts.map((post) => (
-                  <motion.tr key={post.id} {...rowPresence}>
-                    <td>
-                      <Link
-                        to="/admin/posts/$id/edit"
-                        params={{ id: String(post.id) }}
-                        className="font-semibold hover:underline underline-offset-4"
-                      >
-                        {post.title}
-                      </Link>
-                      <div className="mt-1 text-sm text-text-secondary">
-                        /{post.slug}
-                      </div>
-                    </td>
-                    <td>
-                      <ContentStatusBadge status={post.status} />
-                    </td>
-                    <td className="whitespace-nowrap">
-                      {formatPostDate(post.createdAt)}
-                    </td>
-                    <td>
-                      <RowActions>
-                        <RowAction asChild label={'Edit ' + post.title}>
+            {visibleGroups.map((group) => {
+              const open = groups.isOpen(group.key)
+              return (
+                <tbody key={group.key}>
+                  <GroupHeaderRow
+                    id={'posts-' + group.key}
+                    label={group.label}
+                    count={group.rows.length}
+                    colSpan={COLUMNS}
+                    open={open}
+                    onToggle={() => groups.toggle(group.key)}
+                  />
+                  {open &&
+                    group.rows.map((post) => (
+                      <tr key={post.id}>
+                        <td className="admin-table__title">
                           <Link
                             to="/admin/posts/$id/edit"
                             params={{ id: String(post.id) }}
                           >
-                            <Pencil size={16} aria-hidden="true" />
+                            {post.title}
                           </Link>
-                        </RowAction>
-                        <DeleteAction
-                          label={'Delete ' + post.title}
-                          pending={deleteMutation.isPending}
-                          onConfirm={() => deleteMutation.mutate(post.id)}
-                        />
-                      </RowActions>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </Table>
-        </TableScroll>
+                        </td>
+                        <td>
+                          <ContentStatusBadge status={post.status} />
+                        </td>
+                        <td className="is-muted" data-optional>
+                          {post.publishedAt ? formatPostDate(post.publishedAt) : '—'}
+                        </td>
+                        <td className="is-num" data-optional>{post.views}</td>
+                        <td>
+                          <RowActions>
+                            <RowAction asChild label={'Edit ' + post.title}>
+                              <Link
+                                to="/admin/posts/$id/edit"
+                                params={{ id: String(post.id) }}
+                              >
+                                <Pencil size={15} aria-hidden="true" />
+                              </Link>
+                            </RowAction>
+                            {post.status === 'published' && (
+                              <RowAction asChild label={'View ' + post.title + ' on the site'}>
+                                <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                                  <ExternalLink size={15} aria-hidden="true" />
+                                </Link>
+                              </RowAction>
+                            )}
+                            <DeleteAction
+                              label={'Delete ' + post.title}
+                              pending={deleteMutation.isPending}
+                              onConfirm={() => deleteMutation.mutate(post.id)}
+                            />
+                          </RowActions>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              )
+            })}
+          </table>
+        </div>
       )}
-    </div>
+      {posts.length > 0 && (
+        <ListFoot>Grouped by publish month · drafts first</ListFoot>
+      )}
+    </section>
   )
 }

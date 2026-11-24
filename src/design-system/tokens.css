@@ -1,5 +1,7 @@
-/* Canonical values. Page styles consume these tokens rather than restating them. */
-:root {
+/* Canonical values. Page styles consume these tokens rather than restating them.
+   A public-surface preview restates them so it shows public values inside the
+   studio, which points these names at its own palette. */
+:root, [data-ui-surface='public'] {
   --font-body: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
   --font-code: 'DM Mono', ui-monospace, monospace;
   --brand-ink: #142027;
@@ -95,7 +97,7 @@
   --adventure-blue: var(--brand-blue);
   --adventure-red: var(--brand-red);
 }
-.dark {
+.dark, .dark [data-ui-surface='public'] {
   --brand-ink: #0b1214;
   --brand-paper: #edf1dc;
   --brand-yellow: #c8e64a;

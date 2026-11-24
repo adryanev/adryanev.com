@@ -30,9 +30,11 @@
 .admin-main { min-width: 0; }
 .admin-main > :not(.admin-screen) { width: 100%; max-width: 1120px; padding: 28px 24px 80px; }
 
-/* Screens that predate the studio keep their markup; the shell sets density */
-.admin-main h1 { font-size: 1.375rem; font-weight: var(--weight-heading); line-height: 1.2; letter-spacing: -.02em; text-transform: none; }
-.admin-main h2 { font-size: var(--text-lg); font-weight: var(--weight-bold); text-transform: none; letter-spacing: -.015em; }
+/* Screens that predate the studio keep their markup; the shell sets density.
+   The post preview keeps the article's headings; the :where() adds no
+   specificity, so the order of the two stylesheets does not matter. */
+.admin-main h1:where(:not(.post-preview__page *)) { font-size: 1.375rem; font-weight: var(--weight-heading); line-height: 1.2; letter-spacing: -.02em; text-transform: none; }
+.admin-main h2:where(:not(.post-preview__page *)) { font-size: var(--text-lg); font-weight: var(--weight-bold); text-transform: none; letter-spacing: -.015em; }
 .admin-main .ui-page-header { margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom-color: var(--line-2); }
 .admin-main .ui-page-header h1 { font-size: 1.375rem; }
 .admin-main .ui-page-header p { font-size: var(--text-sm); }

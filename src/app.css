@@ -267,7 +267,7 @@
   }
 
   /* Inline code */
-  .editorjs-container code {
+  .editorjs-container :not(pre) > code {
     background: var(--bg-secondary);
     color: var(--accent);
     padding: 0.125rem 0.375rem;
@@ -441,6 +441,10 @@
   border: 1px solid var(--border-color) !important;
   color: var(--text-primary) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+/* EditorJS keeps the closed toolbar in the page; empty, it is a stray box */
+.ce-inline-toolbar:empty {
+  display: none;
 }
 .ce-inline-tool {
   color: var(--text-primary) !important;

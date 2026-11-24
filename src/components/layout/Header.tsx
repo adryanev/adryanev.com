@@ -5,14 +5,18 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { MobileNav } from './MobileNav'
 
 import { Button } from '@/components/ui'
-const navItems = [
+const pageItems = [
   { label: 'About', to: '/about' },
   { label: 'Resume', to: '/resume' },
   { label: 'Work', to: '/portfolio' },
   { label: 'Writing', to: '/blog' },
   { label: 'Products', to: '/saas' },
-  { label: 'Contact', to: '/contact' },
 ] as const
+
+// The masthead sets Contact apart as its call to action
+const contactItem = { label: 'Contact', to: '/contact' } as const
+
+const navItems = [...pageItems, contactItem]
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -26,12 +30,12 @@ export function Header() {
         </Link>
 
         <nav className="site-masthead__nav" aria-label="Primary navigation">
-          {navItems.map((item) => (
+          {pageItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               className="site-masthead__link"
-              activeProps={{ className: 'site-masthead__link is-active' }}
+              activeProps={{ className: 'is-active' }}
             >
               {item.label}
             </Link>
@@ -47,6 +51,13 @@ export function Header() {
             </Button>
             <ThemeToggle />
           </div>
+          <Link
+            to={contactItem.to}
+            className="site-masthead__link site-masthead__cta"
+            activeProps={{ className: 'is-active' }}
+          >
+            {contactItem.label}
+          </Link>
         </nav>
 
         <div className="site-masthead__mobile">

@@ -208,9 +208,9 @@ export async function renderEditorJs(data: OutputData, options: RenderOptions = 
   return (await renderEditorJsWithHeadings(data, options)).html
 }
 
-export async function renderProjectDescription(description: string): Promise<string> {
+function parseProjectDescription(description: string): OutputData {
   const text = description.trim()
-  if (!text) return ''
+  if (!text) return { blocks: [] }
 
   let data: unknown
   try {
@@ -218,12 +218,67 @@ export async function renderProjectDescription(description: string): Promise<str
   } catch { /* descriptions predating EditorJS are plain text */ }
 
   if (data && typeof data === 'object' && 'blocks' in data) {
-    return renderEditorJs(data as OutputData)
+    return data as OutputData
   }
 
-  return text.split(/\r?\n\s*\r?\n/)
-    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\r?\n/g, '<br />')}</p>`)
-    .join('\n')
+  return {
+    blocks: text.split(/\r?\n\s*\r?\n/).map((paragraph) => ({
+      type: 'paragraph',
+      data: { text: escapeHtml(paragraph).replace(/\r?\n/g, '<br />') },
+    })),
+  }
+}
+
+// A sentence ends at . ! or ? followed by whitespace and a capital, digit or opening quote
+const SENTENCE_END = /[.!?](?=\s+["“(]?[A-Z0-9])/g
+const INLINE_TAG = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g
+
+function closesEveryInlineTag(html: string): boolean {
+  if (/<[^>]*$/.test(html)) return false
+  let open = 0
+  for (const [, closing, tag] of html.matchAll(INLINE_TAG)) {
+    if (tag.toLowerCase() === 'br') continue
+    open += closing ? -1 : 1
+  }
+  return open === 0
+}
+
+// Splits inline HTML after its first sentence, never inside a tag or an open <b>, <a>, ...
+function splitFirstSentence(html: string): [first: string, rest: string] {
+  for (const match of html.matchAll(SENTENCE_END)) {
+    const end = match.index + 1
+    const first = html.slice(0, end)
+    if (closesEveryInlineTag(first)) return [first, html.slice(end).trim()]
+  }
+  return [html, '']
+}
+
+export type ProjectStory = {
+  // The description's first sentence, as inline HTML; empty when it opens with a non-paragraph block
+  ledeHtml: string
+  // Everything after the lede
+  bodyHtml: string
+}
+
+export async function renderProjectStory(description: string): Promise<ProjectStory> {
+  const { blocks, ...data } = parseProjectDescription(description)
+  const [first, ...others] = blocks
+  if (first?.type !== 'paragraph') {
+    return { ledeHtml: '', bodyHtml: await renderEditorJs({ ...data, blocks }) }
+  }
+
+  const [ledeHtml, remainder] = splitFirstSentence(sanitizeInlineHtml(first.data.text as string))
+  const bodyBlocks = remainder
+    ? [{ ...first, data: { ...first.data, text: remainder } }, ...others]
+    : others
+  return { ledeHtml, bodyHtml: await renderEditorJs({ ...data, blocks: bodyBlocks }) }
+}
+
+// The description's first sentence as plain text, for cards that link to the project
+export function projectSummary(description: string): string {
+  const [first] = parseProjectDescription(description).blocks
+  if (first?.type !== 'paragraph') return ''
+  return plainText(splitFirstSentence(sanitizeInlineHtml(first.data.text as string))[0])
 }
 
 function stripHtml(html: string): string {

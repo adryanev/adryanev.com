@@ -53,7 +53,6 @@
 .chapter-terminal [role='dialog'] { max-height: 86dvh; }
 .chapter-terminal__body { height: min(500px, 58dvh); padding: var(--space-6); }
 .chapter-terminal input { min-width: 0; min-height: 44px; }
-.site-tools { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .site-search-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 44px; color: var(--adventure-paper); }
 .site-masthead__theme { gap: var(--space-2); }
 .site-search-toggle:hover { color: var(--adventure-ink); background: var(--adventure-blue); }

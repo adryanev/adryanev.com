@@ -2,6 +2,7 @@ import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
 import { createdAt, id, timestamp, updatedAt } from './columns'
 import { contentStatuses } from './enums'
+import type { ProjectMetric } from '../../lib/project-metrics'
 
 export const portfolioCategories = sqliteTable('portfolio_categories', {
   id: id(),
@@ -23,6 +24,8 @@ export const portfolioProjects = sqliteTable('portfolio_projects', {
   role: text('role').notNull(),
   workplace: text('workplace').notNull(),
   technology: text('technology', { mode: 'json' }).$type<string[]>().notNull(),
+  metrics: text('metrics', { mode: 'json' }).$type<ProjectMetric[]>().notNull().default([]),
+  metricsNote: text('metrics_note'),
   githubUrl: text('github_url'),
   externalUrl: text('external_url'),
   status: text('status', { enum: contentStatuses }).notNull().default('draft'),

@@ -9,6 +9,7 @@ import {
 import { getCurrentUser } from '@/server/functions/auth.functions'
 import { slugify } from '@/lib/slugify'
 import { parseReorderInput } from '@/lib/reorder'
+import { parseProjectMetrics, type ProjectMetric } from '@/lib/project-metrics'
 import { nextSortOrder, writeSortOrder } from '@/server/sort-order'
 
 // Categories
@@ -167,7 +168,9 @@ export const createProject = createServerFn({ method: 'POST' })
       status: 'draft' | 'published'
       sortOrder?: number
       images?: { url: string; alt?: string }[]
-    }) => data,
+      metrics: ProjectMetric[]
+      metricsNote?: string | null
+    }) => ({ ...data, ...parseProjectMetrics(data) }),
   )
   .handler(async ({ data }) => {
     const user = await getCurrentUser()
@@ -192,6 +195,8 @@ export const createProject = createServerFn({ method: 'POST' })
         role: data.role,
         workplace: data.workplace,
         technology: data.technology,
+        metrics: data.metrics,
+        metricsNote: data.metricsNote,
         githubUrl: data.githubUrl,
         externalUrl: data.externalUrl,
         status: data.status,
@@ -235,7 +240,9 @@ export const updateProject = createServerFn({ method: 'POST' })
       status: 'draft' | 'published'
       sortOrder?: number
       images?: { url: string; alt?: string }[]
-    }) => data,
+      metrics: ProjectMetric[]
+      metricsNote?: string | null
+    }) => ({ ...data, ...parseProjectMetrics(data) }),
   )
   .handler(async ({ data }) => {
     const user = await getCurrentUser()
@@ -256,6 +263,8 @@ export const updateProject = createServerFn({ method: 'POST' })
         role: data.role,
         workplace: data.workplace,
         technology: data.technology,
+        metrics: data.metrics,
+        metricsNote: data.metricsNote,
         githubUrl: data.githubUrl,
         externalUrl: data.externalUrl,
         status: data.status,

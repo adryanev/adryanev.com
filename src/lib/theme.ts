@@ -2,6 +2,9 @@ export type Theme = 'light' | 'dark' | 'system'
 
 const THEME_KEY = 'theme:v1'
 
+// Runs inline in <head> before first paint, so it cannot import this module
+export const themeInitScript = `(function(){try{var t=localStorage.getItem('${THEME_KEY}');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`
+
 export function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'dark'
   return window.matchMedia('(prefers-color-scheme: dark)').matches

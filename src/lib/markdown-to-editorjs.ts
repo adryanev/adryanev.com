@@ -16,13 +16,14 @@ export function markdownToEditorJs(md: string): OutputData {
   while (i < lines.length) {
     const line = lines[i]
 
-    // Fenced code block
-    if (line.startsWith('```')) {
-      const lang = line.slice(3).trim() || 'text'
+    // Fenced code block, possibly indented under a list item
+    if (isFence(line)) {
+      const indent = line.length - line.trimStart().length
+      const lang = line.trim().slice(3).trim() || 'text'
       const codeLines: string[] = []
       i++
-      while (i < lines.length && !lines[i].startsWith('```')) {
-        codeLines.push(lines[i])
+      while (i < lines.length && !isFence(lines[i])) {
+        codeLines.push(stripIndent(lines[i], indent))
         i++
       }
       i++ // skip closing ```
@@ -145,10 +146,26 @@ function isTableSeparator(line: string): boolean {
   return /^\|[\s:|-]+\|$/.test(line.trim())
 }
 
+// A pipe inside a code span, as in `a || b`, belongs to the cell
+function splitTableCells(line: string): string[] {
+  const cells: string[] = []
+  let cell = ''
+  let inCode = false
+  for (const char of line.trim()) {
+    if (char === '`') inCode = !inCode
+    if (char === '|' && !inCode) {
+      cells.push(cell)
+      cell = ''
+    } else {
+      cell += char
+    }
+  }
+  cells.push(cell)
+  return cells.slice(1, -1) // remove leading/trailing empty splits from outer pipes
+}
+
 function parseTableRow(line: string): string[] {
-  return line.split('|')
-    .slice(1, -1) // remove leading/trailing empty splits from outer pipes
-    .map((cell) => inlineMarkdown(cell.trim()))
+  return splitTableCells(line).map((cell) => inlineMarkdown(cell.trim()))
 }
 
 function parseTable(lines: string[], startIndex: number): { content: string[][]; nextIndex: number } {
@@ -171,9 +188,18 @@ function parseTable(lines: string[], startIndex: number): { content: string[][];
   return { content, nextIndex: i }
 }
 
+function isFence(line: string): boolean {
+  return line.trimStart().startsWith('```')
+}
+
+function stripIndent(line: string, indent: number): string {
+  const leading = line.length - line.trimStart().length
+  return line.slice(Math.min(leading, indent))
+}
+
 function isBlockStart(line: string): boolean {
   return /^#{1,6}\s/.test(line) ||
-    line.startsWith('```') ||
+    isFence(line) ||
     line.startsWith('> ') ||
     /^[-*+]\s/.test(line) ||
     /^\d+\.\s/.test(line) ||
@@ -182,11 +208,23 @@ function isBlockStart(line: string): boolean {
     (isTableRow(line))
 }
 
+function escapeCode(code: string): string {
+  return code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 /** Convert inline markdown (bold, italic, code, links) to HTML tags that EditorJS understands */
 function inlineMarkdown(text: string): string {
+  // Code spans are literal: escape them and keep emphasis and links out of them
   return text
-    // inline code
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .split(/(`[^`]+`)/)
+    .map((part, index) =>
+      index % 2 === 1 ? `<code>${escapeCode(part.slice(1, -1))}</code>` : inlineEmphasis(part),
+    )
+    .join('')
+}
+
+function inlineEmphasis(text: string): string {
+  return text
     // bold (**text** or __text__)
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
     .replace(/(?<![a-zA-Z0-9])__(.+?)__(?![a-zA-Z0-9])/g, '<b>$1</b>')

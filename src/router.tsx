@@ -8,7 +8,7 @@ import { RouteError, RoutePending } from '@/components/layout/RouteState'
 export function createAppRouter() {
   const queryClient = new QueryClient()
   // @ts-expect-error — routerWithQueryClient wrapper type is incompatible with Register
-  return routerWithQueryClient(createRouter({ routeTree, defaultPendingComponent: RoutePending, defaultErrorComponent: RouteError }), queryClient)
+  return routerWithQueryClient(createRouter({ routeTree, defaultPendingComponent: RoutePending, defaultErrorComponent: RouteError, scrollRestoration: true }), queryClient)
 }
 
 export const router = createAppRouter()

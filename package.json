@@ -22,7 +22,8 @@
     "db:set-metrics:remote": "sh scripts/set-project-metrics.sh --remote",
     "media:upload-portfolio":"sh scripts/upload-portfolio-images.sh --local",
     "media:upload-portfolio:remote": "sh scripts/upload-portfolio-images.sh --remote",
-    "db:backfill-post-text": "tsx src/db/backfill-post-text.ts"
+    "db:backfill-post-text": "tsx src/db/backfill-post-text.ts",
+    "db:import-ghost": "tsx src/db/import-ghost.ts"
   },
   "dependencies": {
     "@editorjs/delimiter": "^1.4.2",
